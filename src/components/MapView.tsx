@@ -1,20 +1,52 @@
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet'
+import L from 'leaflet'
+import { useEffect } from 'react'
+import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap } from 'react-leaflet'
 import { quests } from '../data/quests'
 import { vendors } from '../data/vendors'
+import { haversine } from '../lib/geo'
 import { useLocation } from '../store/useLocation'
 
-// Markers: blue = user, green = quest, orange = vendor.
+// Emoji pin avoids Leaflet's default-icon asset problem under Vite.
+const youIcon = L.divIcon({
+  html: '<div style="font-size:28px;line-height:28px">📍</div>',
+  className: '',
+  iconSize: [28, 28],
+  iconAnchor: [14, 28],
+})
+
+function Recenter({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap()
+  useEffect(() => {
+    const c = map.getCenter()
+    // Follow the user marker, but don't fight the user while they pan nearby
+    if (haversine(c.lat, c.lng, lat, lng) > 300) map.setView([lat, lng], map.getZoom())
+  }, [lat, lng, map])
+  return null
+}
+
+// Pin = user (draggable in simulated mode), green = quest, orange = vendor.
 export default function MapView() {
-  const { lat, lng, placeName } = useLocation()
+  const { source, lat, lng, placeName, setSimulated } = useLocation()
   return (
-    <MapContainer center={[lat, lng]} zoom={12} style={{ height: 400, width: '100%' }}>
+    <MapContainer center={[lat, lng]} zoom={12} style={{ height: 380, width: '100%' }}>
       <TileLayer
         attribution="&copy; OpenStreetMap contributors"
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <CircleMarker center={[lat, lng]} radius={8} pathOptions={{ color: 'blue' }}>
-        <Popup>Kamu: {placeName}</Popup>
-      </CircleMarker>
+      <Recenter lat={lat} lng={lng} />
+      <Marker
+        position={[lat, lng]}
+        icon={youIcon}
+        draggable={source === 'simulated'}
+        eventHandlers={{
+          dragend: (e) => {
+            const p = (e.target as L.Marker).getLatLng()
+            setSimulated(p.lat, p.lng) // name is reverse-geocoded
+          },
+        }}
+      >
+        <Popup>{source === 'simulated' ? `Simulated: ${placeName}` : `Kamu: ${placeName}`}</Popup>
+      </Marker>
       {quests.map((q) => (
         <CircleMarker key={q.id} center={[q.lat, q.lng]} radius={7} pathOptions={{ color: 'green' }}>
           <Popup>Quest: {q.title}</Popup>
