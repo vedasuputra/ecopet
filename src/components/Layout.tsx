@@ -1,8 +1,10 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Navigate, Outlet, useLocation as useRoute, useNavigate } from 'react-router-dom'
 import PhoneFrame from './PhoneFrame'
 import BannerAd from './BannerAd'
 import BottomNav from './BottomNav'
+import { supabase } from '../lib/supabase'
+import { loadRemote, startSync } from '../store/sync'
 import { useAppStore } from '../store/useAppStore'
 
 const PUBLIC = ['/login', '/dev']
@@ -12,6 +14,16 @@ export default function Layout() {
   const navigate = useNavigate()
   const user = useAppStore((s) => s.user)
   const taps = useRef(0)
+
+  // On app load with an existing Supabase session: pull the saved account state, then keep saving.
+  useEffect(() => {
+    supabase?.auth.getSession().then(async ({ data }) => {
+      const u = data.session?.user
+      if (!u) return
+      await loadRemote(u.id)
+      startSync(u.id)
+    })
+  }, [])
 
   // Tap logo 5x to open the hidden dev panel.
   const onLogoTap = () => {

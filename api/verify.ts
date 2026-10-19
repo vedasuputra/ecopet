@@ -2,13 +2,10 @@ import { createHash } from 'node:crypto'
 import { quests } from '../src/data/quests.js'
 import { haversine } from '../src/lib/geo.js'
 import { callGemini, sendError, type Req, type Res } from './_gemini.js'
+import { hashExists, saveHash } from './_supabase.js'
 
 const MAX_PHOTO_AGE_MS = 2 * 60 * 1000
 const MIN_CONFIDENCE = 0.7
-
-// Best-effort duplicate-photo memory (per serverless instance).
-// TODO: move to a Supabase table so duplicates are rejected across instances.
-const seenHashes = new Set<string>()
 
 const schema = {
   type: 'OBJECT',
@@ -51,7 +48,7 @@ export default async function handler(req: Req, res: Res) {
 
   // Anti-cheat: duplicate photo
   const hash = createHash('sha256').update(image).digest('hex')
-  if (seenHashes.has(hash)) {
+  if (await hashExists(hash)) {
     return res.json({ ok: false, reason: 'duplicate', message: 'Foto ini sudah pernah dipakai' })
   }
 
@@ -85,7 +82,7 @@ export default async function handler(req: Req, res: Res) {
       reason: string
     }
     const pass = r.detected && r.confidence >= MIN_CONFIDENCE && !r.is_screenshot_or_screen
-    if (pass) seenHashes.add(hash)
+    if (pass) await saveHash(hash, quest.id)
     return res.json({
       ok: pass,
       reason: pass ? 'verified' : r.is_screenshot_or_screen ? 'screenshot' : 'not_detected',
