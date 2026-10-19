@@ -6,9 +6,10 @@ import App from './App.tsx'
 import DesktopShell from './components/DesktopShell.tsx'
 
 // Top-level wide window -> phone-sized iframe shell. Inside the iframe (or on a real phone) -> the app.
-// The vendor dashboard (/vendor) is a normal responsive web app and never goes in the phone shell.
-const isWideTopLevel = () =>
-  window.self === window.top && window.innerWidth > 500 && !window.location.pathname.startsWith('/vendor')
+// The public pages (/, /privacy) and the vendor dashboard (/vendor) are normal responsive web pages and
+// never go in the phone shell. Everything else is the traveler app.
+const isWebPage = (path: string) => path === '/' || path.startsWith('/privacy') || path.startsWith('/vendor')
+const isWideTopLevel = () => window.self === window.top && window.innerWidth > 500 && !isWebPage(window.location.pathname)
 
 function Root() {
   const [shell, setShell] = useState(isWideTopLevel)

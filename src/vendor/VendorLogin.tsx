@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useLang, useT, type Key } from '../i18n'
+import { consentRecord } from '../data/privacy'
 import { searchPlaces, type Place } from '../lib/geocode'
 import { supabase } from '../lib/supabase'
 import { errorKey, vendorApi } from './api'
@@ -33,6 +34,7 @@ export default function VendorLogin() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Place[]>([])
   const [picked, setPicked] = useState<{ label: string; lat: number; lng: number } | null>(null)
+  const [agree, setAgree] = useState(false)
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -80,6 +82,7 @@ export default function VendorLogin() {
     if (!supabase) return setMsg(t('supabaseMissing'))
     if (!email || password.length < 6) return setMsg(t('vErrCredentials'))
     if (tab === 'register') {
+      if (!agree) return setMsg(t('consentRequired'))
       if (listed && !vendorId) return setMsg(t('vErrPickBusiness'))
       if (!listed && (bizName.trim().length < 2 || catEn.trim().length < 2 || catVi.trim().length < 2 || !picked)) return setMsg(t('vErrNewBiz'))
     }
@@ -87,7 +90,7 @@ export default function VendorLogin() {
     setMsg('')
 
     if (tab === 'register') {
-      const { data, error } = await supabase.auth.signUp({ email, password })
+      const { data, error } = await supabase.auth.signUp({ email, password, options: { data: consentRecord() } })
       if (error) {
         setBusy(false)
         return setMsg(error.message)
@@ -256,6 +259,14 @@ export default function VendorLogin() {
             <p className="v-hint" style={{ marginBottom: 12 }}>
               {t('vPrototypeNote')}
             </p>
+            <div className="v-field">
+              <label>
+                <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} /> {t('consentAgree')}{' '}
+                <Link to="/privacy" target="_blank">
+                  {t('privacyPolicy')}
+                </Link>
+              </label>
+            </div>
           </>
         )}
 

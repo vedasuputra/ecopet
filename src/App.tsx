@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import Login from './pages/Login'
 import Onboarding from './pages/Onboarding'
@@ -14,15 +14,18 @@ import Profile from './pages/Profile'
 import DevPanel from './pages/DevPanel'
 import VendorApp from './vendor/VendorApp'
 import WelcomeGift from './pages/WelcomeGift'
+import Landing from './site/Landing'
+import Privacy from './site/Privacy'
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Vendor dashboard: a normal responsive web app, outside the phone frame */}
+        {/* Public website pages and the vendor dashboard: normal responsive web pages, outside the phone frame */}
+        <Route path="/" element={<Landing />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="/vendor/*" element={<VendorApp />} />
         <Route element={<Layout />}>
-          <Route index element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/quests" element={<Quests />} />

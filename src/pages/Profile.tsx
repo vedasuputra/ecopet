@@ -3,6 +3,7 @@ import MeiluAvatar from '../components/MeiluAvatar'
 import { useLang, useT, type Lang } from '../i18n'
 import { supabase } from '../lib/supabase'
 import { stopSync } from '../store/sync'
+import { economyApi } from '../lib/api'
 import { useAppStore } from '../store/useAppStore'
 
 const LANGUAGES: { code: Lang; label: string }[] = [
@@ -20,6 +21,17 @@ export default function Profile() {
     stopSync()
     await supabase?.auth.signOut()
     reset() // clear this device's cache; the account's data stays in Supabase
+    navigate('/login')
+  }
+
+  const deleteAccount = async () => {
+    if (!confirm(t('deleteConfirm'))) return
+    const r = await economyApi('delete_account')
+    if (r.error === 'vendor_account') return alert(t('deleteVendor'))
+    if (!r.ok) return alert(t('deleteFailed'))
+    stopSync()
+    await supabase?.auth.signOut()
+    reset()
     navigate('/login')
   }
 
@@ -46,6 +58,12 @@ export default function Profile() {
 
       <div>
         <button onClick={logout}>{t('logout')}</button>
+      </div>
+      <p>
+        <Link to="/privacy">{t('privacyPolicy')}</Link>
+      </p>
+      <div>
+        <button onClick={() => void deleteAccount()}>{t('deleteAccount')}</button>
       </div>
     </div>
   )

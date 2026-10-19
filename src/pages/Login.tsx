@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { consentRecord } from '../data/privacy'
 import { useT } from '../i18n'
 import { supabase } from '../lib/supabase'
 import { refreshEconomy } from '../store/economy'
@@ -14,6 +15,7 @@ export default function Login() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [agree, setAgree] = useState(false)
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -31,12 +33,13 @@ export default function Login() {
   const submit = async () => {
     if (!supabase) return setMsg(t('supabaseMissing'))
     if (!email || password.length < 6) return setMsg(t('fillFields'))
+    if (mode === 'signup' && !agree) return setMsg(t('consentRequired'))
     setBusy(true)
     setMsg('')
 
     const { data, error } =
       mode === 'signup'
-        ? await supabase.auth.signUp({ email, password, options: { data: { name } } })
+        ? await supabase.auth.signUp({ email, password, options: { data: { name, ...consentRecord() } } })
         : await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
@@ -81,6 +84,16 @@ export default function Login() {
           onKeyDown={(e) => e.key === 'Enter' && submit()}
         />
       </div>
+      {mode === 'signup' && (
+        <p>
+          <label>
+            <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} /> {t('consentAgree')}{' '}
+            <Link to="/privacy" target="_blank">
+              {t('privacyPolicy')}
+            </Link>
+          </label>
+        </p>
+      )}
       <button onClick={submit} disabled={busy}>
         {mode === 'signup' ? t('signUp') : t('signIn')}
       </button>

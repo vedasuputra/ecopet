@@ -14,6 +14,23 @@ const en = {
   rewardCoins: '+{n} coins',
   costCoins: '{n} coins',
 
+  // public pages + consent
+  siteNavHome: 'Home',
+  siteNavVendors: 'For vendors',
+  siteNavPrivacy: 'Privacy Policy',
+  siteOpenApp: 'Open the app',
+  siteVendorCta: 'Vendor sign-in',
+  siteFooter: 'Prototype pilot · Mekong Delta, Vietnam',
+  siteContactUs: 'Questions? Write to {email}.',
+  privacyTitle: 'Privacy Policy',
+  consentAgree: 'I have read and agree to the',
+  privacyPolicy: 'Privacy Policy',
+  consentRequired: 'Please agree to the Privacy Policy to create an account.',
+  deleteAccount: 'Delete my account',
+  deleteConfirm: 'Delete your account and all your data (coins, coupons, chat history)? This cannot be undone.',
+  deleteFailed: "Couldn't delete the account. Please try again.",
+  deleteVendor: 'Shop accounts are deleted on request: please write to us.',
+
   // login
   loginTagline: 'Explore the Mekong Delta with Meilu.',
   name: 'Name',
@@ -93,6 +110,11 @@ const en = {
   askPlaceholder: 'Ask Meilu...',
   send: 'Send',
   meiluCant: "Meilu can't answer right now.",
+  chatLogin: 'Please sign in to chat with Meilu.',
+  chatTooLong: 'That message is too long. Please keep it under 500 characters.',
+  chatSlowDown: 'You are chatting very fast. Give Meilu a moment, then try again.',
+  chatDailyLimit: "You've reached today's chat limit. Meilu will be back tomorrow!",
+  chatBusy: 'Meilu is very busy right now. Please try again later.',
 
   // celebration + petting
   celebrateQuest: 'Quest complete! +{n} coins',

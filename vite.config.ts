@@ -62,8 +62,8 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: 'Eco-Pet',
         short_name: 'Eco-Pet',
-        description: 'Ekowisata Mekong Delta bersama Meilu',
-        start_url: '/',
+        description: 'Sustainable travel rewards in the Mekong Delta, with Meilu the bird guide',
+        start_url: '/login',
         scope: '/',
         display: 'standalone',
         orientation: 'portrait',

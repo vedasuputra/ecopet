@@ -1,6 +1,6 @@
 import { DEMO_ECONOMY } from '../src/data/demoState.js'
 import { quests } from '../src/data/quests.js'
-import { authedUser, rest, rpc, supabaseConfigured } from './_supabase.js'
+import { authedUser, deleteAuthUser, getJsonRows, rest, rpc, supabaseConfigured } from './_supabase.js'
 import type { Req, Res } from './_gemini.js'
 
 // The only way coins, the welcome gift and coupon purchases change. Every action is authenticated
@@ -29,6 +29,13 @@ export default async function handler(req: Req, res: Res) {
   if (!user) return fail(res, 401, 'unauthorized')
 
   const { action, couponId, amount } = req.body ?? {}
+
+  // Right to erasure: a traveler deletes their own account and everything tied to it.
+  if (action === 'delete_account') {
+    const acct = (await getJsonRows<{ role: string }>(`accounts?id=eq.${user.id}&select=role`))[0]
+    if (acct?.role === 'vendor') return fail(res, 403, 'vendor_account') // shop accounts: on request, so the listing is handled properly
+    return (await deleteAuthUser(user.id)) ? res.json({ ok: true }) : fail(res, 500, 'db_error')
+  }
 
   if (action === 'ad_reward') {
     const r = await rpc('claim_ad_reward', { p_user: user.id, p_amount: AD_REWARD, p_limit: AD_DAILY_LIMIT })

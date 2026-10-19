@@ -1,14 +1,35 @@
 import { callGemini, sendError, type Req, type Res } from './_gemini.js'
+import { authedUser, rpc, supabaseConfigured } from './_supabase.js'
 
 const LANGS: Record<string, string> = { en: 'English', vi: 'Vietnamese' }
 
+// Protects the free Gemini quota: sign-in required, plus caps per minute, per user per day, and for everyone per day.
+// Override on the server with CHAT_PER_MINUTE / CHAT_PER_DAY / CHAT_GLOBAL_PER_DAY.
+const num = (v: string | undefined, d: number) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : d)
+const PER_MINUTE = num(process.env.CHAT_PER_MINUTE, 8)
+const PER_DAY = num(process.env.CHAT_PER_DAY, 100)
+const GLOBAL_PER_DAY = num(process.env.CHAT_GLOBAL_PER_DAY, 1200)
+const MAX_MESSAGE_CHARS = 500
+const MAX_HISTORY_CHARS = 600
+
 export default async function handler(req: Req, res: Res) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false, message: 'POST only' })
+
+  // 1) only signed-in users (the check is made with Supabase, not trusted from the client)
+  if (!supabaseConfigured()) return res.status(500).json({ ok: false, error: 'not_configured' })
+  const user = await authedUser(req)
+  if (!user) return res.status(401).json({ ok: false, error: 'unauthorized' })
 
   const { message, history, placeName, lat, lng, nearest, activeQuests, language } = req.body ?? {}
   if (typeof message !== 'string' || !message.trim()) {
     return res.status(400).json({ ok: false, message: 'Empty message' })
   }
+  if (message.length > MAX_MESSAGE_CHARS) return res.status(413).json({ ok: false, error: 'message_too_long' })
+
+  // 2) rate limits (atomic, recorded in the database). A refused message costs no Gemini quota.
+  const hit = await rpc('chat_hit', { p_user: user.id, p_per_minute: PER_MINUTE, p_per_day: PER_DAY, p_global_per_day: GLOBAL_PER_DAY })
+  if (!hit.ok) return res.status(500).json({ ok: false, error: 'server_error' })
+  if (hit.data !== 'ok') return res.status(429).json({ ok: false, error: 'chat_limit', reason: hit.data })
 
   const lang = LANGS[language as string] ?? 'English'
   const allHistory = Array.isArray(history) ? history : []
@@ -46,7 +67,7 @@ export default async function handler(req: Req, res: Res) {
 
   const past = allHistory.slice(-10).map((m: any) => ({
     role: m.role === 'meilu' ? 'model' : 'user',
-    parts: [{ text: String(m.text ?? '') }],
+    parts: [{ text: String(m.text ?? '').slice(0, MAX_HISTORY_CHARS) }],
   }))
 
   try {

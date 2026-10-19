@@ -70,3 +70,16 @@ export async function authedUser(req: { headers?: Record<string, string | string
   const token = String(Array.isArray(auth) ? auth[0] : (auth ?? '')).replace(/^Bearer\s+/i, '')
   return userFromToken(token)
 }
+
+/** Deletes an auth user; the database cascades their profile, wallet, coupons, chat limits, etc. */
+export async function deleteAuthUser(userId: string): Promise<boolean> {
+  if (!url || !key) return false
+  const r = await fetch(`${url}/auth/v1/admin/users/${userId}`, { method: 'DELETE', headers: headers() })
+  return r.ok
+}
+
+/** GET rows through PostgREST with the service key (empty array on error). */
+export async function getJsonRows<T>(path: string): Promise<T[]> {
+  const r = await rest(path)
+  return r.ok ? ((await r.json()) as T[]) : []
+}

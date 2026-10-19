@@ -33,6 +33,9 @@ export function failureMessage(r: ApiResult, t: T, fallback: Key): string {
   if (r.error === 'unreachable') return t('unreachable')
   if (r.error === 'rate_limit') return t('rateLimit')
   if (r.error === 'server_error') return t('serverError')
+  if (r.error === 'unauthorized') return t('chatLogin')
+  if (r.error === 'message_too_long') return t('chatTooLong')
+  if (r.error === 'chat_limit') return t(r.reason === 'per_minute' ? 'chatSlowDown' : r.reason === 'per_day' ? 'chatDailyLimit' : 'chatBusy')
   return t(fallback)
 }
 
@@ -54,7 +57,7 @@ export const askMeilu = (p: {
   nearest?: { name: string; distanceM: number }
   activeQuests: string[]
   language: 'en' | 'vi'
-}) => post('/api/chat', p)
+}) => post('/api/chat', p, true)
 
 /** Everything that changes coins, coupons or the welcome gift goes through here (server-checked). */
 export const economyApi = (action: string, extra: Record<string, unknown> = {}) =>

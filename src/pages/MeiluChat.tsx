@@ -88,6 +88,7 @@ export default function MeiluChat() {
       </div>
       <input
         value={text}
+        maxLength={500}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && send()}
         placeholder={t('askPlaceholder')}
