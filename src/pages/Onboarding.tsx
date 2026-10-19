@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DESTINATIONS } from '../data/quests'
+import { useT } from '../i18n'
 import { useAppStore } from '../store/useAppStore'
 
 export default function Onboarding() {
   const navigate = useNavigate()
+  const t = useT()
   const setOnboarding = useAppStore((s) => s.setOnboarding)
+  const giftClaimed = useAppStore((s) => s.welcomeGiftClaimed)
   const [days, setDays] = useState(2)
   const [dest, setDest] = useState<string[]>([])
 
@@ -14,9 +17,9 @@ export default function Onboarding() {
 
   return (
     <div>
-      <h2>Rencana trip</h2>
+      <h2>{t('tripPlan')}</h2>
       <label>
-        Berapa hari menginap?{' '}
+        {t('daysQ')}{' '}
         <input
           type="number"
           min={1}
@@ -25,7 +28,7 @@ export default function Onboarding() {
           onChange={(e) => setDays(Number(e.target.value) || 1)}
         />
       </label>
-      <p>Mau ke mana?</p>
+      <p>{t('whereQ')}</p>
       {DESTINATIONS.map((d) => (
         <div key={d}>
           <label>
@@ -36,10 +39,11 @@ export default function Onboarding() {
       <button
         onClick={() => {
           setOnboarding(days, dest)
-          navigate('/quests')
+          // first time: the welcome coupon gacha, then quests
+          navigate(giftClaimed ? '/quests' : '/gift')
         }}
       >
-        Mulai
+        {t('start')}
       </button>
     </div>
   )

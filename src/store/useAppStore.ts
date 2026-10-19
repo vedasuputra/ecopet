@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { quests } from '../data/quests'
 import { coupons, AVG_BASKET_VND, COMMISSION_RATE } from '../data/coupons'
+import { recordIssued } from '../lib/couponLedger'
 
 export interface User {
   name: string
@@ -50,6 +51,8 @@ interface AppState {
   chatHistory: ChatMessage[]
   adWatch: { date: string; count: number }
   commissionEvents: CommissionEvent[]
+  /** True once the new-user free coupon (gacha) has been claimed. */
+  welcomeGiftClaimed: boolean
 
   login: (name: string) => void
   setOnboarding: (days: number, destinations: string[]) => void
@@ -57,6 +60,8 @@ interface AppState {
   completeQuest: (id: string) => void
   skipQuest: (id: string) => void
   redeemCoupon: (couponId: string) => boolean
+  /** Adds the free welcome coupon once per account. Returns false if already claimed. */
+  claimWelcomeCoupon: (couponId: string) => boolean
   useCoupon: (uid: string) => void
   addChat: (m: ChatMessage) => void
   adsLeftToday: () => number
@@ -73,6 +78,7 @@ const initial = {
   chatHistory: [] as ChatMessage[],
   adWatch: { date: today(), count: 0 },
   commissionEvents: [] as CommissionEvent[],
+  welcomeGiftClaimed: false,
 }
 
 export const useAppStore = create<AppState>()(
@@ -114,13 +120,23 @@ export const useAppStore = create<AppState>()(
       redeemCoupon: (couponId) => {
         const c = coupons.find((x) => x.id === couponId)
         if (!c || get().coins < c.costCoins) return false
+        const uid = `${couponId}-${Date.now()}`
         set((s) => ({
           coins: s.coins - c.costCoins,
-          ownedCoupons: [
-            ...s.ownedCoupons,
-            { uid: `${couponId}-${Date.now()}`, couponId, status: 'unused' },
-          ],
+          ownedCoupons: [...s.ownedCoupons, { uid, couponId, status: 'unused' }],
         }))
+        void recordIssued(uid, couponId, 'coins') // visible to the vendor, scannable
+        return true
+      },
+
+      claimWelcomeCoupon: (couponId) => {
+        if (get().welcomeGiftClaimed || !coupons.some((c) => c.id === couponId)) return false
+        const uid = `${couponId}-welcome-${Date.now()}`
+        set((s) => ({
+          welcomeGiftClaimed: true,
+          ownedCoupons: [...s.ownedCoupons, { uid, couponId, status: 'unused' }],
+        }))
+        void recordIssued(uid, couponId, 'welcome')
         return true
       },
 

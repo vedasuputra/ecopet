@@ -4,18 +4,21 @@
 export interface Place {
   name: string
   detail: string
+  /** Broad area (city/province), used for Meilu chips and the place label. */
+  area: string
   lat: number
   lng: number
 }
 
 const PHOTON = 'https://photon.komoot.io'
 
-function describe(p: any): { name: string; detail: string } {
-  const name = p.name ?? p.street ?? p.district ?? p.city ?? p.state ?? 'Lokasi'
+function describe(p: any): { name: string; detail: string; area: string } {
+  const name = p.name ?? p.street ?? p.district ?? p.city ?? p.state ?? 'Unknown place'
+  const area = p.city ?? p.county ?? p.state ?? p.district ?? ''
   const parts = [p.district, p.city ?? p.county, p.state, p.country].filter(
     (x: string | undefined, i: number, arr: (string | undefined)[]) => x && x !== name && arr.indexOf(x) === i,
   )
-  return { name, detail: parts.join(', ') }
+  return { name, detail: parts.join(', '), area }
 }
 
 export async function searchPlaces(
@@ -41,9 +44,8 @@ export async function reverseGeocode(lat: number, lng: number): Promise<string> 
     if (!r.ok) throw new Error(String(r.status))
     const f = (await r.json()).features?.[0]
     if (!f) throw new Error('empty')
-    const { name, detail } = describe(f.properties ?? {})
-    const city = detail.split(', ')[0]
-    return city ? `${name}, ${city}` : name
+    const { name, area } = describe(f.properties ?? {})
+    return area && area !== name ? `${name}, ${area}` : name
   } catch {
     return `${lat.toFixed(4)}, ${lng.toFixed(4)}`
   }

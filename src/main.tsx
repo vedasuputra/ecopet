@@ -6,7 +6,9 @@ import App from './App.tsx'
 import DesktopShell from './components/DesktopShell.tsx'
 
 // Top-level wide window -> phone-sized iframe shell. Inside the iframe (or on a real phone) -> the app.
-const isWideTopLevel = () => window.self === window.top && window.innerWidth > 500
+// The vendor dashboard (/vendor) is a normal responsive web app and never goes in the phone shell.
+const isWideTopLevel = () =>
+  window.self === window.top && window.innerWidth > 500 && !window.location.pathname.startsWith('/vendor')
 
 function Root() {
   const [shell, setShell] = useState(isWideTopLevel)

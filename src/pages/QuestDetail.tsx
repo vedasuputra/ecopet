@@ -1,28 +1,37 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import CameraCapture, { type Captured } from '../components/CameraCapture'
 import { quests } from '../data/quests'
-import { verifyQuest } from '../lib/api'
+import { useLoc, useT, type Key } from '../i18n'
+import { failureMessage, verifyQuest } from '../lib/api'
 import { formatDistance, haversine } from '../lib/geo'
-import { compressImage } from '../lib/image'
 import { useAppStore } from '../store/useAppStore'
 import { useLocation } from '../store/useLocation'
+
+const LOC_STATUS_KEY: Record<string, Key> = {
+  denied: 'locDenied',
+  unsupported: 'locUnsupported',
+  error: 'locError',
+}
 
 export default function QuestDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const t = useT()
+  const loc = useLoc()
   const quest = quests.find((q) => q.id === id)
-  const { lat, lng, placeName, source } = useLocation()
+  const { lat, lng, placeName, source, status, userChose, startReal } = useLocation()
   const { questStatus, completeQuest } = useAppStore()
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
-  // Photo is compressed and stamped with time + location at the moment it is chosen/taken.
-  const [photo, setPhoto] = useState<{ name: string; base64: string; at: number; lat: number; lng: number } | null>(null)
-  const [allowGallery, setAllowGallery] = useState(false) // hidden demo toggle
+  const [cameraOpen, setCameraOpen] = useState(false)
+  // The photo is stamped with the location at the moment it was taken.
+  const [photo, setPhoto] = useState<(Captured & { lat: number; lng: number }) | null>(null)
 
   if (!quest) {
     return (
       <p>
-        Quest tidak ditemukan. <Link to="/quests">Kembali</Link>
+        {t('questNotFound')} <Link to="/quests">{t('back')}</Link>
       </p>
     )
   }
@@ -32,34 +41,30 @@ export default function QuestDetail() {
   const checkLocation = () => {
     const d = haversine(lat, lng, quest.lat, quest.lng)
     if (d > quest.radiusM) {
-      setMsg(`Kamu masih ${formatDistance(d)} dari lokasi quest`)
+      setMsg(t('tooFar', { d: formatDistance(d) }))
       return false
     }
-    setMsg('Lokasi OK')
+    setMsg(t('locationOk'))
     return true
   }
 
-  const onPhoto = async (file: File | undefined) => {
-    if (!file) return setPhoto(null)
-    setBusy(true)
-    try {
-      setPhoto({ name: file.name, base64: await compressImage(file), at: Date.now(), lat, lng })
-      setMsg('')
-    } catch {
-      setMsg('Gagal membaca foto')
-    }
-    setBusy(false)
+  // Opening the camera asks for camera permission (inside CameraCapture) and, unless the user
+  // deliberately picked a simulated spot, location permission too.
+  const openCamera = () => {
+    if (!userChose && source !== 'real') startReal()
+    setMsg('')
+    setCameraOpen(true)
   }
 
   const verify = async () => {
     if (!needsPhoto) {
       // e.g. "redeem coupon" quest completes via VendorScan instead
-      return setMsg('Quest ini selesai otomatis saat kupon dipakai di toko.')
+      return setMsg(t('autoQuest'))
     }
     if (!checkLocation()) return
-    if (!photo) return setMsg('Ambil atau pilih foto dulu')
+    if (!photo) return setMsg(t('pickPhoto'))
     setBusy(true)
-    setMsg('Memeriksa foto...')
+    setMsg(t('checkingPhoto'))
     const r = await verifyQuest({
       questId: quest.id,
       image: photo.base64,
@@ -70,45 +75,67 @@ export default function QuestDetail() {
     setBusy(false)
     if (r.ok) {
       completeQuest(quest.id)
-      setMsg(`Terverifikasi! +${quest.rewardCoins} koin`)
-    } else {
-      setMsg(r.message ?? 'Verifikasi gagal')
+      return setMsg(t('verified', { n: quest.rewardCoins }))
+    }
+    // Server sends reason codes; texts are translated here.
+    switch (r.reason) {
+      case 'too_far':
+        return setMsg(t('tooFar', { d: formatDistance(Number(r.distanceM ?? 0)) }))
+      case 'stale':
+        return setMsg(t('photoStale'))
+      case 'duplicate':
+        return setMsg(t('photoDuplicate'))
+      case 'screenshot':
+        return setMsg(t('photoScreenshot'))
+      case 'not_detected':
+        return setMsg(t('photoNoMatch', { reason: String(r.detail ?? '') }))
+      default:
+        return setMsg(failureMessage(r, t, 'verifyFailed'))
     }
   }
 
   return (
     <div>
-      <h2>{quest.title}</h2>
-      <p>{quest.description}</p>
+      <h2>{loc(quest.title)}</h2>
+      <p>{loc(quest.description)}</p>
       <p>
-        Destinasi: {quest.destination} | Radius {quest.radiusM} m | +{quest.rewardCoins} koin
+        {t('destination')}: {quest.destination} | {t('radius')} {quest.radiusM} m | {t('rewardCoins', { n: quest.rewardCoins })}
       </p>
-      <p>{source === 'simulated' ? `Simulated: ${placeName}` : placeName}</p>
-      <button onClick={checkLocation}>Cek lokasi</button>
-      {needsPhoto && (
+      <p>{source === 'simulated' ? t('simulatedAt', { place: placeName }) : t('realAt', { place: placeName })}</p>
+      {LOC_STATUS_KEY[status] && <p>{t(LOC_STATUS_KEY[status])}</p>}
+      <button onClick={checkLocation}>{t('checkLocation')}</button>
+
+      {needsPhoto && !done && (
         <div>
-          <input
-            type="file"
-            accept="image/*"
-            capture={allowGallery ? undefined : 'environment'}
-            onChange={(e) => onPhoto(e.target.files?.[0])}
-          />
-          <label style={{ fontSize: 10 }}>
-            <input
-              type="checkbox"
-              checked={allowGallery}
-              onChange={(e) => setAllowGallery(e.target.checked)}
-            />{' '}
-            izinkan galeri
-          </label>
-          {photo && <p>Foto: {photo.name}</p>}
+          {cameraOpen ? (
+            <CameraCapture
+              onCapture={(c) => {
+                setPhoto({ ...c, lat, lng })
+                setCameraOpen(false)
+                setMsg(t('photoTaken'))
+              }}
+              onCancel={() => setCameraOpen(false)}
+            />
+          ) : (
+            <>
+              {photo && <img src={photo.preview} alt="" style={{ width: '100%', maxHeight: 240, objectFit: 'contain' }} />}
+              <div>
+                <button onClick={openCamera} disabled={busy}>
+                  {photo ? t('retake') : t('takePhoto')}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       )}
-      <button onClick={verify} disabled={done || busy}>
-        {done ? 'Sudah selesai' : 'Verifikasi'}
-      </button>
+
+      {!cameraOpen && (
+        <button onClick={verify} disabled={done || busy}>
+          {done ? t('alreadyCompleted') : t('verify')}
+        </button>
+      )}
       {msg && <p>{msg}</p>}
-      <button onClick={() => navigate('/quests')}>Kembali</button>
+      <button onClick={() => navigate('/quests')}>{t('back')}</button>
     </div>
   )
 }

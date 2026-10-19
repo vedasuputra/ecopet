@@ -10,6 +10,8 @@ export interface LocationState {
   placeName: string
   accuracy: number | null
   status: 'idle' | 'requesting' | 'denied' | 'unsupported' | 'error'
+  /** True once the user picked a simulated spot on purpose (search, drag, dev panel). */
+  userChose: boolean
   /** Simulate being at a place. Resolves the place name by reverse geocoding when none is given. */
   setSimulated: (lat: number, lng: number, placeName?: string) => void
   /** Switch to the device's GPS. Asks for permission when called (must be a user action). */
@@ -39,10 +41,11 @@ export const useLocation = create<LocationState>()(
         placeName: 'Can Tho',
         accuracy: null,
         status: 'idle',
+        userChose: false,
 
         setSimulated: (lat, lng, placeName) => {
           get().stopReal()
-          set({ source: 'simulated', lat, lng, placeName: placeName ?? 'Memuat nama tempat...', accuracy: null, status: 'idle' })
+          set({ source: 'simulated', lat, lng, placeName: placeName ?? '…', accuracy: null, status: 'idle', userChose: true })
           if (!placeName) void nameFor(lat, lng)
         },
 
@@ -78,7 +81,7 @@ export const useLocation = create<LocationState>()(
     {
       name: 'ecopet-location',
       // Only remember the simulated spot; real GPS must be re-requested each session.
-      partialize: (s) => ({ lat: s.lat, lng: s.lng, placeName: s.placeName }),
+      partialize: (s) => ({ lat: s.lat, lng: s.lng, placeName: s.placeName, userChose: s.userChose }),
     },
   ),
 )

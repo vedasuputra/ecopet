@@ -4,7 +4,7 @@ import PhoneFrame from './PhoneFrame'
 import BannerAd from './BannerAd'
 import BottomNav from './BottomNav'
 import { supabase } from '../lib/supabase'
-import { loadRemote, startSync } from '../store/sync'
+import { loadRemote, startSync, syncCouponLedger } from '../store/sync'
 import { useAppStore } from '../store/useAppStore'
 
 const PUBLIC = ['/login', '/dev']
@@ -23,6 +23,13 @@ export default function Layout() {
       await loadRemote(u.id)
       startSync(u.id)
     })
+  }, [])
+
+  // Pick up coupons a vendor has scanned (and backfill the ledger) every few seconds while signed in.
+  useEffect(() => {
+    void syncCouponLedger()
+    const id = setInterval(() => void syncCouponLedger(), 4000)
+    return () => clearInterval(id)
   }, [])
 
   // Tap logo 5x to open the hidden dev panel.

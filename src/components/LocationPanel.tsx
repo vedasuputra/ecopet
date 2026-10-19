@@ -1,21 +1,23 @@
 import { useEffect, useState } from 'react'
+import { useT, type Key } from '../i18n'
 import { searchPlaces, type Place } from '../lib/geocode'
 import { useLocation } from '../store/useLocation'
 
-const STATUS_TEXT: Record<string, string> = {
-  requesting: 'Meminta izin lokasi...',
-  denied: 'Izin lokasi ditolak. Aktifkan di pengaturan browser, atau pakai lokasi simulasi.',
-  unsupported: 'Browser tidak mendukung lokasi.',
-  error: 'Tidak bisa mendapatkan lokasi. Coba lagi atau pakai lokasi simulasi.',
+const STATUS_KEY: Record<string, Key> = {
+  requesting: 'locRequesting',
+  denied: 'locDenied',
+  unsupported: 'locUnsupported',
+  error: 'locError',
 }
 
 export default function LocationPanel() {
+  const t = useT()
   const { source, lat, lng, placeName, accuracy, status, setSimulated, startReal } = useLocation()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Place[]>([])
   const [searching, setSearching] = useState(false)
-  const [searchError, setSearchError] = useState('')
+  const [searchError, setSearchError] = useState(false)
 
   // Debounced Photon search (min 3 chars), previous request aborted.
   useEffect(() => {
@@ -24,24 +26,24 @@ export default function LocationPanel() {
       return
     }
     const ctrl = new AbortController()
-    const t = setTimeout(async () => {
+    const timer = setTimeout(async () => {
       setSearching(true)
-      setSearchError('')
+      setSearchError(false)
       try {
         setResults(await searchPlaces(query.trim(), { lat, lng }, ctrl.signal))
       } catch (e) {
-        if ((e as Error).name !== 'AbortError') setSearchError('Pencarian gagal, coba lagi.')
+        if ((e as Error).name !== 'AbortError') setSearchError(true)
       }
       setSearching(false)
     }, 400)
     return () => {
-      clearTimeout(t)
+      clearTimeout(timer)
       ctrl.abort()
     }
   }, [query, open, lat, lng])
 
   const choose = (p: Place) => {
-    setSimulated(p.lat, p.lng, p.detail ? `${p.name}, ${p.detail.split(', ')[0]}` : p.name)
+    setSimulated(p.lat, p.lng, p.area && p.area !== p.name ? `${p.name}, ${p.area}` : p.name)
     setOpen(false)
     setQuery('')
     setResults([])
@@ -50,24 +52,24 @@ export default function LocationPanel() {
   return (
     <div>
       <p>
-        <b>{source === 'simulated' ? `Simulated: ${placeName}` : `Lokasi asli: ${placeName}`}</b>
+        <b>{source === 'simulated' ? t('simulatedAt', { place: placeName }) : t('realAt', { place: placeName })}</b>
         {source === 'real' && accuracy !== null && ` (±${Math.round(accuracy)} m)`}
       </p>
-      {STATUS_TEXT[status] && <p>{STATUS_TEXT[status]}</p>}
+      {STATUS_KEY[status] && <p>{t(STATUS_KEY[status])}</p>}
       <button onClick={startReal} disabled={source === 'real' || status === 'requesting'}>
-        Pakai lokasi asli
+        {t('useRealLocation')}
       </button>
-      <button onClick={() => setOpen((o) => !o)}>Ubah lokasi</button>
+      <button onClick={() => setOpen((o) => !o)}>{t('changeLocation')}</button>
       {open && (
         <div>
           <input
             autoFocus
-            placeholder="Cari tempat (mis. Cai Rang)"
+            placeholder={t('searchPlaceholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          {searching && <p>Mencari...</p>}
-          {searchError && <p>{searchError}</p>}
+          {searching && <p>{t('searching')}</p>}
+          {searchError && <p>{t('searchFailed')}</p>}
           <ul>
             {results.map((p, i) => (
               <li key={`${p.lat},${p.lng},${i}`}>
@@ -78,7 +80,7 @@ export default function LocationPanel() {
               </li>
             ))}
           </ul>
-          <small>Geser pin di peta untuk menyesuaikan.</small>
+          <small>{t('dragHint')}</small>
         </div>
       )}
     </div>

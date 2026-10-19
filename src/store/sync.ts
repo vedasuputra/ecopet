@@ -1,3 +1,4 @@
+import { recordIssued } from '../lib/couponLedger'
 import { supabase } from '../lib/supabase'
 import { useAppStore } from './useAppStore'
 
@@ -13,6 +14,7 @@ const pick = (s: ReturnType<typeof useAppStore.getState>) => ({
   chatHistory: s.chatHistory,
   adWatch: s.adWatch,
   commissionEvents: s.commissionEvents,
+  welcomeGiftClaimed: s.welcomeGiftClaimed,
 })
 
 let timer: ReturnType<typeof setTimeout> | undefined
@@ -50,4 +52,29 @@ export function stopSync() {
   clearTimeout(timer)
   unsub?.()
   unsub = undefined
+}
+
+/**
+ * Keeps this traveler's coupons in step with the shared ledger:
+ *  - backfills coupons the ledger doesn't know yet (so a vendor can scan them)
+ *  - applies redemptions a vendor made, which marks the coupon used, completes the
+ *    "redeem a coupon" quest and pays the bonus coins (all done by useCoupon)
+ */
+export async function syncCouponLedger(): Promise<void> {
+  if (!supabase) return
+  const { data: sess } = await supabase.auth.getSession()
+  const user = sess.session?.user
+  if (!user) return
+
+  const { data: rows, error } = await supabase.from('coupons_issued').select('uid,status').eq('user_id', user.id)
+  if (error || !rows) return
+  const remote = new Map(rows.map((r) => [r.uid as string, r.status as string]))
+
+  for (const oc of useAppStore.getState().ownedCoupons) {
+    if (oc.status === 'unused' && !remote.has(oc.uid)) {
+      await recordIssued(oc.uid, oc.couponId, oc.uid.includes('-welcome-') ? 'welcome' : 'coins')
+    } else if (oc.status === 'unused' && remote.get(oc.uid) === 'used') {
+      useAppStore.getState().useCoupon(oc.uid)
+    }
+  }
 }

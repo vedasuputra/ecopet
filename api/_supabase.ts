@@ -32,3 +32,26 @@ export async function saveHash(hash: string, questId: string): Promise<void> {
   })
   if (!r.ok && r.status !== 409) console.error('photo_hashes insert failed', r.status, await r.text())
 }
+
+// --- Auth + generic REST helpers used by /api/vendor ---------------------------------------------
+
+const anon = process.env.VITE_SUPABASE_ANON_KEY
+
+export const supabaseConfigured = () => !!(url && key && anon)
+
+/** Verifies a user's access token with Supabase Auth and returns their id (or null). */
+export async function userFromToken(token: string): Promise<{ id: string } | null> {
+  if (!url || !anon || !token) return null
+  const r = await fetch(`${url}/auth/v1/user`, { headers: { apikey: anon, Authorization: `Bearer ${token}` } })
+  if (!r.ok) return null
+  const u = await r.json()
+  return u?.id ? { id: u.id as string } : null
+}
+
+/** PostgREST call with the service_role key (bypasses RLS). Path is relative to /rest/v1/. */
+export function rest(path: string, init: RequestInit = {}) {
+  return fetch(`${url}/rest/v1/${path}`, {
+    ...init,
+    headers: { ...headers(), ...(init.headers as Record<string, string> | undefined) },
+  })
+}

@@ -12,12 +12,15 @@ import RewardedAd from './pages/RewardedAd'
 import TripCard from './pages/TripCard'
 import Profile from './pages/Profile'
 import DevPanel from './pages/DevPanel'
-import VendorScan from './pages/VendorScan'
+import VendorApp from './vendor/VendorApp'
+import WelcomeGift from './pages/WelcomeGift'
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Vendor dashboard: a normal responsive web app, outside the phone frame */}
+        <Route path="/vendor/*" element={<VendorApp />} />
         <Route element={<Layout />}>
           <Route index element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
@@ -32,7 +35,7 @@ export default function App() {
           <Route path="/trip-card" element={<TripCard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/dev" element={<DevPanel />} />
-          <Route path="/vendor" element={<VendorScan />} />
+          <Route path="/gift" element={<WelcomeGift />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useT } from '../i18n'
 import { IMA_AD_TAG, loadIma, withCorrelator } from '../lib/ima'
 import { AD_REWARD, useAppStore } from '../store/useAppStore'
 
@@ -14,6 +15,7 @@ const SIM_SECONDS = 25 // demo ad length (20-30s)
 // 25s ad plays instead, with the X hidden until it finishes.
 export default function RewardedAd() {
   const navigate = useNavigate()
+  const t = useT()
   const { claimAd, adsLeftToday } = useAppStore()
   const [phase, setPhase] = useState<Phase>('idle')
   const [msg, setMsg] = useState('')
@@ -27,7 +29,7 @@ export default function RewardedAd() {
 
   const fallback = (why: string) => {
     cleanup.current()
-    setMsg(why ? `${why} Memakai iklan contoh.` : '')
+    setMsg(why ? t('usingDemo', { why }) : '')
     setSimLeft(SIM_SECONDS)
     setPhase('sim')
   }
@@ -36,13 +38,13 @@ export default function RewardedAd() {
   useEffect(() => {
     if (phase !== 'sim') return
     if (simLeft <= 0) {
-      setMsg(claimAd() ? `+${AD_REWARD} koin!` : 'Batas harian tercapai.')
+      setMsg(claimAd() ? t('coinsGot', { n: AD_REWARD }) : t('dailyLimit'))
       setPhase('simdone')
       return
     }
-    const t = setTimeout(() => setSimLeft((s) => s - 1), 1000)
-    return () => clearTimeout(t)
-  }, [phase, simLeft, claimAd])
+    const tick = setTimeout(() => setSimLeft((s) => s - 1), 1000)
+    return () => clearTimeout(tick)
+  }, [phase, simLeft, claimAd, t])
 
   // Real ad: runs once the overlay (phase 'ima') is mounted so IMA can measure the container.
   useEffect(() => {
@@ -52,7 +54,7 @@ export default function RewardedAd() {
     let adsLoader: any
     let started = false
     const timer = setTimeout(() => {
-      if (!started) fail('Iklan tidak merespons (timeout).')
+      if (!started) fail(t('adTimeout'))
     }, IMA_START_TIMEOUT_MS)
 
     const fail = (why: string) => {
@@ -81,19 +83,19 @@ export default function RewardedAd() {
         adsLoader = new ima.AdsLoader(displayContainer)
 
         adsLoader.addEventListener(ima.AdErrorEvent.Type.AD_ERROR, () =>
-          fail('Google tidak mengembalikan iklan (no fill / error).'),
+          fail(t('adNoFill')),
         )
         adsLoader.addEventListener(ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED, (e: any) => {
           if (dead) return
           adsManager = e.getAdsManager(videoEl.current)
-          adsManager.addEventListener(ima.AdErrorEvent.Type.AD_ERROR, () => fail('Iklan gagal diputar.'))
+          adsManager.addEventListener(ima.AdErrorEvent.Type.AD_ERROR, () => fail(t('adPlayFail')))
           adsManager.addEventListener(ima.AdEvent.Type.STARTED, () => {
             started = true
             clearTimeout(timer)
           })
           adsManager.addEventListener(ima.AdEvent.Type.COMPLETE, () => {
             if (dead) return
-            setMsg(claimAd() ? `+${AD_REWARD} koin!` : 'Batas harian tercapai.')
+            setMsg(claimAd() ? t('coinsGot', { n: AD_REWARD }) : t('dailyLimit'))
             // Auto-close shortly after completion
             setTimeout(() => {
               cleanup.current()
@@ -102,14 +104,14 @@ export default function RewardedAd() {
           })
           adsManager.addEventListener(ima.AdEvent.Type.SKIPPED, () => {
             cleanup.current()
-            setMsg('Iklan dilewati, tidak ada koin.')
+            setMsg(t('adSkipped'))
             setPhase('done')
           })
           try {
             adsManager.init(box.clientWidth, box.clientHeight, ima.ViewMode.NORMAL)
             adsManager.start()
           } catch {
-            fail('Iklan gagal diputar.')
+            fail(t('adPlayFail'))
           }
         })
 
@@ -119,14 +121,14 @@ export default function RewardedAd() {
         req.linearAdSlotHeight = box.clientHeight
         adsLoader.requestAds(req)
       })
-      .catch(() => fail('Iklan tidak bisa dimuat (mungkin diblokir).'))
+      .catch(() => fail(t('adBlocked')))
 
     return () => cleanup.current()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase])
 
   const start = () => {
-    if (adsLeftToday() <= 0) return setMsg('Batas harian tercapai.')
+    if (adsLeftToday() <= 0) return setMsg(t('dailyLimit'))
     if (forceDemo) return fallback('')
     setMsg('')
     setPhase('ima')
@@ -143,28 +145,28 @@ export default function RewardedAd() {
 
   return (
     <div>
-      <h2>Iklan berhadiah</h2>
-      <p>Sisa hari ini: {adsLeftToday()}</p>
+      <h2>{t('adTitle')}</h2>
+      <p>{t('adsLeft', { n: adsLeftToday() })}</p>
       {phase === 'idle' && (
         <>
-          <button onClick={start}>Tonton iklan (+{AD_REWARD} koin)</button>
+          <button onClick={start}>{t('watchAd', { n: AD_REWARD })}</button>
           <div>
             <label style={{ fontSize: 12 }}>
               <input type="checkbox" checked={forceDemo} onChange={(e) => setForceDemo(e.target.checked)} />{' '}
-              Pakai iklan contoh (demo)
+              {t('demoAd')}
             </label>
           </div>
         </>
       )}
       {msg && <p>{msg}</p>}
-      <button onClick={() => navigate('/quests')}>Kembali</button>
+      <button onClick={() => navigate('/quests')}>{t('back')}</button>
 
       {/* Real ad (IMA): fills the phone frame, no close button until it completes */}
       {phase === 'ima' && (
         <div style={overlay}>
           <video ref={videoEl} playsInline style={{ position: 'absolute', width: '100%', height: '100%' }} />
           <div ref={adBox} style={{ position: 'absolute', inset: 0 }} />
-          <p style={{ position: 'absolute', bottom: 4, left: 8, fontSize: 11, margin: 0 }}>Memuat iklan...</p>
+          <p style={{ position: 'absolute', bottom: 4, left: 8, fontSize: 11, margin: 0 }}>{t('adLoading')}</p>
         </div>
       )}
 
@@ -184,21 +186,21 @@ export default function RewardedAd() {
         >
           {phase === 'simdone' && (
             <button
-              aria-label="Tutup iklan"
+              aria-label={t('closeAd')}
               onClick={() => setPhase('done')}
               style={{ position: 'absolute', top: 8, right: 8, fontSize: 20 }}
             >
               ✕
             </button>
           )}
-          <p style={{ fontSize: 12, opacity: 0.7 }}>Iklan contoh</p>
-          <h2>Cafe Sen Xanh</h2>
-          <p>Kopi kelapa khas Can Tho. Tukar kupon di Eco-Pet untuk diskon 15%.</p>
+          <p style={{ fontSize: 12, opacity: 0.7 }}>{t('adSample')}</p>
+          <h2>{t('adSampleTitle')}</h2>
+          <p>{t('adSampleBody')}</p>
           <div style={{ width: '80%', height: 6, background: '#444', marginTop: 24 }}>
             <div style={{ width: `${progress}%`, height: '100%', background: '#4caf50', transition: 'width 1s linear' }} />
           </div>
           <p style={{ fontSize: 12 }}>
-            {phase === 'sim' ? `Hadiah dalam ${simLeft} detik` : `Selesai! ${msg}`}
+            {phase === 'sim' ? t('rewardIn', { n: simLeft }) : t('adFinished', { msg })}
           </p>
         </div>
       )}

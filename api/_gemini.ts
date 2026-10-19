@@ -4,6 +4,7 @@
 export interface Req {
   method?: string
   body?: any
+  headers?: Record<string, string | string[] | undefined>
 }
 export interface Res {
   status: (code: number) => Res

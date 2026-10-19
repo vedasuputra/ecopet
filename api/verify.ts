@@ -37,19 +37,20 @@ export default async function handler(req: Req, res: Res) {
     return res.json({
       ok: false,
       reason: 'too_far',
-      message: `Kamu masih ${(dist / 1000).toFixed(1)} km dari lokasi quest`,
+      distanceM: Math.round(dist),
+      message: `You are still ${(dist / 1000).toFixed(1)} km from the quest location`,
     })
   }
 
   // Anti-cheat: stale photo
   if (typeof timestamp !== 'number' || Math.abs(Date.now() - timestamp) > MAX_PHOTO_AGE_MS) {
-    return res.json({ ok: false, reason: 'stale', message: 'Foto terlalu lama, ambil foto baru' })
+    return res.json({ ok: false, reason: 'stale', message: 'The photo is too old, take a new one' })
   }
 
   // Anti-cheat: duplicate photo
   const hash = createHash('sha256').update(image).digest('hex')
   if (await hashExists(hash)) {
-    return res.json({ ok: false, reason: 'duplicate', message: 'Foto ini sudah pernah dipakai' })
+    return res.json({ ok: false, reason: 'duplicate', message: 'This photo has already been used' })
   }
 
   // Layer 2: photo content, checked by Gemini with structured output
@@ -86,7 +87,7 @@ export default async function handler(req: Req, res: Res) {
     return res.json({
       ok: pass,
       reason: pass ? 'verified' : r.is_screenshot_or_screen ? 'screenshot' : 'not_detected',
-      message: pass ? 'Terverifikasi!' : `Foto belum cocok: ${r.reason}`,
+      message: pass ? 'Verified!' : `Photo does not match: ${r.reason}`,
       confidence: r.confidence,
       detail: r.reason,
     })

@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap } from 'react-leaflet'
 import { quests } from '../data/quests'
 import { vendors } from '../data/vendors'
+import { useLoc, useT } from '../i18n'
 import { haversine } from '../lib/geo'
 import { useLocation } from '../store/useLocation'
 
@@ -26,6 +27,8 @@ function Recenter({ lat, lng }: { lat: number; lng: number }) {
 
 // Pin = user (draggable in simulated mode), green = quest, orange = vendor.
 export default function MapView() {
+  const t = useT()
+  const loc = useLoc()
   const { source, lat, lng, placeName, setSimulated } = useLocation()
   return (
     <MapContainer center={[lat, lng]} zoom={12} style={{ height: 380, width: '100%' }}>
@@ -45,17 +48,17 @@ export default function MapView() {
           },
         }}
       >
-        <Popup>{source === 'simulated' ? `Simulated: ${placeName}` : `Kamu: ${placeName}`}</Popup>
+        <Popup>{source === 'simulated' ? t('simulatedAt', { place: placeName }) : t('mapYou', { place: placeName })}</Popup>
       </Marker>
       {quests.map((q) => (
         <CircleMarker key={q.id} center={[q.lat, q.lng]} radius={7} pathOptions={{ color: 'green' }}>
-          <Popup>Quest: {q.title}</Popup>
+          <Popup>{t('mapQuest', { title: loc(q.title) })}</Popup>
         </CircleMarker>
       ))}
       {vendors.map((v) => (
         <CircleMarker key={v.id} center={[v.lat, v.lng]} radius={7} pathOptions={{ color: 'orange' }}>
           <Popup>
-            {v.name} ({v.category})
+            {v.name} ({loc(v.category)})
           </Popup>
         </CircleMarker>
       ))}
