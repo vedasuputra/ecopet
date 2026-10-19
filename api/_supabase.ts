@@ -39,13 +39,13 @@ const anon = process.env.VITE_SUPABASE_ANON_KEY
 
 export const supabaseConfigured = () => !!(url && key && anon)
 
-/** Verifies a user's access token with Supabase Auth and returns their id (or null). */
-export async function userFromToken(token: string): Promise<{ id: string } | null> {
+/** Verifies a user's access token with Supabase Auth and returns their id and email (or null). */
+export async function userFromToken(token: string): Promise<{ id: string; email: string } | null> {
   if (!url || !anon || !token) return null
   const r = await fetch(`${url}/auth/v1/user`, { headers: { apikey: anon, Authorization: `Bearer ${token}` } })
   if (!r.ok) return null
   const u = await r.json()
-  return u?.id ? { id: u.id as string } : null
+  return u?.id ? { id: u.id as string, email: String(u.email ?? '') } : null
 }
 
 /** PostgREST call with the service_role key (bypasses RLS). Path is relative to /rest/v1/. */
@@ -54,4 +54,19 @@ export function rest(path: string, init: RequestInit = {}) {
     ...init,
     headers: { ...headers(), ...(init.headers as Record<string, string> | undefined) },
   })
+}
+
+/** Calls a SQL function through PostgREST. Postgres `raise exception 'x'` comes back as error 'x'. */
+export async function rpc(fn: string, args: Record<string, unknown>): Promise<{ ok: boolean; data?: any; error?: string }> {
+  const r = await rest(`rpc/${fn}`, { method: 'POST', body: JSON.stringify(args) })
+  const body = await r.json().catch(() => null)
+  if (r.ok) return { ok: true, data: body }
+  return { ok: false, error: String(body?.message ?? 'db_error') }
+}
+
+/** Bearer token from a request, verified against Supabase Auth. */
+export async function authedUser(req: { headers?: Record<string, string | string[] | undefined> }) {
+  const auth = req.headers?.authorization
+  const token = String(Array.isArray(auth) ? auth[0] : (auth ?? '')).replace(/^Bearer\s+/i, '')
+  return userFromToken(token)
 }

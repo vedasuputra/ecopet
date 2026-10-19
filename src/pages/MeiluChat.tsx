@@ -67,7 +67,7 @@ export default function MeiluChat() {
 
   return (
     <div>
-      <MeiluAvatar nodding={nodding} />
+      <MeiluAvatar nodding={nodding} interactive />
       <ul>
         {chatHistory.map((m, i) => (
           <li key={i} style={{ whiteSpace: 'pre-line' }}>

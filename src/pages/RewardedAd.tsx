@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useT } from '../i18n'
 import { IMA_AD_TAG, loadIma, withCorrelator } from '../lib/ima'
+import { claimAd, type ActionResult } from '../store/economy'
 import { AD_REWARD, useAppStore } from '../store/useAppStore'
 
 type Phase = 'idle' | 'ima' | 'sim' | 'simdone' | 'done'
@@ -16,7 +17,11 @@ const SIM_SECONDS = 25 // demo ad length (20-30s)
 export default function RewardedAd() {
   const navigate = useNavigate()
   const t = useT()
-  const { claimAd, adsLeftToday } = useAppStore()
+  const adsLeftToday = useAppStore((s) => s.adsLeftToday)
+  useAppStore((s) => s.adWatch) // re-render when the server-side count changes
+  // The server pays the coins (and enforces 3 a day); we only show the outcome.
+  const rewardMsg = (r: ActionResult) =>
+    r.ok ? t('coinsGot', { n: AD_REWARD }) : r.error === 'daily_limit' ? t('dailyLimit') : r.error === 'unreachable' ? t('unreachable') : t('serverError')
   const [phase, setPhase] = useState<Phase>('idle')
   const [msg, setMsg] = useState('')
   const [simLeft, setSimLeft] = useState(SIM_SECONDS)
@@ -38,13 +43,13 @@ export default function RewardedAd() {
   useEffect(() => {
     if (phase !== 'sim') return
     if (simLeft <= 0) {
-      setMsg(claimAd() ? t('coinsGot', { n: AD_REWARD }) : t('dailyLimit'))
       setPhase('simdone')
+      void claimAd().then((r) => setMsg(rewardMsg(r)))
       return
     }
     const tick = setTimeout(() => setSimLeft((s) => s - 1), 1000)
     return () => clearTimeout(tick)
-  }, [phase, simLeft, claimAd, t])
+  }, [phase, simLeft, t])
 
   // Real ad: runs once the overlay (phase 'ima') is mounted so IMA can measure the container.
   useEffect(() => {
@@ -95,7 +100,7 @@ export default function RewardedAd() {
           })
           adsManager.addEventListener(ima.AdEvent.Type.COMPLETE, () => {
             if (dead) return
-            setMsg(claimAd() ? t('coinsGot', { n: AD_REWARD }) : t('dailyLimit'))
+            void claimAd().then((r) => setMsg(rewardMsg(r)))
             // Auto-close shortly after completion
             setTimeout(() => {
               cleanup.current()

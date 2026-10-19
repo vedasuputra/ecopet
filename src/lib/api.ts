@@ -1,7 +1,8 @@
-// Thin client for the serverless functions in /api (Gemini key stays on the server).
-// Locally these only exist under `npx vercel dev`; plain `npm run dev` will 404.
+// Thin client for the serverless functions in /api (Gemini key and service key stay on the server).
+// Locally they are served by `npm run dev` (see vite.config.ts) or `npx vercel dev`.
 
 import type { Key } from '../i18n'
+import { supabase } from './supabase'
 
 export interface ApiResult {
   ok: boolean
@@ -11,13 +12,14 @@ export interface ApiResult {
   [k: string]: unknown
 }
 
-async function post(path: string, body: unknown): Promise<ApiResult> {
+async function post(path: string, body: unknown, withAuth = false): Promise<ApiResult> {
   try {
-    const r = await fetch(path, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (withAuth) {
+      const token = (await supabase?.auth.getSession())?.data.session?.access_token
+      if (token) headers.Authorization = `Bearer ${token}`
+    }
+    const r = await fetch(path, { method: 'POST', headers, body: JSON.stringify(body) })
     return await r.json()
   } catch {
     return { ok: false, error: 'unreachable' }
@@ -34,13 +36,14 @@ export function failureMessage(r: ApiResult, t: T, fallback: Key): string {
   return t(fallback)
 }
 
+/** Quest photo check. Signed-in only: the server pays the reward to the account. */
 export const verifyQuest = (p: {
   questId: string
   image: string
   lat: number
   lng: number
   timestamp: number
-}) => post('/api/verify', p)
+}) => post('/api/verify', p, true)
 
 export const askMeilu = (p: {
   message: string
@@ -52,3 +55,7 @@ export const askMeilu = (p: {
   activeQuests: string[]
   language: 'en' | 'vi'
 }) => post('/api/chat', p)
+
+/** Everything that changes coins, coupons or the welcome gift goes through here (server-checked). */
+export const economyApi = (action: string, extra: Record<string, unknown> = {}) =>
+  post('/api/economy', { action, ...extra }, true)

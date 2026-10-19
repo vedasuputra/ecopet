@@ -2,13 +2,14 @@ import { Link } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
 import { useVendor } from './context'
 import DailyChart from './DailyChart'
-import { computeStats, couponTitle, dailySeries } from './data'
-import { dateTime, pct, travelerTag, vnd } from './format'
+import { computeStats, couponTitle, dailySeries, subscriptionStatus } from './data'
+import { dateLong, dateTime, pct, travelerTag, vnd } from './format'
 
 export default function Overview() {
   const t = useT()
   const lang = useLang((s) => s.lang)
-  const { vendor, rows } = useVendor()
+  const { vendor, rows, offers } = useVendor()
+  const sub = subscriptionStatus(vendor)
   const s = computeStats(rows)
   const recent = rows.slice(0, 6)
 
@@ -34,6 +35,21 @@ export default function Overview() {
           {t('vScan')}
         </Link>
       </div>
+
+      {sub !== 'active' && (
+        <section className="v-card" style={{ borderColor: 'var(--danger)' }}>
+          <div className="v-row" style={{ justifyContent: 'space-between' }}>
+            <p>
+              {sub === 'inactive'
+                ? t('vStatusInactive')
+                : t('vStatusExpired', { d: dateLong(vendor.plan_paid_until as string, lang) })}
+            </p>
+            <Link className="v-btn primary" to="/vendor/billing" style={{ textDecoration: 'none' }}>
+              {t('vPayNowBtn')}
+            </Link>
+          </div>
+        </section>
+      )}
 
       <section className="v-hero">
         <div className="v-label" style={{ color: 'var(--ink-2)' }}>
@@ -72,7 +88,7 @@ export default function Overview() {
                   {recent.map((r) => (
                     <tr key={r.uid}>
                       <td>
-                        {couponTitle(r.coupon_id, lang)}
+                        {couponTitle(offers, r.coupon_id, lang)}
                         <div className="v-hint">
                           {t('vTravelerTag', { tag: travelerTag(r.uid) })} · {dateTime(r.redeemed_at ?? r.issued_at, lang)}
                         </div>

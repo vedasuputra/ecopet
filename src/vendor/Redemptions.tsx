@@ -9,7 +9,7 @@ type Filter = 'all' | 'used' | 'unused'
 export default function Redemptions() {
   const t = useT()
   const lang = useLang((s) => s.lang)
-  const { rows } = useVendor()
+  const { rows, offers } = useVendor()
   const [filter, setFilter] = useState<Filter>('all')
 
   const shown = useMemo(() => (filter === 'all' ? rows : rows.filter((r) => r.status === filter)), [rows, filter])
@@ -21,7 +21,7 @@ export default function Redemptions() {
     const esc = (v: string | number | null) => `"${String(v ?? '').replaceAll('"', '""')}"`
     const head = ['coupon', 'traveler', 'source', 'status', 'claimed_at', 'redeemed_at', 'amount_vnd', 'commission_vnd']
     const lines = shown.map((r: IssuedRow) =>
-      [couponTitle(r.coupon_id, 'en'), travelerTag(r.uid), r.source, r.status, r.issued_at, r.redeemed_at, r.amount_vnd, r.commission_vnd]
+      [couponTitle(offers, r.coupon_id, 'en'), travelerTag(r.uid), r.source, r.status, r.issued_at, r.redeemed_at, r.amount_vnd, r.commission_vnd]
         .map(esc)
         .join(','),
     )
@@ -79,7 +79,7 @@ export default function Redemptions() {
                 {shown.map((r) => (
                   <tr key={r.uid}>
                     <td>
-                      {couponTitle(r.coupon_id, lang)} <span className="v-hint">({r.discount_pct}%)</span>
+                      {couponTitle(offers, r.coupon_id, lang)} <span className="v-hint">({r.discount_pct}%)</span>
                     </td>
                     <td>#{travelerTag(r.uid)}</td>
                     <td className="hide-md">{r.source === 'welcome' ? t('vSourceWelcome') : t('vSourceCoins')}</td>

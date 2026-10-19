@@ -1,4 +1,3 @@
-import { coupons } from '../data/coupons'
 import type { Lang } from '../i18n'
 
 export interface IssuedRow {
@@ -22,7 +21,34 @@ export interface VendorInfo {
   category_vi: string
   plan: PlanId
   plan_started_at: string | null
+  plan_paid_until: string | null
 }
+
+export interface Offer {
+  id: string
+  vendor_id: string
+  title_en: string
+  title_vi: string
+  discount_pct: number
+  cost_coins: number
+  code: string
+  active: boolean
+}
+
+export interface Payment {
+  id: number
+  vendor_id: string
+  plan: PlanId
+  amount_vnd: number
+  discount_vnd: number
+  method: 'momo' | 'vnpay' | 'zalopay' | 'card'
+  status: 'paid'
+  period_start: string
+  period_end: string
+  created_at: string
+}
+
+export const invoiceNo = (id: number) => `EP-${String(id).padStart(5, '0')}`
 
 // Prices from the business plan. Six-month and annual plans are prepaid; new vendors get 10% off the first payment.
 export const PLANS = {
@@ -34,8 +60,11 @@ export type PlanId = keyof typeof PLANS
 export const FIRST_PAYMENT_DISCOUNT = 0.1
 export const firstPayment = (plan: PlanId) => Math.round(PLANS[plan].price * (1 - FIRST_PAYMENT_DISCOUNT))
 
-export const couponTitle = (couponId: string, lang: Lang) =>
-  coupons.find((c) => c.id === couponId)?.title[lang] ?? couponId
+/** Title of one of this vendor's coupons (from the database), in the chosen language. */
+export const couponTitle = (offers: Offer[], couponId: string, lang: Lang) => {
+  const o = offers.find((x) => x.id === couponId)
+  return o ? (lang === 'vi' ? o.title_vi : o.title_en) : couponId
+}
 
 export interface Stats {
   claimed: number
@@ -101,4 +130,12 @@ export function dailySeries(rows: IssuedRow[], days = 14): DayPoint[] {
     }
   }
   return points
+}
+
+export type SubscriptionStatus = 'active' | 'expired' | 'inactive'
+
+/** Is the vendor's subscription paid up? (null = never paid.) */
+export function subscriptionStatus(v: Pick<VendorInfo, 'plan_paid_until'>): SubscriptionStatus {
+  if (!v.plan_paid_until) return 'inactive'
+  return new Date(v.plan_paid_until) > new Date() ? 'active' : 'expired'
 }

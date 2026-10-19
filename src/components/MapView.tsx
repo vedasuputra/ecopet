@@ -2,9 +2,9 @@ import L from 'leaflet'
 import { useEffect } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap } from 'react-leaflet'
 import { quests } from '../data/quests'
-import { vendors } from '../data/vendors'
 import { useLoc, useT } from '../i18n'
 import { haversine } from '../lib/geo'
+import { useCatalog } from '../store/useCatalog'
 import { useLocation } from '../store/useLocation'
 
 // Emoji pin avoids Leaflet's default-icon asset problem under Vite.
@@ -29,6 +29,7 @@ function Recenter({ lat, lng }: { lat: number; lng: number }) {
 export default function MapView() {
   const t = useT()
   const loc = useLoc()
+  const vendors = useCatalog((s) => s.vendors)
   const { source, lat, lng, placeName, setSimulated } = useLocation()
   return (
     <MapContainer center={[lat, lng]} zoom={12} style={{ height: 380, width: '100%' }}>

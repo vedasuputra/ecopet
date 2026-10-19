@@ -94,6 +94,13 @@ const en = {
   send: 'Send',
   meiluCant: "Meilu can't answer right now.",
 
+  // celebration + petting
+  celebrateQuest: 'Quest complete! +{n} coins',
+  celebrateCoupon: 'Coupon used! Bonus coins unlocked',
+  celebrateGift: 'Enjoy your gift!',
+  celebrateTap: 'Tap to continue',
+  petHint: 'Tap or stroke Meilu 💚',
+
   // welcome gift
   giftTitle: 'A welcome gift for you!',
   giftIntro: 'Every new explorer gets one free coupon. Spin to see what you win!',
@@ -114,6 +121,12 @@ const en = {
   statusUnused: 'unused',
   statusUsed: 'used',
   couponNotFound: 'Coupon not found.',
+  notEnoughCoins: 'Not enough coins for this coupon.',
+  couponGetFail: "Couldn't get the coupon. Please try again.",
+  couponGot: 'Added to My coupons!',
+  photoAlreadyDone: 'You already completed this quest.',
+  devDisabled: 'Dev tools are turned off for this account.',
+  devFailed: 'That dev action failed.',
   codeLabel: 'Code',
   statusLabel: 'Status',
 

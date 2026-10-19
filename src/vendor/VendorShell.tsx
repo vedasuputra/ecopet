@@ -3,29 +3,36 @@ import { Navigate, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
 import { supabase } from '../lib/supabase'
 import type { VendorCtx } from './context'
-import type { IssuedRow, VendorInfo } from './data'
+import type { IssuedRow, Offer, Payment, VendorInfo } from './data'
 
 const REFRESH_MS = 8000
 
 type Auth = { status: 'loading' } | { status: 'out' } | { status: 'ready'; vendor: VendorInfo; userId: string }
 
-// Gate + chrome for the dashboard: loads the signed-in vendor account, its business and its
-// coupon ledger (RLS only returns this business's rows), refreshes every few seconds.
+// Gate for the dashboard: loads the signed-in vendor account, its business, its coupons, its
+// payments and its coupon ledger (row-level security only returns this business's rows), and
+// refreshes them every few seconds.
 export default function VendorShell() {
   const t = useT()
   const navigate = useNavigate()
   const [auth, setAuth] = useState<Auth>({ status: 'loading' })
   const [rows, setRows] = useState<IssuedRow[]>([])
+  const [offers, setOffers] = useState<Offer[]>([])
+  const [payments, setPayments] = useState<Payment[]>([])
 
-  const loadRows = useCallback(async (vendorId: string) => {
+  const loadAll = useCallback(async (vendorId: string) => {
     if (!supabase) return
-    const { data } = await supabase
-      .from('coupons_issued')
-      .select('*')
-      .eq('vendor_id', vendorId)
-      .order('issued_at', { ascending: false })
-      .limit(2000)
-    if (data) setRows(data as IssuedRow[])
+    const [ledger, off, pay, v] = await Promise.all([
+      supabase.from('coupons_issued').select('*').eq('vendor_id', vendorId).order('issued_at', { ascending: false }).limit(2000),
+      supabase.from('coupon_offers').select('*').eq('vendor_id', vendorId).order('created_at', { ascending: true }),
+      supabase.from('vendor_payments').select('*').eq('vendor_id', vendorId).order('created_at', { ascending: false }),
+      supabase.from('vendors').select('*').eq('id', vendorId).maybeSingle(),
+    ])
+    if (ledger.data) setRows(ledger.data as IssuedRow[])
+    if (off.data) setOffers(off.data as Offer[])
+    if (pay.data) setPayments(pay.data as Payment[])
+    const fresh = v.data as VendorInfo | null
+    if (fresh) setAuth((a) => (a.status === 'ready' ? { ...a, vendor: fresh } : a))
   }, [])
 
   useEffect(() => {
@@ -43,25 +50,25 @@ export default function VendorShell() {
       if (dead) return
       if (!vendor) return setAuth({ status: 'out' })
       setAuth({ status: 'ready', vendor: vendor as VendorInfo, userId: user.id })
-      await loadRows(vendor.id)
+      await loadAll(vendor.id)
     })()
     return () => {
       dead = true
     }
-  }, [loadRows])
+  }, [loadAll])
 
   const vendorId = auth.status === 'ready' ? auth.vendor.id : null
   useEffect(() => {
     if (!vendorId) return
-    const id = setInterval(() => void loadRows(vendorId), REFRESH_MS)
+    const id = setInterval(() => void loadAll(vendorId), REFRESH_MS)
     return () => clearInterval(id)
-  }, [vendorId, loadRows])
+  }, [vendorId, loadAll])
 
   if (auth.status === 'loading') return <p style={{ padding: 24 }}>{t('vLoading')}</p>
   if (auth.status === 'out') return <Navigate to="/vendor/login" replace />
 
   const { vendor } = auth
-  const ctx: VendorCtx = { vendor, rows, reload: () => loadRows(vendor.id) }
+  const ctx: VendorCtx = { vendor, rows, offers, payments, reload: () => loadAll(vendor.id) }
 
   const signOut = async () => {
     await supabase?.auth.signOut()
@@ -81,6 +88,7 @@ export function VendorChrome({ vendor, ctx, onSignOut }: { vendor: VendorInfo; c
   const items = [
     { to: '/vendor', label: t('vOverview'), end: true },
     { to: '/vendor/scan', label: t('vScan') },
+    { to: '/vendor/coupons', label: t('vNavCoupons') },
     { to: '/vendor/redemptions', label: t('vRedemptions') },
     { to: '/vendor/fees', label: t('vFees') },
   ]

@@ -7,6 +7,7 @@ export interface Coupon {
   costCoins: number
   discountPct: number
   code: string // short alphanumeric fallback code
+  active?: boolean // false = paused by the vendor; default true
 }
 
 export const coupons: Coupon[] = [

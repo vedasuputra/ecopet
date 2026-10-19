@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useLang, useT } from '../i18n'
+import { useLang, useT, type Key } from '../i18n'
+import { searchPlaces, type Place } from '../lib/geocode'
 import { supabase } from '../lib/supabase'
 import { errorKey, vendorApi } from './api'
 import { PLANS, type PlanId } from './data'
@@ -12,6 +13,9 @@ interface Listing {
   category_vi: string
 }
 
+// Where to search places from when a new business picks its location (Mekong Delta centre).
+const SEARCH_NEAR = { lat: 10.0452, lng: 105.7469 }
+
 export default function VendorLogin() {
   const t = useT()
   const navigate = useNavigate()
@@ -20,8 +24,15 @@ export default function VendorLogin() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [listings, setListings] = useState<Listing[]>([])
+  const [listed, setListed] = useState(true) // claim a listed business vs add a new one
   const [vendorId, setVendorId] = useState('')
   const [plan, setPlan] = useState<PlanId>('monthly')
+  const [bizName, setBizName] = useState('')
+  const [catEn, setCatEn] = useState('')
+  const [catVi, setCatVi] = useState('')
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<Place[]>([])
+  const [picked, setPicked] = useState<{ label: string; lat: number; lng: number } | null>(null)
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -47,10 +58,31 @@ export default function VendorLogin() {
     })()
   }, [navigate])
 
+  // Debounced place search for a new business's location.
+  useEffect(() => {
+    if (listed || query.trim().length < 3 || picked) {
+      setResults([])
+      return
+    }
+    const ctrl = new AbortController()
+    const timer = setTimeout(() => {
+      searchPlaces(query.trim(), SEARCH_NEAR, ctrl.signal)
+        .then(setResults)
+        .catch(() => {})
+    }, 400)
+    return () => {
+      clearTimeout(timer)
+      ctrl.abort()
+    }
+  }, [query, listed, picked])
+
   const submit = async () => {
     if (!supabase) return setMsg(t('supabaseMissing'))
     if (!email || password.length < 6) return setMsg(t('vErrCredentials'))
-    if (tab === 'register' && !vendorId) return setMsg(t('vErrPickBusiness'))
+    if (tab === 'register') {
+      if (listed && !vendorId) return setMsg(t('vErrPickBusiness'))
+      if (!listed && (bizName.trim().length < 2 || catEn.trim().length < 2 || catVi.trim().length < 2 || !picked)) return setMsg(t('vErrNewBiz'))
+    }
     setBusy(true)
     setMsg('')
 
@@ -64,13 +96,20 @@ export default function VendorLogin() {
         setBusy(false)
         return setMsg(t('confirmEmail'))
       }
-      const r = await vendorApi('register', { vendorId, plan })
+      const r = await vendorApi(
+        'register',
+        listed
+          ? { vendorId, plan }
+          : { plan, newBusiness: { name: bizName, categoryEn: catEn, categoryVi: catVi, lat: picked!.lat, lng: picked!.lng } },
+      )
       setBusy(false)
       if (!r.ok) {
         await supabase.auth.signOut()
-        return setMsg(t(r.error === 'already_claimed' || r.error === 'unreachable' ? errorKey(r.error) : 'vErrRegister'))
+        const key: Key = r.error === 'already_claimed' || r.error === 'unreachable' ? errorKey(r.error) : r.error === 'bad_business' ? 'vErrNewBiz' : 'vErrRegister'
+        return setMsg(t(key))
       }
-      return navigate('/vendor', { replace: true })
+      // new vendors land on the page where they pay for their plan
+      return navigate('/vendor/billing', { replace: true })
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
@@ -136,18 +175,73 @@ export default function VendorLogin() {
 
         {tab === 'register' && (
           <>
-            <div className="v-field">
-              <label htmlFor="v-biz">{t('vChooseBusiness')}</label>
-              <select id="v-biz" className="v-select" value={vendorId} onChange={(e) => setVendorId(e.target.value)}>
-                <option value="">{t('vChoosePlaceholder')}</option>
-                {listings.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.name} ({lang === 'vi' ? l.category_vi : l.category_en})
-                  </option>
-                ))}
-              </select>
-              {listings.length === 0 && <span className="v-hint">{t('vNoBusinesses')}</span>}
+            <div className="v-tabs" role="tablist">
+              <button className={listed ? 'active' : ''} onClick={() => setListed(true)}>
+                {t('vRegisterListed')}
+              </button>
+              <button className={!listed ? 'active' : ''} onClick={() => setListed(false)}>
+                {t('vRegisterUnlisted')}
+              </button>
             </div>
+
+            {listed ? (
+              <div className="v-field">
+                <label htmlFor="v-biz">{t('vChooseBusiness')}</label>
+                <select id="v-biz" className="v-select" value={vendorId} onChange={(e) => setVendorId(e.target.value)}>
+                  <option value="">{t('vChoosePlaceholder')}</option>
+                  {listings.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.name} ({lang === 'vi' ? l.category_vi : l.category_en})
+                    </option>
+                  ))}
+                </select>
+                {listings.length === 0 && <span className="v-hint">{t('vNoBusinesses')}</span>}
+              </div>
+            ) : (
+              <>
+                <div className="v-field">
+                  <label htmlFor="v-name">{t('vNewName')}</label>
+                  <input id="v-name" className="v-input" maxLength={60} value={bizName} onChange={(e) => setBizName(e.target.value)} />
+                </div>
+                <div className="v-row" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}>
+                  <div className="v-field" style={{ flex: 1 }}>
+                    <label htmlFor="v-cen">{t('vNewCategoryEn')}</label>
+                    <input id="v-cen" className="v-input" maxLength={40} value={catEn} onChange={(e) => setCatEn(e.target.value)} />
+                  </div>
+                  <div className="v-field" style={{ flex: 1 }}>
+                    <label htmlFor="v-cvi">{t('vNewCategoryVi')}</label>
+                    <input id="v-cvi" className="v-input" maxLength={40} value={catVi} onChange={(e) => setCatVi(e.target.value)} />
+                  </div>
+                </div>
+                <div className="v-field">
+                  <label htmlFor="v-loc">{t('vNewLocation')}</label>
+                  {picked ? (
+                    <div className="v-row">
+                      <span>{t('vPickedLocation', { place: picked.label })}</span>
+                      <button className="v-btn small" onClick={() => { setPicked(null); setQuery('') }}>
+                        {t('changeLocation')}
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <input id="v-loc" className="v-input" value={query} onChange={(e) => setQuery(e.target.value)} />
+                      <span className="v-hint">{t('vNewLocationHint')}</span>
+                      {results.map((p, i) => (
+                        <button
+                          key={`${p.lat},${p.lng},${i}`}
+                          className="v-btn small"
+                          style={{ textAlign: 'left', whiteSpace: 'normal' }}
+                          onClick={() => setPicked({ label: p.area && p.area !== p.name ? `${p.name}, ${p.area}` : p.name, lat: p.lat, lng: p.lng })}
+                        >
+                          {p.name} <span className="v-hint">{p.detail}</span>
+                        </button>
+                      ))}
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+
             <div className="v-field">
               <label htmlFor="v-plan">{t('vPlan')}</label>
               <select id="v-plan" className="v-select" value={plan} onChange={(e) => setPlan(e.target.value as PlanId)}>

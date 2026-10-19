@@ -1,9 +1,11 @@
 import { useOutletContext } from 'react-router-dom'
-import type { IssuedRow, VendorInfo } from './data'
+import type { IssuedRow, Offer, Payment, VendorInfo } from './data'
 
 export interface VendorCtx {
   vendor: VendorInfo
   rows: IssuedRow[]
+  offers: Offer[]
+  payments: Payment[]
   reload: () => Promise<void>
 }
 

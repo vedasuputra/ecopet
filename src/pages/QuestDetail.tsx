@@ -5,7 +5,9 @@ import { quests } from '../data/quests'
 import { useLoc, useT, type Key } from '../i18n'
 import { failureMessage, verifyQuest } from '../lib/api'
 import { formatDistance, haversine } from '../lib/geo'
+import { refreshEconomy } from '../store/economy'
 import { useAppStore } from '../store/useAppStore'
+import { useCelebration } from '../store/useCelebration'
 import { useLocation } from '../store/useLocation'
 
 const LOC_STATUS_KEY: Record<string, Key> = {
@@ -21,7 +23,7 @@ export default function QuestDetail() {
   const loc = useLoc()
   const quest = quests.find((q) => q.id === id)
   const { lat, lng, placeName, source, status, userChose, startReal } = useLocation()
-  const { questStatus, completeQuest } = useAppStore()
+  const questStatus = useAppStore((s) => s.questStatus)
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
   const [cameraOpen, setCameraOpen] = useState(false)
@@ -74,7 +76,8 @@ export default function QuestDetail() {
     })
     setBusy(false)
     if (r.ok) {
-      completeQuest(quest.id)
+      void refreshEconomy() // the server already paid the reward
+      useCelebration.getState().show(t('celebrateQuest', { n: quest.rewardCoins }))
       return setMsg(t('verified', { n: quest.rewardCoins }))
     }
     // Server sends reason codes; texts are translated here.
@@ -83,6 +86,9 @@ export default function QuestDetail() {
         return setMsg(t('tooFar', { d: formatDistance(Number(r.distanceM ?? 0)) }))
       case 'stale':
         return setMsg(t('photoStale'))
+      case 'already_done':
+        void refreshEconomy()
+        return setMsg(t('photoAlreadyDone'))
       case 'duplicate':
         return setMsg(t('photoDuplicate'))
       case 'screenshot':

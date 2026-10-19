@@ -3,8 +3,11 @@ import { Navigate, Outlet, useLocation as useRoute, useNavigate } from 'react-ro
 import PhoneFrame from './PhoneFrame'
 import BannerAd from './BannerAd'
 import BottomNav from './BottomNav'
+import CelebrationOverlay from './CelebrationOverlay'
 import { supabase } from '../lib/supabase'
-import { loadRemote, startSync, syncCouponLedger } from '../store/sync'
+import { refreshEconomy } from '../store/economy'
+import { loadRemote, startSync } from '../store/sync'
+import { useCatalog } from '../store/useCatalog'
 import { useAppStore } from '../store/useAppStore'
 
 const PUBLIC = ['/login', '/dev']
@@ -25,11 +28,17 @@ export default function Layout() {
     })
   }, [])
 
-  // Pick up coupons a vendor has scanned (and backfill the ledger) every few seconds while signed in.
+  // Mirror the server-owned economy (coins, quests, coupons) every few seconds: this is also how a
+  // coupon a vendor just scanned shows up as used. The vendor/coupon catalog changes rarely.
   useEffect(() => {
-    void syncCouponLedger()
-    const id = setInterval(() => void syncCouponLedger(), 4000)
-    return () => clearInterval(id)
+    void refreshEconomy()
+    void useCatalog.getState().refresh()
+    const fast = setInterval(() => void refreshEconomy(), 4000)
+    const slow = setInterval(() => void useCatalog.getState().refresh(), 30000)
+    return () => {
+      clearInterval(fast)
+      clearInterval(slow)
+    }
   }, [])
 
   // Tap logo 5x to open the hidden dev panel.
@@ -55,6 +64,7 @@ export default function Layout() {
       </main>
       <BannerAd />
       <BottomNav />
+      <CelebrationOverlay />
     </PhoneFrame>
   )
 }

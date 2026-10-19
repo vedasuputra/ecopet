@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useT } from '../i18n'
 import { supabase } from '../lib/supabase'
+import { refreshEconomy } from '../store/economy'
 import { loadRemote, startSync } from '../store/sync'
 import { useAppStore } from '../store/useAppStore'
 
@@ -54,6 +55,7 @@ export default function Login() {
       login(name.trim() || email.split('@')[0])
     }
     startSync(data.user.id)
+    await refreshEconomy()
     setBusy(false)
     navigate(had && useAppStore.getState().activeQuestIds.length ? '/quests' : '/onboarding')
   }

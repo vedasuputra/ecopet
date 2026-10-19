@@ -1,6 +1,5 @@
 import { Html5Qrcode } from 'html5-qrcode'
 import { useEffect, useRef, useState } from 'react'
-import { coupons } from '../data/coupons'
 import { useLang, useT } from '../i18n'
 import { errorKey, vendorApi } from './api'
 import { useVendor } from './context'
@@ -21,7 +20,7 @@ interface Found {
 export default function Scan() {
   const t = useT()
   const lang = useLang((s) => s.lang)
-  const { reload } = useVendor()
+  const { reload, offers } = useVendor()
   const scanner = useRef<Html5Qrcode | null>(null)
   const handling = useRef(false)
   const [scanning, setScanning] = useState(false)
@@ -160,11 +159,11 @@ export default function Scan() {
             <h3>{t('vCouponFound')}</h3>
             <p>
               {t('vDiscountLine', {
-                title: couponTitle(found.couponId, lang),
+                title: couponTitle(offers, found.couponId, lang),
                 pct: found.discountPct,
               })}
             </p>
-            <p className="v-hint">{coupons.find((c) => c.id === found.couponId)?.code}</p>
+            <p className="v-hint">{offers.find((o) => o.id === found.couponId)?.code}</p>
             <div className="v-field" style={{ marginTop: 12 }}>
               <label htmlFor="v-amount">{t('vAmountLabel')}</label>
               <input

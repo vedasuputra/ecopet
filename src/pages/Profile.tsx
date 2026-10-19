@@ -25,7 +25,8 @@ export default function Profile() {
 
   return (
     <div>
-      <MeiluAvatar />
+      <MeiluAvatar interactive />
+      <small>{t('petHint')}</small>
       <h2>{user?.name}</h2>
       <p>
         {t('stays', { days: user?.days ?? 1, dest: user?.destinations.join(', ') || '-' })}

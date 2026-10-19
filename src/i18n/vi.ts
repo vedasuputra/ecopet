@@ -88,6 +88,12 @@ const vi: Record<keyof typeof en, string> = {
   send: 'Gửi',
   meiluCant: 'Meilu hiện chưa trả lời được.',
 
+  celebrateQuest: 'Hoàn thành nhiệm vụ! +{n} xu',
+  celebrateCoupon: 'Đã dùng phiếu! Nhận thêm xu thưởng',
+  celebrateGift: 'Chúc bạn dùng quà vui vẻ!',
+  celebrateTap: 'Chạm để tiếp tục',
+  petHint: 'Chạm hoặc vuốt ve Meilu 💚',
+
   giftTitle: 'Quà chào mừng dành cho bạn!',
   giftIntro: 'Mỗi nhà thám hiểm mới đều nhận một phiếu giảm giá miễn phí. Quay để xem bạn trúng gì nhé!',
   giftSpin: 'Quay',
@@ -106,6 +112,12 @@ const vi: Record<keyof typeof en, string> = {
   statusUnused: 'chưa dùng',
   statusUsed: 'đã dùng',
   couponNotFound: 'Không tìm thấy phiếu giảm giá.',
+  notEnoughCoins: 'Không đủ xu để đổi phiếu này.',
+  couponGetFail: 'Không nhận được phiếu. Vui lòng thử lại.',
+  couponGot: 'Đã thêm vào Phiếu của tôi!',
+  photoAlreadyDone: 'Bạn đã hoàn thành nhiệm vụ này rồi.',
+  devDisabled: 'Công cụ dev đã bị tắt cho tài khoản này.',
+  devFailed: 'Thao tác dev thất bại.',
   codeLabel: 'Mã',
   statusLabel: 'Trạng thái',
 
