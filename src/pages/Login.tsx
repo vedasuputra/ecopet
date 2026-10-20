@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { consentRecord } from '../data/privacy'
 import { useLang, useT } from '../i18n'
+import { openInBrowser } from '../lib/openExternal'
 import { supabase } from '../lib/supabase'
 import { refreshEconomy } from '../store/economy'
 import { loadRemote, startSync } from '../store/sync'
@@ -111,6 +112,19 @@ export default function Login() {
         {mode === 'signup' ? t('toSignIn') : t('toSignUp')}
       </button>
       {msg && <p>{msg}</p>}
+      <p>
+        <a
+          href="/vendor"
+          target="_blank"
+          rel="noopener"
+          onClick={(e) => {
+            e.preventDefault()
+            openInBrowser('/vendor')
+          }}
+        >
+          {t('loginAsVendor')}
+        </a>
+      </p>
     </div>
   )
 }

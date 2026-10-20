@@ -22,6 +22,8 @@ interface Attempt {
   distance_m: number | null
   review_image: string | null
   review_status: string | null
+  reported_by_user?: boolean | null
+  user_note?: string | null
   created_at: string
 }
 
@@ -49,7 +51,8 @@ export default async function handler(req: Req, res: Res) {
     await rest(`verification_attempts?created_at=lt.${encodeURIComponent(daysAgo(LOG_KEEP_DAYS))}`, { method: 'DELETE' })
 
     const items = await getJsonRows<Attempt>(
-      'verification_attempts?review_status=eq.pending&select=id,user_id,quest_id,outcome,reason,confidence,red_flags,ai_reason,distance_m,review_image,created_at&order=created_at.asc&limit=20',
+      // select=* so it also works before report_schema.sql has been run
+      'verification_attempts?review_status=eq.pending&select=*&order=created_at.asc&limit=20',
     )
     return res.json({
       ok: true,

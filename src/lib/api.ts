@@ -49,6 +49,9 @@ export const verifyQuest = (p: {
   timestamp: number
 }) => post('/api/verify', p, true)
 
+/** "The AI got this photo wrong": sends the rejected photo to the admin review queue. */
+export const reportAttempt = (p: { attemptId: number; image: string; note?: string }) => post('/api/report', p, true)
+
 export const askMeilu = (p: {
   message: string
   history: { role: 'user' | 'meilu'; text: string }[]

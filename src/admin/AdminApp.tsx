@@ -18,6 +18,8 @@ interface QueueItem {
   ai_reason: string | null
   distance_m: number | null
   review_image: string | null
+  reported_by_user?: boolean | null
+  user_note?: string | null
   created_at: string
   quest: { id: string; rewardCoins: number; requiredObject?: string; requiredScene?: string; radiusM: number } | null
 }
@@ -42,6 +44,10 @@ interface Stats {
 const REASON_TEXT: Record<string, string> = {
   low_confidence: 'AI unsure (confidence 0.5 – 0.7)',
   similar_photo: 'Looks like a photo another traveler already sent for this quest',
+  not_detected: 'The AI said the photo does not match the quest',
+  no_evidence: 'The AI said the photo shows no proof (the purchase, the bike or the boat)',
+  suspicious: 'The AI said the photo looks edited or not taken by the traveler',
+  screenshot: 'The AI said the photo looks like a screenshot',
 }
 const when = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 const tag = (id: string) => `#${id.slice(0, 4)}`
@@ -183,6 +189,12 @@ function Queue({ title }: { title: (id: string) => string }) {
               <p className="v-hint">
                 Needs: {it.quest?.requiredObject ?? it.quest?.requiredScene ?? '?'} · reward {it.quest?.rewardCoins ?? '?'} coins · sent {when(it.created_at)} · traveler {tag(it.user_id)}
               </p>
+              {it.reported_by_user && (
+                <p className="v-error" style={{ margin: '10px 0 0' }}>
+                  <b>Reported by the traveler: they say the AI was wrong.</b>
+                  {it.user_note ? ` Their note: "${it.user_note}"` : ''}
+                </p>
+              )}
               <p style={{ margin: '10px 0' }}>
                 <b>{REASON_TEXT[it.reason] ?? it.reason}</b>
               </p>

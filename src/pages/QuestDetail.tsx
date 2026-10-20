@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import CameraCapture, { type Captured } from '../components/CameraCapture'
 import { useCatalog } from '../store/useCatalog'
 import { useLoc, useT, type Key } from '../i18n'
-import { failureMessage, verifyQuest } from '../lib/api'
+import { failureMessage, reportAttempt, verifyQuest } from '../lib/api'
 import { formatDistance, haversine } from '../lib/geo'
 import { refreshEconomy } from '../store/economy'
 import { useAppStore } from '../store/useAppStore'
@@ -29,6 +29,8 @@ export default function QuestDetail() {
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
   const [cameraOpen, setCameraOpen] = useState(false)
+  // the AI rejected the photo: the traveler may report that it was wrong
+  const [report, setReport] = useState<{ attemptId: number; open: boolean; note: string; sent: boolean; busy: boolean } | null>(null)
   // The photo is stamped with the location at the moment it was taken.
   const [photo, setPhoto] = useState<(Captured & { lat: number; lng: number }) | null>(null)
 
@@ -62,6 +64,27 @@ export default function QuestDetail() {
     setCameraOpen(true)
   }
 
+  const sendReport = async () => {
+    if (!report || !photo) return
+    setReport({ ...report, busy: true })
+    const r = await reportAttempt({ attemptId: report.attemptId, image: photo.base64, note: report.note.trim() || undefined })
+    if (r.ok) {
+      setReport({ ...report, busy: false, open: false, sent: true })
+      void refreshEconomy() // the quest now shows as "under review"
+      return setMsg(t('reportThanks'))
+    }
+    setReport({ ...report, busy: false })
+    setMsg(
+      r.error === 'report_limit' ? t('reportLimit')
+        : r.error === 'already_reported' ? t('reportAlready')
+          : r.error === 'too_late' ? t('reportTooLate')
+            : r.error === 'review_pending' ? t('photoReviewPending')
+              : r.error === 'already_done' ? t('photoAlreadyDone')
+                : r.error === 'unreachable' ? t('unreachable')
+                  : t('reportFailed'),
+    )
+  }
+
   const verify = async () => {
     if (!needsPhoto) {
       // e.g. "redeem coupon" quest completes via VendorScan instead
@@ -79,6 +102,7 @@ export default function QuestDetail() {
       timestamp: photo.at,
     })
     setBusy(false)
+    setReport(typeof r.attemptId === 'number' ? { attemptId: r.attemptId, open: false, note: '', sent: false, busy: false } : null)
     if (r.ok) {
       void refreshEconomy() // the server already paid the reward
       useCelebration.getState().show(t('celebrateQuest', { n: quest.rewardCoins }))
@@ -150,6 +174,7 @@ export default function QuestDetail() {
             <CameraCapture
               onCapture={(c) => {
                 setPhoto({ ...c, lat, lng })
+                setReport(null)
                 setCameraOpen(false)
                 setMsg(t('photoTaken'))
               }}
@@ -174,6 +199,33 @@ export default function QuestDetail() {
         </button>
       )}
       {msg && <p>{msg}</p>}
+      {report && !report.sent && !done && (
+        <div>
+          {!report.open ? (
+            <button onClick={() => setReport({ ...report, open: true })}>{t('reportButton')}</button>
+          ) : (
+            <div>
+              <p>
+                <small>{t('reportInfo')}</small>
+              </p>
+              <textarea
+                maxLength={200}
+                rows={2}
+                style={{ width: '100%' }}
+                placeholder={t('reportNotePlaceholder')}
+                value={report.note}
+                onChange={(e) => setReport({ ...report, note: e.target.value })}
+              />
+              <button onClick={() => void sendReport()} disabled={report.busy}>
+                {t('reportSend')}
+              </button>{' '}
+              <button onClick={() => setReport({ ...report, open: false })} disabled={report.busy}>
+                {t('reportCancel')}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
       <button onClick={() => navigate('/quests')}>{t('back')}</button>
     </div>
   )

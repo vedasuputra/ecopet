@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import { haversine } from '../src/lib/geo.js'
+import { REPORTABLE_REASONS } from './report.js'
 import { dhash, hamming, SIMILAR_MAX_DISTANCE } from './_phash.js'
 import { callGemini, sendError, type Req, type Res } from './_gemini.js'
 import {
@@ -236,7 +237,7 @@ export default async function handler(req: Req, res: Res) {
     reason = 'low_confidence'
   }
 
-  await logAttempt({ ...base, outcome, reason })
+  const attemptId = await logAttempt({ ...base, outcome, reason })
   const reasonCode = reason === 'screenshot' ? 'screenshot' : reason === 'suspicious' ? 'suspicious' : reason === 'no_evidence' ? 'no_evidence' : 'not_detected'
   return res.json({
     ok: false,
@@ -245,5 +246,7 @@ export default async function handler(req: Req, res: Res) {
     confidence: ai.confidence,
     detail: ai.reason,
     flags: ai.red_flags,
+    // the traveler may report an AI rejection (the photo then goes to the admin review queue)
+    ...(attemptId !== null && REPORTABLE_REASONS.includes(reason) ? { attemptId } : {}),
   })
 }

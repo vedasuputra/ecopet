@@ -62,6 +62,10 @@ export const PRIVACY: Section[] = [
         vi: 'Lịch trình: nếu bạn nhờ Meilu lên kế hoạch các ngày, số ngày và điểm đến bạn chọn được gửi đến AI, và AI chỉ được chọn trong danh sách nhiệm vụ và cửa hàng đối tác của chúng tôi. Kế hoạch được lưu trong tài khoản và bạn có thể chỉnh sửa hoặc xóa.',
       },
       {
+        en: 'Reporting a photo: if the AI rejects your quest photo and you press Report, that photo (and your short note, if you write one) is sent to Eco-Pet admins, who look at it and decide. The photo is deleted as soon as they decide.',
+        vi: 'Báo cáo ảnh: nếu AI từ chối ảnh nhiệm vụ của bạn và bạn bấm Báo cáo, bức ảnh đó (cùng ghi chú ngắn nếu bạn viết) sẽ được gửi đến quản trị viên Eco-Pet để xem và quyết định. Ảnh được xóa ngay khi họ quyết định.',
+      },
+      {
         en: 'Travel style: Meilu asks a few multiple-choice questions (pace, interests, who you travel with, budget, early mornings). Your answers are saved in your account and sent to the AI together with your trip so suggestions fit you. You can change them any time in My itinerary.',
         vi: 'Phong cách du lịch: Meilu hỏi vài câu trắc nghiệm (nhịp độ, sở thích, đi cùng ai, ngân sách, dậy sớm). Câu trả lời được lưu trong tài khoản và gửi đến AI cùng chuyến đi của bạn để gợi ý hợp với bạn hơn. Bạn có thể đổi bất cứ lúc nào trong Lịch trình của tôi.',
       },
