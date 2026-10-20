@@ -10,8 +10,7 @@ import { useAppStore } from '../store/useAppStore'
 import { useCelebration } from '../store/useCelebration'
 import { useLocation } from '../store/useLocation'
 import { QUEST_ICON } from '../data/questIcons'
-import Home from './Home'
-import Quests from './Quests'
+import { useFadeClose } from '../lib/useFadeClose'
 import './questdetail.css'
 
 const LOC_STATUS_KEY: Record<string, Key> = {
@@ -49,7 +48,7 @@ export default function QuestDetail() {
 
   // always back to the list of quests (going "back" in the history could lead nowhere, e.g. after a refresh)
   const fromHome = (useRoute().state as { from?: string } | null)?.from === 'home'
-  const close = () => navigate(fromHome ? '/' : '/quests', { replace: true })
+  const [closing, close] = useFadeClose(() => navigate(fromHome ? '/home' : '/quests', { replace: true }))
   useEffect(() => {
     closeBtn.current?.focus()
     const key = (e: KeyboardEvent) => e.key === 'Escape' && close()
@@ -61,8 +60,7 @@ export default function QuestDetail() {
   // the quests stay behind the popup, dimmed
   const shell = (body: React.ReactNode, overlay?: React.ReactNode) => (
     <>
-      {fromHome ? <Home /> : <Quests />}
-      <div className="popup-backdrop" role="dialog" aria-modal="true" aria-label={t('questDetailHeading')} onClick={close} hidden={!!overlay}>
+      <div className={`popup-backdrop${closing ? ' is-closing' : ''}`} role="dialog" aria-modal="true" aria-label={t('questDetailHeading')} onClick={close} hidden={!!overlay}>
         <div className="popup-card qd-popup" onClick={(e) => e.stopPropagation()}>
           <div className="popup-head">
             <div className="popup-titles">
@@ -208,7 +206,7 @@ export default function QuestDetail() {
   const noteOk = !!report && report.note.trim().length >= 10 // the reason is required, so nobody reports just like that
   const reportPopup =
     reportOpen && report && photo ? (
-      <div className="popup-backdrop qd-report-backdrop" role="dialog" aria-modal="true" aria-label={t('reportHeading')} onClick={close}>
+      <div className={`popup-backdrop qd-report-backdrop${closing ? ' is-closing' : ''}`} role="dialog" aria-modal="true" aria-label={t('reportHeading')} onClick={close}>
         <div className="popup-card qd-popup" onClick={(e) => e.stopPropagation()}>
           <div className="popup-head">
             <button className="popup-close qd-back" onClick={() => setReport({ ...report, open: false })} aria-label={t('back')} title={t('back')}>

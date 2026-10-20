@@ -80,3 +80,6 @@ export const requestItinerary = (p: { days: number; destinations: string[]; lang
 /** Everything that changes coins, coupons or the welcome gift goes through here (server-checked). */
 export const economyApi = (action: string, extra: Record<string, unknown> = {}) =>
   post('/api/economy', { action, ...extra }, true)
+
+/** Customer service: report a problem (create) and read your own reports with the answers (mine). */
+export const supportApi = (action: 'create' | 'mine', extra: Record<string, unknown> = {}) => post('/api/support', { action, ...extra }, true)

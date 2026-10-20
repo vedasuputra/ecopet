@@ -6,7 +6,7 @@ import { useAppStore, vnDay } from '../store/useAppStore'
 const dayIndex = (start: string, today: string) => Math.round((Date.parse(today) - Date.parse(start)) / 86_400_000) + 1
 
 // Under the chat box on Home: which day of the trip it is, and what is planned for it. Only shown when the traveler told us
-// about the trip (the places they go to); a domestic traveler is not asked how long they stay, so no "of N days" for them.
+// about the trip (the places they go to and how many days).
 export default function TripOverview() {
   const t = useT()
   const user = useAppStore((s) => s.user)
@@ -36,13 +36,12 @@ export default function TripOverview() {
   if (!start) return null
 
   const day = dayIndex(start, vnDay(new Date()))
-  const known = user.origin !== 'domestic' // we only know how many days for travelers who told us
-  const total = known ? user.days : null
+  const total = user.days // every traveler tells us how long they stay
 
   if (day < 1) return null
-  if (total !== null && day > total) {
+  if (day > total) {
     return (
-      <Link to="/onboarding" className="trip-card">
+      <Link to="/itinerary" className="trip-card">
         <span className="trip-card-text">
           <span className="trip-card-title">{t('dayOver')}</span>
         </span>
@@ -52,7 +51,6 @@ export default function TripOverview() {
       </Link>
     )
   }
-  if (total === null && day > 2) return null // a short domestic visit: nothing to say after two days
 
   const plan = itinerary?.days[day - 1]
   const quests = plan ? plan.questIds.filter((id) => questStatus[id] !== 'done').length : 0

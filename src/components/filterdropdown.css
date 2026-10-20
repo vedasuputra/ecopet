@@ -162,3 +162,25 @@
   font-weight: 500;
   color: var(--ink-2);
 }
+
+/* an option with two lines: the name in blue (medium), the place under it smaller, regular and faded */
+.fd-opt {
+  display: grid;
+  min-width: 0;
+  gap: 0;
+}
+.fd-opt-title {
+  font-weight: 500;
+  color: var(--navy);
+}
+.fd-opt-sub {
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+.fd-list button.active .fd-opt-title {
+  color: #fff;
+}
+.fd-list button.active .fd-opt-sub {
+  color: rgba(255, 255, 255, 0.8);
+}

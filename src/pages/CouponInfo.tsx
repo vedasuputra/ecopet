@@ -12,8 +12,7 @@ import { useCatalog } from '../store/useCatalog'
 import { useLocation } from '../store/useLocation'
 import '../components/ticket.css'
 import './couponinfo.css'
-import Coupons from './Coupons'
-import Home from './Home'
+import { useFadeClose } from '../lib/useFadeClose'
 
 // Everything about a coupon before you get it, as a popup over the list of coupons (dimmed behind it): the deal and its price,
 // where the shop is, when it is open, and the button to get it.
@@ -32,7 +31,7 @@ export default function CouponInfo() {
   const closeBtn = useRef<HTMLButtonElement>(null)
 
   const fromHome = (useRoute().state as { from?: string } | null)?.from === 'home'
-  const close = () => (fromHome ? navigate('/', { replace: true }) : window.history.length > 1 ? navigate(-1) : navigate('/coupons', { replace: true }))
+  const [closing, close] = useFadeClose(() => navigate(fromHome ? '/home' : '/coupons', { replace: true }))
   useEffect(() => {
     closeBtn.current?.focus()
     const key = (e: KeyboardEvent) => e.key === 'Escape' && close()
@@ -81,8 +80,7 @@ export default function CouponInfo() {
   return (
     <>
       {/* the coupons stay behind the popup, dimmed */}
-      {fromHome ? <Home /> : <Coupons />}
-      <div className="popup-backdrop" role="dialog" aria-modal="true" aria-label={t('qrHeading')} onClick={close}>
+      <div className={`popup-backdrop${closing ? ' is-closing' : ''}`} role="dialog" aria-modal="true" aria-label={t('qrHeading')} onClick={close}>
         <div className={`popup-card info-popup cat-${cat}`} onClick={(e) => e.stopPropagation()}>
           <div className="popup-head">
             <div className="popup-titles">

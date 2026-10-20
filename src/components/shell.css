@@ -506,3 +506,68 @@
   outline: 3px solid var(--blue);
   outline-offset: 2px;
 }
+
+
+/* ---- soft transitions: a screen fades in, popups fade and rise in and fade out, list items appear one by one ---- */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+@keyframes rise-out {
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+@keyframes item-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.page-fade {
+  animation: fade-in 0.24s ease-out;
+}
+.popup-backdrop {
+  animation: fade-in 0.18s ease-out;
+}
+.popup-backdrop .popup-card {
+  animation: rise-in 0.22s ease-out;
+}
+.popup-backdrop.is-closing {
+  animation: fade-out 0.16s ease-in forwards;
+}
+.popup-backdrop.is-closing .popup-card {
+  animation: rise-out 0.16s ease-in forwards;
+}
+.qcard,
+.ticket-wrap,
+.chat-row {
+  animation: item-in 0.25s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-fade,
+  .popup-backdrop,
+  .popup-backdrop .popup-card,
+  .popup-backdrop.is-closing,
+  .popup-backdrop.is-closing .popup-card,
+  .qcard,
+  .ticket-wrap,
+  .chat-row,
+  .chat-sheet,
+  .chat-backdrop.is-closing .chat-sheet {
+    animation: none;
+  }
+}

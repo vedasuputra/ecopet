@@ -54,7 +54,7 @@ const tag = (id: string) => `#${id.slice(0, 4)}`
 
 export default function AdminApp() {
   const [auth, setAuth] = useState<'loading' | 'signin' | 'denied' | 'ok'>('loading')
-  const [tab, setTab] = useState<'queue' | 'attempts'>('queue')
+  const [tab, setTab] = useState<'queue' | 'attempts' | 'support'>('queue')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [msg, setMsg] = useState('')
@@ -127,15 +127,18 @@ export default function AdminApp() {
 
         {auth === 'ok' && (
           <>
-            <div className="v-tabs" style={{ maxWidth: 360 }}>
+            <div className="v-tabs" style={{ maxWidth: 520 }}>
               <button className={tab === 'queue' ? 'active' : ''} onClick={() => setTab('queue')}>
                 Review queue
               </button>
               <button className={tab === 'attempts' ? 'active' : ''} onClick={() => setTab('attempts')}>
                 Recent checks
               </button>
+              <button className={tab === 'support' ? 'active' : ''} onClick={() => setTab('support')}>
+                Customer service
+              </button>
             </div>
-            {tab === 'queue' ? <Queue title={title} /> : <Attempts title={title} />}
+            {tab === 'queue' ? <Queue title={title} /> : tab === 'attempts' ? <Attempts title={title} /> : <Support />}
           </>
         )}
       </div>
@@ -302,6 +305,142 @@ function Attempts({ title }: { title: (id: string) => string }) {
           </table>
         </div>
       </section>
+    </>
+  )
+}
+
+interface Ticket {
+  id: number
+  user_id: string
+  category: string
+  coupon_uid: string | null
+  message: string
+  status: 'open' | 'resolved' | 'rejected'
+  resolution: string | null
+  refunded_coins: number | null
+  admin_note: string | null
+  created_at: string
+  coupon: { status: string; source: string; expires_at: string | null } | null
+  offer: { title_en: string; cost_coins: number } | null
+  vendor: { name: string; plan_paid_until: string | null } | null
+}
+
+const CATEGORY_TEXT: Record<string, string> = {
+  shop_closed: 'The shop was closed',
+  shop_refused: 'The shop would not take the coupon',
+  wrong_deal: 'The deal was not as described',
+  coupon_problem: 'Another problem with a coupon',
+  coins_problem: 'A problem with coins',
+  other: 'Something else',
+}
+
+// The reports travelers send from Profile -> Customer service. For each one: what they said, the coupon and the shop, and three
+// answers: coins back (a coupon bought with coins that is still unused), 7 more days on the coupon, or just a note.
+function Support() {
+  const [items, setItems] = useState<Ticket[] | null>(null)
+  const [notes, setNotes] = useState<Record<number, string>>({})
+  const [busy, setBusy] = useState<number | null>(null)
+  const [msg, setMsg] = useState('')
+
+  const load = useCallback(async () => {
+    const r = await adminApi('tickets')
+    if (r.ok) setItems(r.items as Ticket[])
+  }, [])
+  useEffect(() => {
+    void load()
+  }, [load])
+
+  const resolve = async (id: number, resolution: 'refund' | 'extend' | 'none') => {
+    setBusy(id)
+    setMsg('')
+    const r = await adminApi('resolve_ticket', { id, resolution, note: notes[id] ?? '' })
+    setBusy(null)
+    if (!r.ok) {
+      setMsg(r.error === 'already_decided' ? 'Someone already answered this report.' : r.error === 'not_refundable' ? 'This coupon cannot be refunded or extended (already used, bought for free, or gone).' : 'Could not save. Try again.')
+    }
+    await load()
+  }
+
+  if (!items) return <p>Loading...</p>
+  const open = items.filter((x) => x.status === 'open')
+  const done = items.filter((x) => x.status !== 'open')
+
+  return (
+    <>
+      {msg && <p className="v-error">{msg}</p>}
+      <section className="v-card">
+        <h2>Waiting for an answer ({open.length})</h2>
+        {open.length === 0 && <p className="v-hint">Nothing waiting.</p>}
+      </section>
+      {open.map((x) => {
+        const unused = x.coupon?.status === 'unused'
+        const canRefund = unused && x.coupon?.source === 'coins'
+        return (
+          <section className="v-card" key={x.id}>
+            <h2>
+              {CATEGORY_TEXT[x.category] ?? x.category} <span className="v-badge">{tag(x.user_id)}</span>
+            </h2>
+            <p className="v-hint">{when(x.created_at)}</p>
+            <p style={{ whiteSpace: 'pre-line' }}>{x.message}</p>
+            {x.coupon_uid && (
+              <ul className="v-list">
+                <li>Coupon: {x.offer?.title_en ?? '?'} ({x.offer ? `${x.offer.cost_coins} coins` : '?'})</li>
+                <li>
+                  Now: {x.coupon ? `${x.coupon.status}, ${x.coupon.source === 'coins' ? 'bought with coins' : 'free gift'}${x.coupon.expires_at ? `, expires ${when(x.coupon.expires_at)}` : ''}` : 'no longer in the traveler wallet'}
+                </li>
+                <li>
+                  Shop: {x.vendor?.name ?? '?'}
+                  {x.vendor?.plan_paid_until ? ` (plan paid until ${new Date(x.vendor.plan_paid_until).toLocaleDateString('en-GB')})` : ''}
+                </li>
+              </ul>
+            )}
+            <div className="v-field" style={{ marginTop: 12 }}>
+              <label htmlFor={`sn${x.id}`}>Reply (shown to the traveler)</label>
+              <input id={`sn${x.id}`} className="v-input" maxLength={300} value={notes[x.id] ?? ''} onChange={(e) => setNotes({ ...notes, [x.id]: e.target.value })} />
+            </div>
+            <div className="v-row">
+              <button className="v-btn primary" disabled={busy === x.id || !canRefund} onClick={() => void resolve(x.id, 'refund')} title={canRefund ? '' : 'Only a coupon bought with coins that is still unused'}>
+                Refund {x.offer ? `${x.offer.cost_coins} coins` : 'coins'}
+              </button>
+              <button className="v-btn" disabled={busy === x.id || !unused} onClick={() => void resolve(x.id, 'extend')} title={unused ? '' : 'Only an unused coupon'}>
+                Add 7 days
+              </button>
+              <button className="v-btn" disabled={busy === x.id} onClick={() => void resolve(x.id, 'none')}>
+                Close with a reply
+              </button>
+            </div>
+          </section>
+        )
+      })}
+      {done.length > 0 && (
+        <section className="v-card">
+          <h2>Answered</h2>
+          <div className="v-table-scroll">
+            <table className="v-table">
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>Traveler</th>
+                  <th>About</th>
+                  <th>Answer</th>
+                  <th>Reply</th>
+                </tr>
+              </thead>
+              <tbody>
+                {done.map((x) => (
+                  <tr key={x.id}>
+                    <td>{when(x.created_at)}</td>
+                    <td>{tag(x.user_id)}</td>
+                    <td>{CATEGORY_TEXT[x.category] ?? x.category}</td>
+                    <td>{x.resolution === 'refund' ? `Refunded ${x.refunded_coins ?? ''} coins` : x.resolution === 'extend' ? '+7 days' : 'Closed'}</td>
+                    <td>{x.admin_note ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </>
   )
 }

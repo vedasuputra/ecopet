@@ -1,0 +1,102 @@
+/* Days and places of the trip (the first set-up and the trip page). */
+.ts {
+  display: grid;
+  gap: 10px;
+  font-family: var(--font);
+}
+.ts *,
+.ts *::before,
+.ts *::after {
+  box-sizing: border-box;
+}
+.ts-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ts-label {
+  font-family: var(--font-title);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.ts-places-label {
+  margin-top: 4px;
+}
+.ts-stepper {
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: #fff;
+}
+.ts-stepper b {
+  min-width: 72px;
+  padding: 0 8px;
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+.ts-stepper button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  cursor: pointer;
+}
+.ts-stepper button:hover:not(:disabled) {
+  background: var(--sky);
+}
+.ts-stepper button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.ts-stepper .mi {
+  font-size: 20px;
+}
+.ts-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ts-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--navy);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ts-chip .mi {
+  font-size: 16px;
+}
+.ts-chip.active {
+  background: var(--navy);
+  color: #fff;
+}
+.ts-chip:not(.active):hover:not(:disabled) {
+  background: var(--sky);
+}
+.ts-chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.ts :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}

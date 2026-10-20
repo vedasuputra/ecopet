@@ -41,7 +41,7 @@ export const isCouponExpired = (c: { status: string; expiresAt?: string | null }
   c.status === 'unused' && !!c.expiresAt && new Date(c.expiresAt) < new Date()
 
 export const AD_REWARD = 5
-export const AD_DAILY_LIMIT = 3
+export const AD_DAILY_LIMIT = 10
 
 /**
  * Picks `count` quests for a trip. The traveler's destinations come first, then the rest; within each
@@ -143,7 +143,7 @@ export const useAppStore = create<AppState>()(
       login: (name, origin) => set({ user: { name, origin, days: origin === 'domestic' ? DOMESTIC_DEFAULT_DAYS : 1, destinations: [] } }),
 
       setOrigin: (origin) =>
-        set((s) => ({ user: s.user ? { ...s.user, origin, days: origin === 'domestic' ? DOMESTIC_DEFAULT_DAYS : s.user.days } : s.user })),
+        set((s) => ({ user: s.user ? { ...s.user, origin } : s.user })),
 
       // A longer stay gets more quests; finished quests are not suggested again; a changed trip
       // makes the old itinerary stale, so it is cleared.

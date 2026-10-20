@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import BannerAd from '../components/BannerAd'
 import CouponTicket from '../components/CouponTicket'
 import FilterDropdown, { FilterBar, GroupTitle, SearchRow, groupBy } from '../components/FilterDropdown'
@@ -20,7 +20,7 @@ const CAT_KEY: Record<CouponCategory, Key> = { food_drink: 'catFood', shopping: 
 
 // Coupons: every coupon you can get (nearest first, filtered by what the shop sells) and the coupons you already have.
 // A ticket opens its details, where it can be taken with coins; a coupon you have opens its QR code.
-export default function Coupons({ initialTab = 'available' }: { initialTab?: Tab }) {
+export default function Coupons({ initialTab = 'available', forceTab }: { initialTab?: Tab; forceTab?: Tab }) {
   const t = useT()
   const loc = useLoc()
   const coins = useAppStore((s) => s.coins)
@@ -28,7 +28,10 @@ export default function Coupons({ initialTab = 'available' }: { initialTab?: Tab
   const coupons = useCatalog((s) => s.coupons)
   const vendors = useCatalog((s) => s.vendors)
   const { lat, lng } = useLocation()
-  const [tab, setTab] = useState<Tab>(initialTab)
+  const [tab, setTab] = useState<Tab>(forceTab ?? initialTab)
+  useEffect(() => {
+    if (forceTab) setTab(forceTab)
+  }, [forceTab])
   const [filter, setFilter] = useState<CouponCategory | 'all'>('all')
   const [search, setSearch] = useState('')
   const [area, setArea] = useState<string>('all') // where the coupon can be redeemed

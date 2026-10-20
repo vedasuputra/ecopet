@@ -10,7 +10,7 @@ import { isCouponExpired, useAppStore } from '../store/useAppStore'
 import { useCatalog } from '../store/useCatalog'
 import '../components/ticket.css'
 import './couponqr.css'
-import Coupons from './Coupons'
+import { useFadeClose } from '../lib/useFadeClose'
 
 // A coupon you have, shown as a popup over your coupons (they stay behind it, dimmed): a ticket with a tear line and a
 // notch on each side. Above the line a top bar ("Coupon Detail" and the X), then the shop, the deal and the rules; below it the
@@ -26,7 +26,7 @@ export default function CouponQR() {
   const vendor = useCatalog((s) => s.vendors.find((v) => v.id === coupon?.vendorId))
   const closeBtn = useRef<HTMLButtonElement>(null)
 
-  const close = () => (window.history.length > 1 ? navigate(-1) : navigate('/coupons', { replace: true }))
+  const [closing, close] = useFadeClose(() => navigate('/coupons', { replace: true }))
   useEffect(() => {
     closeBtn.current?.focus()
     const key = (e: KeyboardEvent) => e.key === 'Escape' && close()
@@ -42,9 +42,7 @@ export default function CouponQR() {
 
   return (
     <>
-      {/* your coupons stay behind the popup, dimmed */}
-      <Coupons initialTab="mine" />
-      <div className="popup-backdrop qr-backdrop" role="dialog" aria-modal="true" aria-label={coupon ? loc(coupon.title) : t('couponNotFound')} onClick={close}>
+      <div className={`popup-backdrop qr-backdrop${closing ? ' is-closing' : ''}`} role="dialog" aria-modal="true" aria-label={coupon ? loc(coupon.title) : t('couponNotFound')} onClick={close}>
         <div className="qr-stack" onClick={(e) => e.stopPropagation()}>
           {!oc || !coupon ? (
             <div className="qr-ticket">

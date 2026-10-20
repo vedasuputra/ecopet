@@ -1,3 +1,4 @@
+import { useFadeClose } from '../lib/useFadeClose'
 import { useEffect, useRef, useState } from 'react'
 import { useT } from '../i18n'
 import { useLocation } from '../store/useLocation'
@@ -7,8 +8,9 @@ type View = 'main' | 'real' | 'change'
 
 // The popup behind the location pill in the top bar. It shows where the app thinks you are and two buttons; each button
 // opens another view inside the same popup (use the real location, or pick another place), with a back arrow.
-export default function LocationPopup({ onClose }: { onClose: () => void }) {
+export default function LocationPopup({ onClose: closeNow }: { onClose: () => void }) {
   const t = useT()
+  const [closing, onClose] = useFadeClose(closeNow)
   const [view, setView] = useState<View>('main')
   const { source, placeName } = useLocation()
   const closeBtn = useRef<HTMLButtonElement>(null)
@@ -25,7 +27,7 @@ export default function LocationPopup({ onClose }: { onClose: () => void }) {
   const title = view === 'real' ? t('locRealShort') : view === 'change' ? t('changeLocation') : t('settingsLocation')
 
   return (
-    <div className="popup-backdrop" role="dialog" aria-modal="true" aria-label={title} onClick={onClose}>
+    <div className={`popup-backdrop${closing ? ' is-closing' : ''}`} role="dialog" aria-modal="true" aria-label={title} onClick={onClose}>
       <div className="popup-card" onClick={(e) => e.stopPropagation()}>
         <div className="popup-head">
           {view !== 'main' && (

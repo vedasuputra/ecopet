@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { CONTACT_EMAIL } from '../data/privacy'
 import { useLang, useT } from '../i18n'
 import './site.css'
 
@@ -40,7 +39,6 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
           <div>
             <b>Eco-Pet</b>
             <div>{t('siteFooter')}</div>
-            <div>{t('siteContactUs', { email: CONTACT_EMAIL })}</div>
           </div>
           <nav>
             <Link to="/">{t('siteNavHome')}</Link>

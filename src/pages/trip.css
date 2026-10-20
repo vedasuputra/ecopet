@@ -1,0 +1,330 @@
+/* My trip: the trip and its plan on one page. Same palette, fonts and small text sizes as the rest of the app. */
+.tp-page {
+  min-height: 100%;
+  padding: 16px;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.tp-page *,
+.tp-page *::before,
+.tp-page *::after {
+  box-sizing: border-box;
+}
+.tp-title {
+  margin: 0 0 12px;
+  font-family: var(--font-title);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: var(--navy);
+}
+.tp-card {
+  padding: 14px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+}
+.tp-changed {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fdf3dc;
+}
+.tp-changed p {
+  margin: 0 0 8px;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #6b4a00;
+}
+.tp-style {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--mist);
+}
+.tp-style-text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 0;
+}
+.tp-style-text b {
+  font-family: var(--font-title);
+  font-size: 0.8125rem;
+  color: var(--navy);
+}
+.tp-style-text span {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--ink-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tp-msg {
+  margin: 10px 0 0;
+  font-size: 0.75rem;
+  color: #1b7a43;
+}
+.tp-empty {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  margin-top: 12px;
+  text-align: center;
+}
+.tp-empty p {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+}
+.tp-summary {
+  margin: 14px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.tp-source {
+  margin: 2px 0 12px;
+  font-size: 0.6875rem;
+  color: var(--ink-2);
+}
+
+/* a day of the plan */
+.tp-day {
+  margin-top: 12px;
+  overflow: hidden;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+}
+.tp-day-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #e3f1fa;
+}
+.tp-day-n {
+  flex: none;
+  font-family: var(--font-title);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+.tp-day-theme {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  color: var(--ink);
+}
+.tp-day-body {
+  padding: 10px 12px 12px;
+}
+.tp-where {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+.tp-where .mi {
+  font-size: 18px;
+  color: var(--blue);
+}
+.tp-select {
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.8125rem;
+}
+.tp-sub {
+  margin: 12px 0 4px;
+  font-family: var(--font-title);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.tp-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.tp-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 0.8125rem;
+  text-decoration: none;
+}
+a.tp-item:hover {
+  background: color-mix(in srgb, var(--sky) 30%, #fff);
+}
+.tp-item > .mi:first-child {
+  flex: none;
+  font-size: 18px;
+  color: var(--navy);
+}
+.tp-item-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tp-go {
+  flex: none;
+  font-size: 18px;
+  color: var(--ink-2);
+}
+.tp-free {
+  padding: 4px 6px;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.tp-x {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #b3261e;
+  cursor: pointer;
+}
+.tp-x .mi {
+  font-size: 18px;
+}
+.tp-note {
+  margin: 10px 0 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: #f0f7fc;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+.tp-note-edit {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.tp-note-edit input {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.8125rem;
+}
+
+/* buttons */
+.tp-actions {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  margin-top: 16px;
+}
+.tp-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+.tp-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.tp-btn:hover:not(:disabled) {
+  background: var(--sky);
+}
+.tp-primary {
+  background: var(--navy);
+  color: #fff;
+}
+.tp-primary:hover:not(:disabled) {
+  background: #033269;
+}
+.tp-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.tp-small {
+  flex: none;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.tp-small:hover {
+  background: var(--sky);
+}
+.tp-link {
+  border: 0;
+  background: none;
+  color: var(--blue);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.tp-link:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.tp-page :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}

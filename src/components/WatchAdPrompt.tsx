@@ -1,11 +1,13 @@
+import { useFadeClose } from '../lib/useFadeClose'
 import { useEffect, useRef } from 'react'
 import { useT } from '../i18n'
 import { AD_REWARD, useAppStore } from '../store/useAppStore'
 
 // The popup behind the "+" button in the top bar: watch a short ad to earn coins. Shows the reward, how many ads are left today
 // and one button (there is no "not now": the X closes it).
-export default function WatchAdPrompt({ onWatch, onClose }: { onWatch: () => void; onClose: () => void }) {
+export default function WatchAdPrompt({ onWatch, onClose: closeNow }: { onWatch: () => void; onClose: () => void }) {
   const t = useT()
+  const [closing, onClose] = useFadeClose(closeNow)
   const left = useAppStore((s) => s.adsLeftToday)()
   const closeBtn = useRef<HTMLButtonElement>(null)
 
@@ -17,7 +19,7 @@ export default function WatchAdPrompt({ onWatch, onClose }: { onWatch: () => voi
   }, [onClose])
 
   return (
-    <div className="popup-backdrop" role="dialog" aria-modal="true" aria-label={t('adPromptHeading')} onClick={onClose}>
+    <div className={`popup-backdrop${closing ? ' is-closing' : ''}`} role="dialog" aria-modal="true" aria-label={t('adPromptHeading')} onClick={onClose}>
       <div className="popup-card ad-card" onClick={(e) => e.stopPropagation()}>
         <div className="popup-head">
           <div className="popup-titles">

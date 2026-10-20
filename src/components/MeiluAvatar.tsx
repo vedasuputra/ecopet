@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import MeiluSprite, { SPRITE_VIEW } from './MeiluSprite'
+import MeiluSprite, { SPRITE_VIEW, loadSprite } from './MeiluSprite'
 
 // Meilu is a layered SVG (see MeiluSprite). Small animations move her parts on their own: she breathes, blinks, her
 // tail sways and her wings twitch. The bigger ones (nod, hop, squish, wiggle, party) are CSS transforms on the whole figure.
@@ -35,11 +35,20 @@ const css = `
   50% { transform: translateY(0) rotate(0deg); }
   75% { transform: translateY(-16px) rotate(6deg); }
 }
+@keyframes meilu-think {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  50% { transform: rotate(-6deg) translateY(1px); }
+}
 @keyframes meilu-heart {
   0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
   15% { opacity: 1; }
   100% { transform: translate(var(--dx), -56px) scale(1.1); opacity: 0; }
 }
+/* while her pictures load: a small ring that turns, and she fades in when she is whole */
+@keyframes meilu-spin { to { transform: rotate(360deg); } }
+.meilu-loading { position: absolute; left: 50%; top: 50%; border-radius: 50%; border: 3px solid rgba(22, 143, 214, 0.25); border-top-color: var(--blue, #168fd6); animation: meilu-spin 0.8s linear infinite; }
+.meilu-fade { transition: opacity 0.3s ease; }
+.meilu-still, .meilu-still * { animation: none !important; }
 /* parts of the SVG: transform-origin is in the drawing's own units (the pivot of each part) */
 @keyframes mp-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.008, 1.014); } }
 @keyframes mp-head { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-1.6px) rotate(0.7deg); } }
@@ -57,6 +66,7 @@ const css = `
 .meilu-hop { animation: meilu-hop 0.65s ease-out; transform-origin: 50% 100%; }
 .meilu-squish { animation: meilu-squish 0.12s ease-out forwards; transform-origin: 50% 100%; }
 .meilu-wiggle { animation: meilu-wiggle 0.8s ease-in-out infinite; transform-origin: 50% 100%; }
+.meilu-think { animation: meilu-think 1.6s ease-in-out infinite; transform-origin: 50% 90%; }
 .meilu-party { animation: meilu-party 0.7s ease-in-out infinite; transform-origin: 50% 100%; }
 .meilu-heart { position: absolute; pointer-events: none; font-size: 20px; line-height: 1; color: #fff; text-shadow: 0 1px 4px rgba(4, 67, 136, 0.45); animation: meilu-heart 1.1s ease-out forwards; }
 /* ---- idle moods (the same pivots as above). The eyes only ever squint: scaleY never goes below 0.45, so they stay open.
@@ -130,7 +140,7 @@ const css = `
 .meilu-wiggle .mp-body { animation: mp-pet-body 0.8s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
   .meilu-hop *, .meilu-wiggle *, .meilu-squish *, [class*='mood-'] * { animation: none !important; }
-  .meilu-nod, .meilu-hop, .meilu-squish, .meilu-wiggle, .meilu-party, .mp-body, .mp-head, .mp-eyes, .mp-tail, .mp-wing-right, .mp-wing-left { animation: none; }
+  .meilu-nod, .meilu-think, .meilu-hop, .meilu-squish, .meilu-wiggle, .meilu-party, .mp-body, .mp-head, .mp-eyes, .mp-tail, .mp-wing-right, .mp-wing-left { animation: none; }
   .meilu-heart { animation: none; opacity: 0.9; }
 }
 `
@@ -150,6 +160,9 @@ const HEART_EVERY_MS = 220
 export default function MeiluAvatar({
   nodding = false,
   celebrating = false,
+  reaction = '',
+  still = false,
+  spinner = true,
   interactive = false,
   mood,
   halfBody = false,
@@ -158,6 +171,12 @@ export default function MeiluAvatar({
 }: {
   nodding?: boolean
   celebrating?: boolean
+  /** A reaction played while it lasts (chat): nod, hop, think (a curious tilt) or party. */
+  reaction?: '' | 'nod' | 'hop' | 'think' | 'party'
+  /** No movement at all (the older messages of the chat). */
+  still?: boolean
+  /** Show a turning ring until all her pictures have loaded (default). */
+  spinner?: boolean
   interactive?: boolean
   /** Her idle behaviour follows the time of day: sleepy in the morning, waving at noon, tired in the evening, nodding off at night. Her eyes always stay open. */
   mood?: 'morning' | 'day' | 'evening' | 'night'
@@ -168,6 +187,14 @@ export default function MeiluAvatar({
   size?: number
 }) {
   const [anim, setAnim] = useState<Anim>('')
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    let on = true
+    void loadSprite().then(() => on && setReady(true))
+    return () => {
+      on = false
+    }
+  }, [])
   const [hearts, setHearts] = useState<Heart[]>([])
   const press = useRef<{ at: number; x: number; y: number; moved: number; lastHeart: number } | null>(null)
   const nextId = useRef(0)
@@ -225,7 +252,7 @@ export default function MeiluAvatar({
     later(() => setAnim((a) => (a === 'hop' ? '' : a)), 680)
   }
 
-  const cls = nodding ? 'meilu-nod' : celebrating ? 'meilu-party' : anim ? `meilu-${anim}` : undefined
+  const cls = nodding ? 'meilu-nod' : celebrating ? 'meilu-party' : reaction ? `meilu-${reaction}` : anim ? `meilu-${anim}` : undefined
 
   return (
     <>
@@ -248,7 +275,17 @@ export default function MeiluAvatar({
           cursor: interactive ? 'pointer' : undefined,
         }}
       >
-        <MeiluSprite className={[cls, mood && `mood-${mood}`].filter(Boolean).join(' ') || undefined} width={fluid ? undefined : size} />
+        <div className="meilu-fade" style={{ opacity: ready ? 1 : 0 }}>
+          <MeiluSprite className={[cls, mood && `mood-${mood}`, still && 'meilu-still'].filter(Boolean).join(' ') || undefined} width={fluid ? undefined : size} />
+        </div>
+        {!ready && spinner && (
+          <span
+            className="meilu-loading"
+            role="status"
+            aria-label="Loading"
+            style={{ width: 28, height: 28, margin: '-14px 0 0 -14px' }}
+          />
+        )}
         {hearts.map((h) => (
           <span
             key={h.id}

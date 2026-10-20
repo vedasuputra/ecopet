@@ -1,0 +1,96 @@
+/* First set-up of the trip. Same palette, fonts and small text sizes as the rest of the app. */
+.ob-page {
+  min-height: 100%;
+  padding: 20px 16px;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ob-page *,
+.ob-page *::before,
+.ob-page *::after {
+  box-sizing: border-box;
+}
+.ob-center {
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+}
+.ob-title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: var(--navy);
+}
+.ob-block {
+  padding: 14px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+}
+.ob-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+.ob-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.ob-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.ob-btn:hover:not(:disabled) {
+  background: var(--sky);
+}
+.ob-primary {
+  background: var(--navy);
+  color: #fff;
+}
+.ob-primary:hover:not(:disabled) {
+  background: #033269;
+}
+.ob-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.ob-link {
+  border: 0;
+  background: none;
+  color: var(--blue);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.ob-page :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}

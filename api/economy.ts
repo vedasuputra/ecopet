@@ -7,7 +7,7 @@ import type { Req, Res } from './_gemini.js'
 // the browser can ask, but it can never set a balance, a price or a reward itself.
 
 const AD_REWARD = 5
-const AD_DAILY_LIMIT = 3
+const AD_DAILY_LIMIT = 10
 
 const fail = (res: Res, code: number, error: string) => res.status(code).json({ ok: false, error })
 

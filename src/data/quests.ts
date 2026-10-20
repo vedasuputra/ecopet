@@ -63,7 +63,7 @@ export const quests: Quest[] = [
     title: { en: 'Shop at the floating market', vi: 'Mua sắm ở chợ nổi' },
     type: 'floating_market',
     destination: 'Cai Rang Floating Market',
-    lat: 10.0024, lng: 105.74439, radiusM: 400, rewardCoins: 32,
+    lat: 10.0024, lng: 105.74439, radiusM: 400, rewardCoins: 30,
     description: {
       en: 'Buy something from a boat vendor at Cai Rang and take a photo of it with the market around you. Go early: it is busiest from about 5 to 8 am.',
       vi: 'Mua một món từ ghe hàng ở chợ nổi Cái Răng và chụp ảnh món đó cùng khung cảnh chợ. Hãy đi sớm: chợ đông nhất từ khoảng 5 đến 8 giờ sáng.',
@@ -91,7 +91,7 @@ export const quests: Quest[] = [
     title: { en: 'Explore Tra Su on foot', vi: 'Khám phá Trà Sư bằng đôi chân' },
     type: 'hiking',
     destination: 'Tra Su',
-    lat: 10.5859, lng: 105.05827, radiusM: 1500, rewardCoins: 38,
+    lat: 10.5859, lng: 105.05827, radiusM: 1500, rewardCoins: 40,
     description: {
       en: 'Walk the long bamboo walkway through the cajuput forest and take a photo of the path.',
       vi: 'Đi bộ trên cây cầu tre dài xuyên rừng tràm và chụp ảnh con đường.',
@@ -145,7 +145,7 @@ export const quests: Quest[] = [
     title: { en: 'Bring your own utensils', vi: 'Mang theo dụng cụ ăn uống cá nhân' },
     type: 'reusable_utensils',
     destination: '',
-    lat: 0, lng: 0, radiusM: 0, rewardCoins: 12,
+    lat: 0, lng: 0, radiusM: 0, rewardCoins: 10,
     description: {
       en: 'Use your own utensils when eating out.',
       vi: 'Dùng dụng cụ ăn uống của riêng bạn khi đi ăn ngoài.',
@@ -212,7 +212,7 @@ export const quests: Quest[] = [
     title: { en: 'Breakfast on the water', vi: 'Ăn sáng trên sông' },
     type: 'local_food',
     destination: 'Cai Rang Floating Market',
-    lat: 10.0024, lng: 105.74439, radiusM: 400, rewardCoins: 28,
+    lat: 10.0024, lng: 105.74439, radiusM: 400, rewardCoins: 30,
     description: {
       en: 'Eat a noodle breakfast from a small boat or stall at the floating market and take a photo of your bowl.',
       vi: 'Ăn sáng món nước từ một ghe hoặc quầy nhỏ ở chợ nổi và chụp ảnh tô của bạn.',
@@ -268,7 +268,7 @@ export const quests: Quest[] = [
     title: { en: 'Paddle into the cajuput forest', vi: 'Chèo xuồng vào rừng tràm' },
     type: 'rowing',
     destination: 'Tra Su',
-    lat: 10.5859, lng: 105.05827, radiusM: 1500, rewardCoins: 36,
+    lat: 10.5859, lng: 105.05827, radiusM: 1500, rewardCoins: 35,
     description: {
       en: 'After the motorboat, switch to a small rowboat through the duckweed deeper into the forest, and take a photo of it. Birds are most active around 7 to 9 am and 4 to 5 pm.',
       vi: 'Sau chặng ca nô, chuyển sang xuồng chèo nhỏ len qua lớp bèo vào sâu trong rừng, và chụp ảnh chiếc xuồng. Chim hoạt động nhiều nhất khoảng 7 đến 9 giờ sáng và 4 đến 5 giờ chiều.',
@@ -296,7 +296,7 @@ export const quests: Quest[] = [
     title: { en: 'Visit the Mang Thit kilns', vi: 'Ghé lò gạch gốm Mang Thít' },
     type: 'craft',
     destination: 'Vinh Long',
-    lat: 10.12594, lng: 106.09038, radiusM: 4000, rewardCoins: 32,
+    lat: 10.12594, lng: 106.09038, radiusM: 4000, rewardCoins: 30,
     description: {
       en: 'The Mang Thit area is known for its traditional brick and pottery kilns. Visit a family workshop that still fires pottery, buy a small piece, and take a photo.',
       vi: 'Vùng Mang Thít nổi tiếng với các lò gạch gốm truyền thống. Ghé một cơ sở gia đình còn nung gốm, mua một món nhỏ và chụp ảnh.',
@@ -324,7 +324,7 @@ export const quests: Quest[] = [
     title: { en: 'Row through the water-coconut canals', vi: 'Đi xuồng qua kênh rạch dừa nước' },
     type: 'rowing',
     destination: 'My Tho',
-    lat: 10.33241, lng: 106.3207, radiusM: 1800, rewardCoins: 36,
+    lat: 10.33241, lng: 106.3207, radiusM: 1800, rewardCoins: 35,
     description: {
       en: 'On Thoi Son island, take a small three-plank sampan rowed by a local through the narrow water-coconut canals, and take a photo of your boat.',
       vi: 'Trên cồn Thới Sơn, đi chiếc xuồng ba lá do người dân địa phương chèo qua những con rạch nhỏ rợp dừa nước, và chụp ảnh chiếc xuồng.',
@@ -366,7 +366,7 @@ export const quests: Quest[] = [
     title: { en: 'Buy a plant at the flower village', vi: 'Mua cây hoa ở làng hoa' },
     type: 'flowers',
     destination: 'Sa Dec',
-    lat: 10.3175, lng: 105.74556, radiusM: 2000, rewardCoins: 32,
+    lat: 10.3175, lng: 105.74556, radiusM: 2000, rewardCoins: 30,
     description: {
       en: 'The Sa Dec flower village is made of family gardens. Buy a small plant or flowers from a grower and take a photo of the garden or your purchase.',
       vi: 'Làng hoa Sa Đéc gồm nhiều vườn hoa của các gia đình. Mua một chậu cây nhỏ hoặc hoa từ nhà vườn và chụp ảnh vườn hoặc món bạn mua.',
@@ -408,7 +408,7 @@ export const quests: Quest[] = [
     title: { en: 'Taste mam at Chau Doc market', vi: 'Thưởng thức mắm ở chợ Châu Đốc' },
     type: 'local_goods',
     destination: 'Chau Doc',
-    lat: 10.71108, lng: 105.11888, radiusM: 400, rewardCoins: 28,
+    lat: 10.71108, lng: 105.11888, radiusM: 400, rewardCoins: 30,
     description: {
       en: 'Chau Doc is famous for mam (fermented fish). Buy some from one of the long-running stalls at Chau Doc market and take a photo.',
       vi: 'Châu Đốc nổi tiếng với mắm. Mua một ít ở một trong những sạp mắm lâu năm tại chợ Châu Đốc và chụp ảnh.',
@@ -422,7 +422,7 @@ export const quests: Quest[] = [
     title: { en: 'Buy hand-woven Cham fabric', vi: 'Mua vải dệt tay của người Chăm' },
     type: 'craft',
     destination: 'Chau Doc',
-    lat: 10.71037, lng: 105.12857, radiusM: 1500, rewardCoins: 32,
+    lat: 10.71037, lng: 105.12857, radiusM: 1500, rewardCoins: 30,
     description: {
       en: 'In the Cham villages across the river from Chau Doc, women weave fabric by hand. Buy a woven piece and take a photo of the loom or your fabric.',
       vi: 'Ở các làng Chăm bên kia sông đối diện Châu Đốc, phụ nữ dệt vải bằng tay. Mua một món vải dệt và chụp ảnh khung dệt hoặc tấm vải của bạn.',
@@ -436,7 +436,7 @@ export const quests: Quest[] = [
     title: { en: 'Walk up Sam Mountain', vi: 'Đi bộ lên núi Sam' },
     type: 'hiking',
     destination: 'Chau Doc',
-    lat: 10.67667, lng: 105.0775, radiusM: 1500, rewardCoins: 38,
+    lat: 10.67667, lng: 105.0775, radiusM: 1500, rewardCoins: 40,
     description: {
       en: 'Climb Sam Mountain on foot instead of by motorbike and take a photo of the path or the view.',
       vi: 'Leo núi Sam bằng đôi chân thay vì đi xe máy và chụp ảnh con đường hoặc khung cảnh.',

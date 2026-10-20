@@ -25,6 +25,9 @@ const NO_NAV = ['/ad']
 
 export default function Layout() {
   const { pathname } = useRoute()
+  const fromHome = (useRoute().state as { from?: string } | null)?.from === 'home'
+  const first = pathname.split('/')[1] ?? ''
+  const section = fromHome ? 'home' : first === 'offers' ? 'coupons' : first // a popup over a screen keeps that screen's key
   const navigate = useNavigate()
   const t = useT()
   const user = useAppStore((s) => s.user)
@@ -126,7 +129,9 @@ export default function Layout() {
           </strong>
         )}
       </header>
-      <main className="phone-scroll">
+      {/* the screen fades in when you go to another one; <main> is only replaced when the section changes, so the popups over a
+          screen (a quest, a coupon) do not make their screen fade again */}
+      <main className="phone-scroll page-fade" key={section}>
         <Outlet />
       </main>
       {!NO_NAV.includes(pathname) && <BottomNav />}

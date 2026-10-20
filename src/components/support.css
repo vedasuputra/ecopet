@@ -1,0 +1,193 @@
+/* Customer service popup. Same popup card, palette and small text as the other popups. */
+.popup-backdrop:has(.sup-popup) {
+  align-items: center;
+}
+.sup-popup {
+  max-height: 100%;
+  overflow-y: auto;
+  padding-bottom: 16px;
+}
+.sup-popup *,
+.sup-popup *::before,
+.sup-popup *::after {
+  box-sizing: border-box;
+}
+.sup-popup .popup-head {
+  gap: 6px;
+  margin-bottom: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--mist);
+}
+.sup-popup .popup-titles {
+  flex: 1;
+  min-width: 0;
+}
+.sup-back {
+  margin-left: -2px;
+}
+.sup-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  margin-top: 14px;
+}
+/* the dropdown fills the popup, and a long name is cut with "..." (the whole name is in its list) */
+.sup-field .fd-btn {
+  width: 100%;
+  max-width: none;
+  min-height: 40px;
+  border-radius: 8px; /* the same corners as the text box below, not a pill */
+}
+.sup-field .fd-label {
+  flex: 1;
+  text-align: left;
+}
+.sup-label {
+  font-family: var(--font-title);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.sup-opt {
+  font-family: var(--font);
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.sup-text {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  resize: vertical;
+}
+.sup-count {
+  justify-self: end;
+  font-size: 0.6875rem;
+  color: var(--ink-2);
+}
+.sup-note {
+  margin: 12px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.sup-err {
+  margin: 10px 0 0;
+  font-size: 0.75rem;
+  color: #b3261e;
+}
+.sup-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 42px;
+  margin-top: 10px;
+  padding: 0 14px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.sup-btn:hover:not(:disabled) {
+  background: var(--sky);
+}
+.sup-primary {
+  background: var(--navy);
+  color: #fff;
+}
+.sup-primary:hover:not(:disabled) {
+  background: #033269;
+}
+.sup-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.sup-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.sup-item {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+}
+.sup-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.sup-item-cat {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-title);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.sup-chip {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #fdf3dc;
+  color: #8a5a00;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+.sup-chip.st-resolved {
+  background: #e3f4ea;
+  color: #1b7a43;
+}
+.sup-chip.st-rejected {
+  background: var(--mist);
+  color: var(--ink-2);
+}
+.sup-item-coupon,
+.sup-item-date {
+  font-size: 0.6875rem;
+  color: var(--ink-2);
+}
+.sup-item-msg {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.sup-item-reply {
+  margin: 2px 0 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: #f0f7fc;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+.sup-popup :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* Send report and My reports side by side */
+.sup-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}

@@ -4,6 +4,8 @@ import './filterdropdown.css'
 export interface FilterOption {
   value: string
   label: string
+  /** A second, smaller line under the label (for example where a coupon can be used). */
+  sub?: string
   count?: number
 }
 
@@ -18,6 +20,7 @@ export default function FilterDropdown({
   options,
   onChange,
   label,
+  matchWidth = false,
 }: {
   icon: string
   prefix?: string
@@ -25,9 +28,11 @@ export default function FilterDropdown({
   options: FilterOption[]
   onChange: (value: string) => void
   label: string
+  /** The list is as wide as the button (for a dropdown that fills its row), instead of its own width. */
+  matchWidth?: boolean
 }) {
   const btn = useRef<HTMLButtonElement>(null)
-  const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
+  const [pos, setPos] = useState<{ top: number; left: number; width?: number } | null>(null)
   const current = options.find((o) => o.value === value) ?? options[0]
   const active = value !== options[0]?.value
 
@@ -45,7 +50,7 @@ export default function FilterDropdown({
   const toggle = () => {
     if (pos) return setPos(null)
     const r = btn.current?.getBoundingClientRect()
-    if (r) setPos({ top: r.bottom + 4, left: Math.max(8, Math.min(r.left, window.innerWidth - 228)) })
+    if (r) setPos(matchWidth ? { top: r.bottom + 4, left: r.left, width: r.width } : { top: r.bottom + 4, left: Math.max(8, Math.min(r.left, window.innerWidth - 228)) })
   }
   return (
     <>
@@ -71,7 +76,7 @@ export default function FilterDropdown({
       </button>
       {pos && (
         // mousedown must not take the focus away from the button, or the list would close before a click lands
-        <ul className="fd-list" role="listbox" style={{ top: pos.top, left: pos.left }} onMouseDown={(e) => e.preventDefault()}>
+        <ul className="fd-list" role="listbox" style={{ top: pos.top, left: pos.left, ...(pos.width ? { width: pos.width } : {}) }} onMouseDown={(e) => e.preventDefault()}>
           {options.map((o) => (
             <li key={o.value}>
               <button
@@ -83,7 +88,14 @@ export default function FilterDropdown({
                   setPos(null)
                 }}
               >
-                <span>{o.label}</span>
+                {o.sub ? (
+                  <span className="fd-opt">
+                    <span className="fd-opt-title">{o.label}</span>
+                    <span className="fd-opt-sub">{o.sub}</span>
+                  </span>
+                ) : (
+                  <span>{o.label}</span>
+                )}
                 {o.count !== undefined && <span className="fd-n">{o.count}</span>}
               </button>
             </li>

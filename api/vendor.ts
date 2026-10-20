@@ -189,7 +189,7 @@ export default async function handler(req: Req, res: Res) {
     const validDays = body.validDays === undefined || body.validDays === '' ? 7 : Math.round(Number(body.validDays)) // at most 7 days
     const monthlyCap = body.monthlyCap === undefined || body.monthlyCap === null || body.monthlyCap === '' ? null : Math.round(Number(body.monthlyCap))
     if (
-      !titleEn || !titleVi || (dealType === 'percent' && !(discount >= 1 && discount <= 50)) || (dealType === 'amount' && !(dealValue! >= 1000 && dealValue! <= 500000)) || !(cost >= 10 && cost <= 500) ||
+      !titleEn || !titleVi || (dealType === 'percent' && !(discount >= 1 && discount <= 50)) || (dealType === 'amount' && !(dealValue! >= 1000 && dealValue! <= 500000)) || !(cost >= 75 && cost <= 500) ||
       !(validDays >= 1 && validDays <= 7) || (monthlyCap !== null && !(monthlyCap >= 1 && monthlyCap <= 10000))
     ) {
       return fail(res, 400, 'bad_input')

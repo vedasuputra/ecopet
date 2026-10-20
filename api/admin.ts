@@ -6,6 +6,7 @@ import type { Req, Res } from './_gemini.js'
 //   queue    photos waiting for a person (oldest first), with what the AI saw
 //   attempts the latest 100 checks + 7-day statistics (to tune the confidence thresholds)
 //   decide   approve (the traveler is paid) or reject (they can try again)
+//   tickets / resolve_ticket   the customer service reports: coins back, more days on the coupon, or just an answer
 
 const REVIEW_EXPIRES_DAYS = 14 // a photo nobody reviewed is rejected and deleted after this long
 const LOG_KEEP_DAYS = 90
@@ -39,7 +40,7 @@ export default async function handler(req: Req, res: Res) {
   const acct = (await getJsonRows<{ role: string }>(`accounts?id=eq.${user.id}&select=role`))[0]
   if (acct?.role !== 'admin') return fail(res, 403, 'not_admin')
 
-  const { action, id, decision, note } = req.body ?? {}
+  const { action, id, decision, note, resolution } = req.body ?? {}
   const quests = await loadQuests()
 
   if (action === 'queue') {
@@ -110,6 +111,33 @@ export default async function handler(req: Req, res: Res) {
     const done = upd.ok ? ((await upd.json()) as unknown[]) : []
     if (!done.length) return fail(res, 409, 'already_decided')
     return res.json({ ok: true })
+  }
+
+  if (action === 'tickets') {
+    const items = await getJsonRows<{ user_id: string; coupon_uid: string | null; coupon_id: string | null; vendor_id: string | null }>(
+      'support_tickets?select=*&order=status.asc,created_at.asc&limit=60',
+    )
+    // what the team needs to decide: the coupon (still unused? bought with coins? how many?) and the shop
+    const out = await Promise.all(
+      items.map(async (t) => {
+        const issued = t.coupon_uid ? (await getJsonRows<{ status: string; source: string; expires_at: string | null }>(`coupons_issued?uid=eq.${encodeURIComponent(t.coupon_uid)}&select=status,source,expires_at`))[0] : undefined
+        const offer = t.coupon_id ? (await getJsonRows<{ title_en: string; cost_coins: number }>(`coupon_offers?id=eq.${encodeURIComponent(t.coupon_id)}&select=title_en,cost_coins`))[0] : undefined
+        const vendor = t.vendor_id ? (await getJsonRows<{ name: string; plan_paid_until: string | null }>(`vendors?id=eq.${encodeURIComponent(t.vendor_id)}&select=name,plan_paid_until`))[0] : undefined
+        return { ...t, coupon: issued ?? null, offer: offer ?? null, vendor: vendor ?? null }
+      }),
+    )
+    return res.json({ ok: true, items: out })
+  }
+
+  if (action === 'resolve_ticket') {
+    if (typeof id !== 'number' || (resolution !== 'refund' && resolution !== 'extend' && resolution !== 'none')) return fail(res, 400, 'bad_request')
+    const r = await rpc('resolve_support_ticket', { p_ticket: id, p_admin: user.id, p_resolution: resolution, p_note: typeof note === 'string' ? note.trim().slice(0, 300) : '' })
+    if (!r.ok) {
+      if (r.error === 'not_open') return fail(res, 409, 'already_decided')
+      if (r.error === 'not_refundable' || r.error === 'no_coupon') return fail(res, 409, r.error)
+      return fail(res, 500, 'db_error')
+    }
+    return res.json({ ok: true, refunded: r.data })
   }
 
   return fail(res, 400, 'unknown_action')

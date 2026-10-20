@@ -21,7 +21,7 @@ interface Form {
 
 const DEAL_KEY: Record<DealType, Key> = { percent: 'vDealPercent', amount: 'vDealAmount', free: 'vDealFree', combo: 'vDealCombo' }
 
-const EMPTY: Form = { titleEn: '', titleVi: '', dealType: 'percent', discountPct: '10', dealValue: '20000', costCoins: '50', code: '', active: true, validDays: '7', monthlyCap: '' }
+const EMPTY: Form = { titleEn: '', titleVi: '', dealType: 'percent', discountPct: '10', dealValue: '20000', costCoins: '75', code: '', active: true, validDays: '7', monthlyCap: '' }
 
 const toForm = (o: Offer): Form => ({
   id: o.id,

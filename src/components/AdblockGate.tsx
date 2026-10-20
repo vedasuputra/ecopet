@@ -5,11 +5,33 @@ import './adblock.css'
 // Ads pay for the coins and coupons, so the app asks travelers to turn off their ad blocker.
 // Two checks: a "bait" element that blockers hide, and requests to the ad scripts the app itself uses (a blocker cancels them).
 // Being offline is not treated as a blocker.
+// Blockers cancel these (uBlock Origin also swaps some of them for a harmless stub, which a plain fetch cannot tell apart,
+// so every script is loaded the way a page loads it: with a script tag, where a cancelled request is an error).
 const AD_SCRIPTS = [
+  'https://static.doubleclick.net/instream/ad_status.js',
+  'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
   'https://securepubads.g.doubleclick.net/tag/js/gpt.js',
   'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
-  'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+  'https://c.amazon-adsystem.com/aax2/apstag.js',
 ]
+
+// true if the script loaded, false if it was blocked (an error); a script that is just slow counts as loaded
+function scriptLoads(url: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const el = document.createElement('script')
+    const done = (ok: boolean) => {
+      clearTimeout(timer)
+      el.remove()
+      resolve(ok)
+    }
+    const timer = setTimeout(() => done(true), 5000)
+    el.async = true
+    el.onload = () => done(true)
+    el.onerror = () => done(false)
+    el.src = url
+    document.head.appendChild(el)
+  })
+}
 
 async function adblockPresent(): Promise<boolean> {
   const bait = document.createElement('div')
@@ -25,14 +47,7 @@ async function adblockPresent(): Promise<boolean> {
   if (hidden) return true
   if (!navigator.onLine) return false
   // any of the ad scripts being cancelled counts
-  const results = await Promise.all(
-    AD_SCRIPTS.map((u) =>
-      fetch(u, { mode: 'no-cors', cache: 'no-store' }).then(
-        () => true,
-        () => false,
-      ),
-    ),
-  )
+  const results = await Promise.all(AD_SCRIPTS.map(scriptLoads))
   if (results.every(Boolean)) return false
   // blocked by an extension, or the network failed: confirm the network works before blaming the blocker
   try {

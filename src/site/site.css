@@ -295,3 +295,21 @@
     max-width: 180px;
   }
 }
+
+/* on a phone the header keeps only the brand, the language switch and the button, all on one row */
+@media (max-width: 560px) {
+  .s-header .s-wrap {
+    flex-wrap: nowrap;
+    padding: 0 14px;
+  }
+  .s-nav {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  .s-nav > a:not(.s-btn) {
+    display: none;
+  }
+  .s-brand {
+    white-space: nowrap;
+  }
+}

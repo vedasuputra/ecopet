@@ -1,5 +1,5 @@
 import type { Localized } from '../i18n'
-import { CONTACT_EMAIL, PRIVACY_VERSION } from '../data/privacy'
+import { PRIVACY_VERSION } from '../data/privacy'
 
 // Text of the public pages (landing + privacy policy), in both languages.
 // The privacy policy describes what the prototype actually does today.
@@ -27,10 +27,6 @@ export const PRIVACY: Section[] = [
       {
         en: 'Eco-Pet is a travel app for the Mekong Delta in Vietnam. It rewards sustainable choices (taking the bus, bringing your own bottle, shopping at small local businesses) with coins that can be traded for discount coupons at partner shops. Meilu, our AI bird guide, chats with travelers during their trip.',
         vi: 'Eco-Pet là ứng dụng du lịch cho Đồng bằng sông Cửu Long, Việt Nam. Ứng dụng thưởng xu cho các lựa chọn bền vững (đi xe buýt, mang bình nước riêng, mua sắm ở cửa hàng nhỏ của người dân) để đổi lấy phiếu giảm giá tại cửa hàng đối tác. Meilu, chú chim hướng dẫn viên AI, trò chuyện cùng du khách trong chuyến đi.',
-      },
-      {
-        en: `Questions about your data: ${CONTACT_EMAIL}.`,
-        vi: `Mọi câu hỏi về dữ liệu của bạn: ${CONTACT_EMAIL}.`,
       },
     ],
   },
