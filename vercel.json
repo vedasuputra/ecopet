@@ -1,3 +1,8 @@
 {
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
+  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }],
+  "functions": {
+    "api/itinerary.ts": { "maxDuration": 60 },
+    "api/verify.ts": { "maxDuration": 60 },
+    "api/chat.ts": { "maxDuration": 30 }
+  }
 }

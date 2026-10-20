@@ -1,7 +1,7 @@
 // Known destinations (coordinates from OpenStreetMap / Wikidata).
 // Used by the dev panel's location shortcuts and to label the traveler's area in Meilu chat.
 
-import { haversine } from '../lib/geo'
+import { haversine } from '../lib/geo.js'
 
 export interface KnownPlace {
   name: string

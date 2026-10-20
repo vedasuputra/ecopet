@@ -1,6 +1,6 @@
-import { PLACES } from '../data/places'
-import { haversine } from './geo'
-import { interestQuestTypes, questsPerDay, vendorMatches, type Interest, type TravelerStyle } from './travelerStyle'
+import { PLACES } from '../data/places.js'
+import { haversine } from './geo.js'
+import { interestQuestTypes, questsPerDay, vendorMatches, type Interest, type TravelerStyle } from './travelerStyle.js'
 
 // Trip planning rules shared by the app and the server: how many quests a trip gets, how quests are
 // picked (the traveler's interests, then variety), the rule-based itinerary, resizing a plan when
