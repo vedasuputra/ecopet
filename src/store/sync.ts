@@ -8,6 +8,7 @@ import { useAppStore } from './useAppStore'
 const pick = (s: ReturnType<typeof useAppStore.getState>) => ({
   user: s.user,
   activeQuestIds: s.activeQuestIds,
+  pinnedQuestIds: s.pinnedQuestIds,
   chatHistory: s.chatHistory,
   itinerary: s.itinerary,
 })
@@ -28,6 +29,7 @@ export async function loadRemote(userId: string): Promise<boolean> {
   useAppStore.setState({
     ...(s.user ? { user: s.user } : {}),
     ...(s.activeQuestIds ? { activeQuestIds: s.activeQuestIds } : {}),
+    ...(s.pinnedQuestIds ? { pinnedQuestIds: s.pinnedQuestIds } : {}),
     ...(s.chatHistory ? { chatHistory: s.chatHistory } : {}),
     ...(s.itinerary ? { itinerary: s.itinerary } : {}),
   })

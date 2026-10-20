@@ -1,0 +1,272 @@
+/* The coupon detail popup (inside the same popup card as the location popup). Small text, like the rest of the app. */
+.popup-backdrop:has(.info-popup) {
+  align-items: center;
+}
+.info-popup {
+  max-height: 100%;
+  overflow-y: auto;
+  padding-bottom: 16px;
+}
+.info-popup *,
+.info-popup *::before,
+.info-popup *::after {
+  box-sizing: border-box;
+}
+/* a line under the heading, like on the coupon QR popup */
+.info-popup .popup-head {
+  margin-bottom: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--mist);
+}
+.info-gone {
+  margin: 14px 0 0;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+}
+
+/* the deal */
+.info-hero {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.info-cat {
+  flex: none;
+  font-size: 34px;
+  color: var(--accent);
+}
+.info-hero-text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 0; /* the name of the coupon and the shop sit close together */
+}
+.info-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-title);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+.info-shop {
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.info-deal {
+  flex: none;
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent-dark);
+}
+.info-deal.is-word {
+  font-size: 1.0625rem;
+  letter-spacing: 0.04em;
+}
+.info-price {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 12px -16px 0; /* edge to edge: it cancels the side padding of the popup */
+  padding: 9px 16px;
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 35%, #fff);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, #fff);
+  border-radius: 0;
+  background: var(--accent-tint);
+}
+.info-cost {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.75rem; /* the same size as the validity text under the box */
+  font-weight: 700;
+}
+.info-cost .mi {
+  font-size: 15px;
+}
+.info-cost.cost-ok {
+  color: #1b7a43;
+}
+.info-cost.cost-short {
+  color: #b3261e;
+}
+.info-cost.cost-paid {
+  color: var(--accent-dark);
+  opacity: 0.45; /* already bought: faded */
+}
+/* not enough coins: the box turns a faded red */
+.info-price.is-short {
+  border-top-color: rgba(179, 38, 30, 0.25);
+  border-bottom-color: rgba(179, 38, 30, 0.25);
+  background: rgba(179, 38, 30, 0.08);
+}
+.info-short {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #b3261e;
+}
+.info-have {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1b7a43;
+}
+.info-left {
+  display: block;
+}
+.info-left::first-letter {
+  text-transform: uppercase;
+}
+.info-valid {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+
+/* where and when */
+.info-section {
+  margin-top: 16px;
+}
+.info-section h4 {
+  margin: 0 0 6px;
+  font-family: var(--font-title);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+.info-where {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.info-map {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  color: var(--navy);
+  text-decoration: none;
+}
+.info-map .mi {
+  font-size: 22px;
+}
+.info-map:hover {
+  background: var(--sky);
+}
+.info-place-text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+.info-address {
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.info-distance {
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.info-status {
+  font-size: 0.75rem;
+}
+.info-hours {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+.info-hours td {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--mist);
+  color: var(--ink-2);
+}
+.info-hours td:last-child {
+  text-align: right;
+}
+.info-hours tr:last-child td {
+  border-bottom: 0;
+}
+.info-hours tr.today td {
+  font-weight: 700;
+  color: var(--navy);
+}
+.info-note {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+/* the action */
+.info-msg {
+  margin: 14px 0 0;
+  font-size: 0.8125rem;
+  color: #b3261e;
+}
+.info-msg.ok {
+  color: #1b7a43;
+}
+.info-need {
+  margin: 14px 0 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #b3261e;
+}
+.info-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 42px;
+  margin-top: 10px;
+  padding: 0 14px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.info-btn:hover:not(:disabled) {
+  background: var(--sky);
+}
+.info-btn-primary {
+  background: var(--navy);
+  color: #fff;
+}
+.info-btn-primary:hover:not(:disabled) {
+  background: #033269;
+}
+.info-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.info-popup :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}

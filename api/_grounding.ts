@@ -13,6 +13,7 @@ export interface Offer {
   vendorId: string
   title: string
   pct: number
+  deal?: string
 }
 export interface GroundingCatalog {
   vendors: PlanVendor[]
@@ -41,7 +42,7 @@ export async function loadCatalog(): Promise<GroundingCatalog> {
 
   const [v, o, q] = await Promise.all([
     getRows<{ id: string; name: string; category_en: string; lat: number | null; lng: number | null }>('vendors?select=id,name,category_en,lat,lng'),
-    getRows<{ vendor_id: string; title_en: string; discount_pct: number }>('coupon_offers?active=eq.true&select=vendor_id,title_en,discount_pct'),
+    getRows<{ vendor_id: string; title_en: string; discount_pct: number; deal_type?: string; deal_value?: number | null }>('coupon_offers?active=eq.true&select=vendor_id,title_en,discount_pct,deal_type,deal_value'),
     getRows<{ id: string; type: string; title_en: string; scope?: string; destination: string | null; lat: number | null; lng: number | null }>('quests?active=eq.true&select=*&order=sort'),
   ])
 
@@ -50,7 +51,7 @@ export async function loadCatalog(): Promise<GroundingCatalog> {
       ? v.filter((x) => x.lat != null && x.lng != null).map((x) => ({ id: x.id, name: x.name, category: x.category_en, lat: x.lat as number, lng: x.lng as number }))
       : staticVendors.map((x) => ({ id: x.id, name: x.name, category: x.category.en, lat: x.lat, lng: x.lng })),
     offers: o
-      ? o.map((x) => ({ vendorId: x.vendor_id, title: x.title_en, pct: x.discount_pct }))
+      ? o.map((x) => ({ vendorId: x.vendor_id, title: x.title_en, pct: x.discount_pct, deal: x.deal_type === 'amount' ? `${x.deal_value} VND off` : x.deal_type === 'free' ? 'free gift' : x.deal_type === 'combo' ? 'combo deal' : undefined }))
       : staticCoupons.filter((c) => c.active !== false).map((c) => ({ vendorId: c.vendorId, title: c.title.en, pct: c.discountPct })),
     quests: q
       ? q
@@ -81,7 +82,7 @@ export function groundingText(cat: GroundingCatalog, lat: number | null, lng: nu
   const shops = near.length
     ? near
         .map(({ v, d }) => {
-          const offers = cat.offers.filter((o) => o.vendorId === v.id).map((o) => `${o.title} ${o.pct}% off`)
+          const offers = cat.offers.filter((o) => o.vendorId === v.id).map((o) => `${o.title} ${o.deal ?? `${o.pct}% off`}`)
           return `- ${v.name} (${v.category})${lat != null ? `, ${km(d)} away` : ''}${offers.length ? `; coupon: ${offers.join(', ')}` : ''}`
         })
         .join('\n')

@@ -12,6 +12,8 @@ export interface User {
   name: string
   /** Chosen at sign-up. Domestic travelers skip the length-of-stay question. Missing on older accounts. */
   origin?: TravelerOrigin
+  /** The day the trip was planned (YYYY-MM-DD, Vietnam time): day 1 of the trip. */
+  tripStart?: string
   days: number
   destinations: string[]
   /** What kind of traveler (asked by Meilu before planning and during onboarding). Optional. */
@@ -81,6 +83,8 @@ interface AppState extends Economy {
   // --- client-owned: kept in the account's profile, freely editable by the user
   user: User | null
   activeQuestIds: string[]
+  /** Quests the traveler pinned to keep them in mind (also for later). Any quest can be pinned. */
+  pinnedQuestIds: string[]
   chatHistory: ChatMessage[]
   itinerary: Itinerary | null
 
@@ -98,6 +102,8 @@ interface AppState extends Economy {
   setItinerary: (it: Itinerary | null) => void
   /** Saves an itinerary and makes the active quests follow it (day by day, skipping finished ones). */
   applyItinerary: (it: Itinerary) => void
+  /** Pins the quest, or unpins it when it is pinned already. */
+  togglePin: (id: string) => void
   skipQuest: (id: string) => void
   /** Adds any quest (also one outside the plan) to the active quests. */
   takeQuest: (id: string) => void
@@ -123,6 +129,7 @@ const initialEconomy: Economy = {
 const initial = {
   user: null as User | null,
   activeQuestIds: [] as string[],
+  pinnedQuestIds: [] as string[],
   chatHistory: [] as ChatMessage[],
   itinerary: null as Itinerary | null,
   ...initialEconomy,
@@ -142,7 +149,7 @@ export const useAppStore = create<AppState>()(
       // makes the old itinerary stale, so it is cleared.
       setOnboarding: (days, destinations, style) =>
         set((s) => ({
-          user: { name: s.user?.name ?? 'Traveler', origin: s.user?.origin, days, destinations, style: style ?? s.user?.style },
+          user: { name: s.user?.name ?? 'Traveler', origin: s.user?.origin, days, destinations, style: style ?? s.user?.style, tripStart: vnDay(new Date()) },
           activeQuestIds: pickQuests(destinations, Object.keys(s.questStatus), slotsForDays(days)),
           itinerary: null,
         })),
@@ -165,6 +172,8 @@ export const useAppStore = create<AppState>()(
         }),
 
       applyItinerary: (it) => set((s) => ({ itinerary: it, activeQuestIds: followPlan(it, s.questStatus) })),
+
+      togglePin: (id) => set((s) => ({ pinnedQuestIds: s.pinnedQuestIds.includes(id) ? s.pinnedQuestIds.filter((x) => x !== id) : [...s.pinnedQuestIds, id] })),
 
       // Replace a quest with a new one not already active or done (and different from the others in type).
       skipQuest: (id) =>

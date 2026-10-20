@@ -1,0 +1,240 @@
+/* The coupon popup: a ticket (tear line with a notch on each side) over the dimmed list of coupons, and a round X under it. */
+.qr-backdrop {
+  align-items: center;
+  overflow-y: auto;
+}
+.qr-backdrop *,
+.qr-backdrop *::before,
+.qr-backdrop *::after {
+  box-sizing: border-box;
+}
+.qr-stack {
+  width: 100%;
+  max-width: 340px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+/* The ticket is two blocks stacked: the top one has holes in its bottom corners, the bottom one in its top corners, which
+   together make the notch on each side of the tear line. The shadow is on the wrapper because a mask also cuts a shadow. */
+.qr-ticket {
+  width: 100%;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35));
+  --notch: 11px;
+}
+.qr-top,
+.qr-bottom {
+  position: relative;
+  background: #fff;
+}
+.qr-top {
+  padding: 18px 18px 18px;
+  border-radius: 12px 12px 0 0;
+  -webkit-mask: radial-gradient(circle var(--notch) at 0 100%, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(circle var(--notch) at 100% 100%, #0000 97%, #000) right / 51% 100% no-repeat;
+  mask: radial-gradient(circle var(--notch) at 0 100%, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(circle var(--notch) at 100% 100%, #0000 97%, #000) right / 51% 100% no-repeat;
+}
+.qr-top.qr-only {
+  border-radius: 12px;
+  -webkit-mask: none;
+  mask: none;
+}
+.qr-bottom {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 18px 18px 12px;
+  border-radius: 0 0 12px 12px;
+  -webkit-mask: radial-gradient(circle var(--notch) at 0 0, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(circle var(--notch) at 100% 0, #0000 97%, #000) right / 51% 100% no-repeat;
+  mask: radial-gradient(circle var(--notch) at 0 0, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(circle var(--notch) at 100% 0, #0000 97%, #000) right / 51% 100% no-repeat;
+}
+.qr-bottom::before {
+  /* the tear line, between the two notches */
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  border-top: 2px dashed var(--sky);
+}
+
+/* the top bar of the ticket: the heading and the X (no box behind it) */
+.qr-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: -4px 0 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--mist);
+}
+.qr-bar h3 {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+.qr-x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-right: -4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  cursor: pointer;
+}
+.qr-x .mi {
+  font-size: 22px;
+}
+.qr-x:hover {
+  color: var(--blue);
+}
+.qr-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.qr-cat {
+  flex: none;
+  font-size: 34px;
+  color: var(--accent);
+}
+.qr-shop {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+.qr-shop-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-title);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+.qr-shop-hours {
+  font-size: 0.6875rem;
+  color: var(--ink-2);
+}
+.qr-deal {
+  flex: none;
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent-dark);
+}
+.qr-deal.is-word {
+  font-size: 1.0625rem;
+  letter-spacing: 0.04em;
+}
+.qr-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* the coins sit right after the name of the coupon */
+  gap: 8px;
+  margin: 14px 0 8px;
+}
+.qr-paid {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent-dark);
+  opacity: 0.45; /* faded: already bought */
+}
+.qr-paid .mi {
+  font-size: 15px;
+}
+.qr-title {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden; /* a long name is cut, the coins after it always stay visible */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-title);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+.qr-rules {
+  margin: 0;
+  padding: 0 0 0 16px;
+  display: grid;
+  gap: 5px;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.qr-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  text-align: center;
+}
+.qr-bottom svg {
+  max-width: 100%;
+  height: auto;
+}
+.qr-code {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.qr-code b {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--navy);
+}
+.qr-state {
+  margin: 36px 0;
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: var(--ink-2);
+}
+.qr-icons {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+.qr-icons a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--navy);
+  text-decoration: none;
+}
+.qr-icons .mi {
+  font-size: 24px;
+}
+.qr-icons a:hover {
+  color: var(--blue);
+}
+
+.qr-backdrop :focus-visible {
+  outline: 3px solid var(--sky);
+  outline-offset: 2px;
+}
+.qr-ticket :focus-visible {
+  outline-color: var(--blue);
+}

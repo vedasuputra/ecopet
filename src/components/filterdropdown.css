@@ -1,0 +1,164 @@
+.fd-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 200px;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--navy);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--navy);
+  font-family: var(--font);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.fd-btn .mi {
+  flex: none;
+  font-size: 16px;
+}
+.fd-btn.active {
+  background: var(--navy);
+  color: #fff;
+}
+.fd-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fd-list {
+  position: fixed;
+  z-index: 3000;
+  width: 220px;
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(4, 67, 136, 0.15);
+  font-family: var(--font);
+}
+.fd-list li + li {
+  border-top: 1px solid var(--mist);
+}
+.fd-list button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.fd-list button:hover {
+  background: color-mix(in srgb, var(--sky) 35%, #fff);
+}
+.fd-list button.active {
+  background: var(--navy);
+  color: #fff;
+}
+.fd-n {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* the row of dropdowns: edge to edge, sliding sideways; the clear button stays at the right */
+.fd-bar {
+  display: flex;
+  align-items: center;
+  margin: 0 -16px 14px;
+}
+.fd-row {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.fd-row::-webkit-scrollbar {
+  display: none;
+}
+/* the search box takes the room, the clear button is a square of the same height next to it */
+.fd-searchrow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.fd-searchrow > :first-child {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+.fd-clear {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--navy);
+  cursor: pointer;
+}
+.fd-clear .mi {
+  font-size: 20px;
+}
+.fd-clear:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.fd-clear:not(:disabled) {
+  border-color: var(--navy);
+}
+.fd-clear:not(:disabled):hover {
+  background: var(--sky);
+}
+
+/* the title of a group in a grouped list */
+.grp-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 16px 0 8px;
+  font-family: var(--font-title);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--navy);
+}
+.grp-title:first-child {
+  margin-top: 0;
+}
+.grp-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.grp-n {
+  flex: none;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--ink-2);
+}

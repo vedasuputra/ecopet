@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLang, useT, type Key } from '../i18n'
+import { DEAL_TYPES, dealOfRow, dealShort, type DealType } from '../data/deal'
 import { errorKey, vendorApi } from './api'
 import { useVendor } from './context'
 import type { Offer } from './data'
@@ -8,7 +9,9 @@ interface Form {
   id?: string
   titleEn: string
   titleVi: string
+  dealType: DealType
   discountPct: string
+  dealValue: string
   costCoins: string
   code: string
   active: boolean
@@ -16,13 +19,17 @@ interface Form {
   monthlyCap: string
 }
 
-const EMPTY: Form = { titleEn: '', titleVi: '', discountPct: '10', costCoins: '50', code: '', active: true, validDays: '30', monthlyCap: '' }
+const DEAL_KEY: Record<DealType, Key> = { percent: 'vDealPercent', amount: 'vDealAmount', free: 'vDealFree', combo: 'vDealCombo' }
+
+const EMPTY: Form = { titleEn: '', titleVi: '', dealType: 'percent', discountPct: '10', dealValue: '20000', costCoins: '50', code: '', active: true, validDays: '7', monthlyCap: '' }
 
 const toForm = (o: Offer): Form => ({
   id: o.id,
   titleEn: o.title_en,
   titleVi: o.title_vi,
-  discountPct: String(o.discount_pct),
+  dealType: (DEAL_TYPES as string[]).includes(o.deal_type ?? '') ? (o.deal_type as DealType) : 'percent',
+  discountPct: String(o.discount_pct || 10),
+  dealValue: String(o.deal_value ?? 20000),
   costCoins: String(o.cost_coins),
   code: o.code,
   active: o.active,
@@ -54,7 +61,9 @@ export default function Offers() {
       id: f.id,
       titleEn: f.titleEn,
       titleVi: f.titleVi,
+      dealType: f.dealType,
       discountPct: Number(f.discountPct),
+      dealValue: Number(f.dealValue),
       costCoins: Number(f.costCoins),
       code: f.code,
       active: f.active,
@@ -106,9 +115,28 @@ export default function Offers() {
               <input id="o-vi" className="v-input" maxLength={60} value={form.titleVi} onChange={(e) => set('titleVi', e.target.value)} />
             </div>
             <div className="v-field">
-              <label htmlFor="o-pct">{t('vDiscount')}</label>
-              <input id="o-pct" className="v-input" inputMode="numeric" value={form.discountPct} onChange={(e) => set('discountPct', e.target.value.replace(/\D/g, ''))} />
+              <label htmlFor="o-type">{t('vDealType')}</label>
+              <select id="o-type" className="v-select" value={form.dealType} onChange={(e) => set('dealType', e.target.value as DealType)}>
+                {DEAL_TYPES.map((d) => (
+                  <option key={d} value={d}>
+                    {t(DEAL_KEY[d])}
+                  </option>
+                ))}
+              </select>
+              <span className="v-hint">{t('vDealHint')}</span>
             </div>
+            {form.dealType === 'percent' && (
+              <div className="v-field">
+                <label htmlFor="o-pct">{t('vDiscount')}</label>
+                <input id="o-pct" className="v-input" inputMode="numeric" value={form.discountPct} onChange={(e) => set('discountPct', e.target.value.replace(/\D/g, ''))} />
+              </div>
+            )}
+            {form.dealType === 'amount' && (
+              <div className="v-field">
+                <label htmlFor="o-amt">{t('vDealAmountLabel')}</label>
+                <input id="o-amt" className="v-input" inputMode="numeric" value={form.dealValue} onChange={(e) => set('dealValue', e.target.value.replace(/\D/g, ''))} />
+              </div>
+            )}
             <div className="v-field">
               <label htmlFor="o-cost">{t('vCostCoins')}</label>
               <input id="o-cost" className="v-input" inputMode="numeric" value={form.costCoins} onChange={(e) => set('costCoins', e.target.value.replace(/\D/g, ''))} />
@@ -141,7 +169,7 @@ export default function Offers() {
           <div className="v-found" style={{ marginTop: 0, marginBottom: 12 }}>
             <div className="v-hint">{t('vPreview')}</div>
             <b>
-              {t('vPreviewLine', { title: previewTitle || '…', pct: form.discountPct || '0', cost: form.costCoins || '0' })}
+              {t('vPreviewDeal', { title: previewTitle || '…', deal: dealShort({ dealType: form.dealType, discountPct: Number(form.discountPct) || 0, dealValue: Number(form.dealValue) || 0 }, t), cost: form.costCoins || '0' })}
             </b>
           </div>
 
@@ -184,7 +212,7 @@ export default function Offers() {
                         {lang === 'vi' ? o.title_vi : o.title_en}
                         <div className="v-hint">{t('vOfferStats', { c: s.claimed, r: s.redeemed })}</div>
                       </td>
-                      <td className="v-num">{o.discount_pct}%</td>
+                      <td className="v-num">{dealShort(dealOfRow(o), t)}</td>
                       <td className="v-num">{o.cost_coins}</td>
                       <td className="hide-sm">{t('vDays', { n: o.valid_days })}</td>
                       <td className="hide-sm">{o.monthly_cap == null ? t('vNoLimit') : o.monthly_cap}</td>

@@ -1,0 +1,136 @@
+/* The Quests screen. Same palette, fonts and small text sizes as Home and Coupons. */
+.quests-page {
+  min-height: 100%;
+  display: flex; /* a column, so the banner ad stays at the very bottom */
+  flex-direction: column;
+  padding: 0 16px;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.quests-page *,
+.quests-page *::before,
+.quests-page *::after {
+  box-sizing: border-box;
+}
+.quests-body {
+  flex: 1;
+  padding-bottom: 16px;
+}
+
+/* two tabs, edge to edge, sticking to the top while the list scrolls */
+.quests-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin: 0 -16px 14px;
+  border-bottom: 1px solid var(--navy);
+  background: #fff;
+}
+.quests-tabs button {
+  min-height: 40px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.quests-tabs button + button {
+  border-left: 1px solid var(--navy);
+}
+.quests-tabs button.active {
+  background: #e3f1fa; /* very light blue, so it does not clash with the navy bar above */
+  color: var(--navy);
+}
+.quests-tabs button:not(.active):hover {
+  background: var(--mist);
+}
+
+/* search */
+.quests-search {
+  position: relative;
+  margin-bottom: 12px;
+}
+.quests-search > .mi {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: var(--ink-2);
+  pointer-events: none;
+}
+.quests-search input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 38px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.quests-search input::-webkit-search-cancel-button {
+  display: none; /* our own clear button is used */
+}
+.quests-search-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  cursor: pointer;
+}
+.quests-search-clear .mi {
+  font-size: 18px;
+}
+
+.quests-body section + section {
+  margin-top: 4px;
+}
+.quests-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* every card has the same width */
+  gap: 10px;
+}
+.quests-empty {
+  margin: 0;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--mist);
+  color: var(--ink-2);
+  font-size: 0.8125rem;
+}
+
+/* the banner ad stays at the very bottom of the screen, edge to edge */
+.quests-page .banner-ad {
+  margin: 0 -16px;
+  width: calc(100% + 32px);
+}
+.quests-page :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}

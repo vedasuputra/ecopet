@@ -152,9 +152,9 @@ const vendorVi: Record<keyof typeof vendorEn, string> = {
   vOfferStats: '{c} đã nhận · {r} đã dùng',
   vErrCodeTaken: 'Mã ngắn này đã được dùng cho một phiếu khác của bạn.',
   vErrTooMany: 'Bạn chỉ có thể có tối đa 12 phiếu.',
-  vErrBadInput: 'Kiểm tra lại: tiêu đề 2-60 ký tự, mức giảm 1-50%, giá 10-500 xu, thời hạn 1-365 ngày, giới hạn tháng từ 1 trở lên.',
+  vErrBadInput: 'Kiểm tra lại: tiêu đề 2-60 ký tự, mức giảm 1-50% (hoặc số tiền 1.000-500.000 VND), giá 10-500 xu, thời hạn 1-7 ngày, giới hạn tháng từ 1 trở lên.',
   vValidDays: 'Thời hạn (ngày)',
-  vValidDaysHint: 'Phiếu dùng được bao lâu sau khi khách nhận (1-365 ngày). Sau đó phiếu hết hạn.',
+  vValidDaysHint: 'Phiếu dùng được bao lâu sau khi khách nhận (1-7 ngày). Sau đó phiếu hết hạn.',
   vMonthlyCap: 'Giới hạn mỗi tháng (không bắt buộc)',
   vMonthlyCapHint: 'Số phiếu loại này phát ra tối đa mỗi tháng. Để trống nếu không giới hạn.',
   vNoLimit: 'Không giới hạn',
@@ -260,6 +260,25 @@ const vendorVi: Record<keyof typeof vendorEn, string> = {
   vOriginInternational: 'Khách quốc tế',
   vOriginDomestic: 'Khách trong nước (Việt Nam)',
   vOriginUnknown: 'Chưa rõ (phiếu cũ)',
+
+  // what the shop sells
+  vKindLabel: 'Cửa hàng của bạn bán gì?',
+  vKindHint: 'Lựa chọn này quyết định màu và biểu tượng của phiếu giảm giá, và giúp du khách thấy nhiều loại phiếu khác nhau.',
+  vKindFood: 'Ăn uống',
+  vKindShopping: 'Mua sắm và quà lưu niệm',
+  vKindActivity: 'Hoạt động và cho thuê',
+  vKindOther: 'Loại khác',
+
+  // kinds of coupon deal
+  vDealType: 'Loại ưu đãi',
+  vDealHint: 'Giảm theo phần trăm, giảm một số tiền cố định, quà tặng kèm hoặc combo. Chỉ ưu đãi phần trăm mới có con số trên vé.',
+  vDealPercent: 'Giảm theo phần trăm',
+  vDealAmount: 'Giảm số tiền cố định (VND)',
+  vDealFree: 'Quà tặng kèm khi mua hàng',
+  vDealCombo: 'Ưu đãi combo',
+  vDealAmountLabel: 'Số tiền giảm (VND, từ 1.000 đến 500.000)',
+  vDealLine: '{title} · {deal}',
+  vPreviewDeal: '{title} · {deal} · {cost} xu',
 }
 
 export default vendorVi

@@ -1,3 +1,4 @@
+import { dealLong } from '../data/deal'
 import { Html5Qrcode } from 'html5-qrcode'
 import { useEffect, useRef, useState } from 'react'
 import { useLang, useT } from '../i18n'
@@ -12,6 +13,8 @@ interface Found {
   uid: string
   couponId: string
   discountPct: number
+  dealType?: string
+  dealValue?: number | null
 }
 
 // Vendor-side scanner. The traveler's app shows the QR (payload = coupon uid) and a short code;
@@ -158,9 +161,9 @@ export default function Scan() {
           <div className="v-found">
             <h3>{t('vCouponFound')}</h3>
             <p>
-              {t('vDiscountLine', {
+              {t('vDealLine', {
                 title: couponTitle(offers, found.couponId, lang),
-                pct: found.discountPct,
+                deal: dealLong(found, t),
               })}
             </p>
             <p className="v-hint">{offers.find((o) => o.id === found.couponId)?.code}</p>

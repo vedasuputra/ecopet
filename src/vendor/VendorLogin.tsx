@@ -5,6 +5,8 @@ import { consentRecord } from '../data/privacy'
 import { searchPlaces, type Place } from '../lib/geocode'
 import { supabase } from '../lib/supabase'
 import { errorKey, vendorApi } from './api'
+import { COUPON_KINDS, type CouponCategory } from '../data/couponCategory'
+import { KIND_KEY } from './kinds'
 import { PLANS, type PlanId } from './data'
 
 interface Listing {
@@ -31,6 +33,7 @@ export default function VendorLogin() {
   const [bizName, setBizName] = useState('')
   const [catEn, setCatEn] = useState('')
   const [catVi, setCatVi] = useState('')
+  const [kind, setKind] = useState<CouponCategory>('food_drink')
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Place[]>([])
   const [picked, setPicked] = useState<{ label: string; lat: number; lng: number } | null>(null)
@@ -103,7 +106,7 @@ export default function VendorLogin() {
         'register',
         listed
           ? { vendorId, plan }
-          : { plan, newBusiness: { name: bizName, categoryEn: catEn, categoryVi: catVi, lat: picked!.lat, lng: picked!.lng } },
+          : { plan, newBusiness: { name: bizName, categoryEn: catEn, categoryVi: catVi, kind, lat: picked!.lat, lng: picked!.lng } },
       )
       setBusy(false)
       if (!r.ok) {
@@ -135,7 +138,7 @@ export default function VendorLogin() {
       <div className="v-login-card">
         <div className="v-row" style={{ justifyContent: 'space-between', marginBottom: 12 }}>
           <div className="v-brand" style={{ padding: 0 }}>
-            <img src="/icon-192.png?v=2" alt="" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+            <img src="/icon-192.png?v=4" alt="" style={{ width: 32, height: 32, borderRadius: '50%' }} />
             Eco-Pet
           </div>
           <div className="v-lang" role="group">
@@ -215,6 +218,17 @@ export default function VendorLogin() {
                     <label htmlFor="v-cvi">{t('vNewCategoryVi')}</label>
                     <input id="v-cvi" className="v-input" maxLength={40} value={catVi} onChange={(e) => setCatVi(e.target.value)} />
                   </div>
+                </div>
+                <div className="v-field">
+                  <label htmlFor="v-kind">{t('vKindLabel')}</label>
+                  <select id="v-kind" className="v-select" value={kind} onChange={(e) => setKind(e.target.value as CouponCategory)}>
+                    {COUPON_KINDS.map((k) => (
+                      <option key={k} value={k}>
+                        {t(KIND_KEY[k])}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="v-hint">{t('vKindHint')}</span>
                 </div>
                 <div className="v-field">
                   <label htmlFor="v-loc">{t('vNewLocation')}</label>

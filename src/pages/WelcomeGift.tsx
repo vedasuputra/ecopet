@@ -1,3 +1,4 @@
+import { dealLong } from '../data/deal'
 import { useEffect, useRef, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useLoc, useT } from '../i18n'
@@ -94,7 +95,7 @@ export default function WelcomeGift() {
               >
                 <b>{vendorOf(c.vendorId)}</b>
                 <div>{loc(c.title)}</div>
-                <div>{t('giftOff', { pct: c.discountPct })}</div>
+                <div>{dealLong(c, t)}</div>
               </div>
             )
           })}
@@ -108,7 +109,7 @@ export default function WelcomeGift() {
       {phase === 'landed' && winner && (
         <div>
           <p>
-            {t('giftYouGot')} <b>{vendorOf(winner.vendorId)}: {loc(winner.title)}</b> ({t('giftOff', { pct: winner.discountPct })})
+            {t('giftYouGot')} <b>{vendorOf(winner.vendorId)}: {loc(winner.title)}</b> ({dealLong(winner, t)})
           </p>
           <p>{t('giftClaimed')}</p>
           <button onClick={() => navigate('/coupons')}>{t('giftViewCoupons')}</button>

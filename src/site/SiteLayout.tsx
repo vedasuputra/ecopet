@@ -13,7 +13,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
       <header className="s-header">
         <div className="s-wrap">
           <Link to="/" className="s-brand">
-            <img src="/icon-192.png?v=2" alt="" /> Eco-Pet
+            <img src="/icon-192.png?v=4" alt="" /> Eco-Pet
           </Link>
           <nav className="s-nav">
             <Link to="/vendor/login">{t('siteNavVendors')}</Link>

@@ -1,0 +1,185 @@
+/* The views inside the location popup (real location, change location). Small text, like the Home screen. */
+.loc-view {
+  margin-top: 10px;
+}
+/* two tabs at the top: search by place, search by quest */
+.loc-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0 -16px 12px; /* edge to edge: it cancels the side padding of the popup */
+  border-top: 1px solid var(--navy);
+  border-bottom: 1px solid var(--navy);
+  border-radius: 0;
+}
+.loc-tabs button {
+  min-height: 34px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.loc-tabs button + button {
+  border-left: 1px solid var(--navy);
+}
+.loc-tabs button.active {
+  background: #e3f1fa; /* a very light blue, so it does not clash with the navy popup title above */
+  color: var(--navy);
+}
+.loc-tabs button:not(.active):hover {
+  background: var(--mist);
+}
+.loc-view *,
+.loc-view *::before,
+.loc-view *::after {
+  box-sizing: border-box;
+}
+.loc-text {
+  margin: 0 0 10px;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.loc-now {
+  margin: 0 0 10px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.loc-note {
+  margin: 0 0 10px;
+  font-size: 0.75rem;
+  color: #b3261e;
+}
+.loc-hint {
+  margin: 6px 0 12px;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.loc-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 6px;
+}
+.loc-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.loc-btn:hover:not(:disabled) {
+  background: var(--sky);
+}
+.loc-btn-primary {
+  background: var(--navy);
+  color: #fff;
+}
+.loc-btn-primary:hover:not(:disabled) {
+  background: #033269;
+}
+.loc-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.loc-input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.8125rem;
+}
+/* suggestions: one panel under the box, rows separated by thin lines (like a dropdown) */
+.loc-combo {
+  position: relative;
+}
+.loc-suggest {
+  position: absolute; /* a dropdown: it floats over the content below and never changes the height of the popup */
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 1500; /* above the map (the map's own layers go up to 1000) */
+  max-height: 260px;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(4, 67, 136, 0.1);
+}
+.loc-suggest li + li {
+  border-top: 1px solid var(--mist);
+}
+.loc-option {
+  display: grid;
+  gap: 1px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.loc-option:hover,
+.loc-option:focus-visible {
+  background: color-mix(in srgb, var(--sky) 35%, #fff);
+}
+.loc-option-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+.loc-option-detail {
+  font-size: 0.6875rem;
+  color: var(--ink-2);
+}
+.loc-empty {
+  padding: 10px 12px;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.loc-label {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+.loc-note-plain {
+  color: var(--ink-2);
+}
+.loc-map {
+  position: relative;
+  isolation: isolate; /* keeps the map's layers below the dropdowns */
+  margin-top: 12px;
+  overflow: hidden;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+}
+.loc-view :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}

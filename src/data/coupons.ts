@@ -5,10 +5,12 @@ export interface Coupon {
   vendorId: string
   title: Localized
   costCoins: number
-  discountPct: number
+  discountPct: number // for a percent deal; 0 for the others
+  dealType?: 'percent' | 'amount' | 'free' | 'combo' // default 'percent'
+  dealValue?: number | null // VND, for an 'amount' deal
   code: string // short alphanumeric fallback code
   active?: boolean // false = paused by the vendor; default true
-  validDays?: number // days a coupon stays usable after a traveler gets it (default 30)
+  validDays?: number // days a coupon stays usable after a traveler gets it (1 to 7, default 7)
   monthlyCap?: number | null // most coupons handed out per month; null/undefined = unlimited
   remaining?: number | null // left this month (null = unlimited); filled in from the database
 }

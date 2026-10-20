@@ -1,14 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom'
 import BannerAd from '../components/BannerAd'
-import LocationPanel from '../components/LocationPanel'
 import MeiluAvatar from '../components/MeiluAvatar'
-import { useLang, useLoc, useT, type Lang } from '../i18n'
+import { useLang, useT, type Lang } from '../i18n'
 import { supabase } from '../lib/supabase'
 import { stopSync } from '../store/sync'
 import { economyApi } from '../lib/api'
 import { useAppStore } from '../store/useAppStore'
-import { useCatalog } from '../store/useCatalog'
-import { useLocation } from '../store/useLocation'
 
 const LANGUAGES: { code: Lang; label: string }[] = [
   { code: 'en', label: 'English' },
@@ -16,13 +13,10 @@ const LANGUAGES: { code: Lang; label: string }[] = [
 ]
 
 export default function Profile() {
-  const quests = useCatalog((s) => s.quests)
-  const loc = useLoc()
   const navigate = useNavigate()
   const t = useT()
   const { lang, setLang } = useLang()
   const { user, coins, questStatus, reset } = useAppStore()
-  const placeQuests = quests.filter((q) => q.scope !== 'general')
 
   const logout = async () => {
     stopSync()
@@ -61,33 +55,6 @@ export default function Profile() {
       <p>{t('profileStats', { coins, quests: Object.keys(questStatus).length })}</p>
       <Link to="/trip-card">{t('tripCardLink')}</Link> | <Link to="/ad">{t('watchAdLink')}</Link> |{' '}
       <Link to="/itinerary">{t('openItinerary')}</Link> | <Link to="/onboarding">{t('changePlan')}</Link>
-
-      <section>
-        <h3>{t('settingsLocation')}</h3>
-        <p>
-          <small>{t('settingsLocationHint')}</small>
-        </p>
-        <LocationPanel />
-        <p>
-          <label>
-            {t('simulatePickQuest')}{' '}
-            <select
-              value=""
-              onChange={(e) => {
-                const q = placeQuests.find((x) => x.id === e.target.value)
-                if (q) useLocation.getState().setSimulated(q.lat, q.lng, q.destination)
-              }}
-            >
-              <option value="">{t('pickQuestSpot')}</option>
-              {placeQuests.map((q) => (
-                <option key={q.id} value={q.id}>
-                  {loc(q.title)} ({q.destination})
-                </option>
-              ))}
-            </select>
-          </label>
-        </p>
-      </section>
 
       <div>
         <p>{t('language')}:</p>

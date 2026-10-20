@@ -1,3 +1,4 @@
+import { dealOfRow, dealShort } from '../data/deal'
 import { useMemo, useState } from 'react'
 import { useLang, useT } from '../i18n'
 import { useVendor } from './context'
@@ -81,7 +82,7 @@ export default function Redemptions() {
                 {shown.map((r) => (
                   <tr key={r.uid}>
                     <td>
-                      {couponTitle(offers, r.coupon_id, lang)} <span className="v-hint">({r.discount_pct}%)</span>
+                      {couponTitle(offers, r.coupon_id, lang)} <span className="v-hint">({dealShort(dealOfRow(r), t)})</span>
                     </td>
                     <td>#{travelerTag(r.uid)}</td>
                     <td className="hide-md">{r.source === 'welcome' ? t('vSourceWelcome') : t('vSourceCoins')}</td>

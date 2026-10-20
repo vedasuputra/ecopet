@@ -1,0 +1,83 @@
+/* Sky behind Meilu on the home screen. Four moods: morning, day, evening, night. */
+.sky {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: background 1.2s;
+}
+.sky-morning { background: linear-gradient(180deg, #8ec5ee 0%, #cfe6f5 58%, #fbe9c8 100%); }
+.sky-day { background: linear-gradient(180deg, #2f8fd6 0%, #6db4e6 60%, #cfe4f1 100%); }
+.sky-evening { background: linear-gradient(180deg, #4a5a96 0%, #c8678a 42%, #f4a259 78%, #fbd08a 100%); }
+/* not too dark: lighter than Meilu's dark feathers, so she still stands out */
+.sky-night { background: linear-gradient(180deg, #43569a 0%, #34457f 55%, #2c3a6e 100%); }
+
+/* ---- sun and moon */
+.sky-sun {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffbe6 0%, #ffe27a 60%, #ffd24d 100%);
+  box-shadow: 0 0 28px 12px rgba(255, 226, 122, 0.55);
+  animation: sky-glow 5s ease-in-out infinite;
+}
+.sky-morning .sky-sun { left: 9%; top: 34%; }
+.sky-day .sky-sun { right: 9%; top: 10%; }
+.sky-evening .sky-sun {
+  right: 8%;
+  top: 46%;
+  width: 62px;
+  height: 62px;
+  background: radial-gradient(circle, #fff2d0 0%, #ffb15c 60%, #ff8a3d 100%);
+  box-shadow: 0 0 36px 16px rgba(255, 150, 70, 0.55);
+}
+.sky-moon {
+  position: absolute;
+  right: 10%;
+  top: 10%;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fffdf2 0%, #f1ecd2 70%, #ddd6b4 100%);
+  box-shadow: 0 0 22px 8px rgba(240, 236, 210, 0.35);
+}
+@keyframes sky-glow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+/* ---- clouds drift slowly across */
+.sky-cloud {
+  position: absolute;
+  width: 96px;
+  color: rgba(255, 255, 255, 0.92);
+  animation: sky-drift 60s linear infinite;
+}
+.sky-evening .sky-cloud { color: rgba(255, 214, 214, 0.55); }
+.sky-night .sky-cloud { color: rgba(180, 195, 240, 0.16); }
+.sky-cloud-1 { top: 10%; left: -30%; }
+.sky-cloud-2 { top: 40%; left: -60%; width: 70px; animation-duration: 85s; animation-delay: -30s; }
+.sky-cloud-3 { top: 24%; left: -10%; width: 58px; animation-duration: 110s; animation-delay: -60s; }
+@keyframes sky-drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(560px); }
+}
+
+/* ---- stars */
+.sky-star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.7);
+  animation: sky-twinkle 3s ease-in-out infinite;
+}
+@keyframes sky-twinkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky, .sky-sun, .sky-cloud, .sky-star { animation: none; transition: none; }
+}

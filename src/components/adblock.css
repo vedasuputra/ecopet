@@ -1,0 +1,77 @@
+/* The ad blocker popup: over the whole screen, the app dimmed behind it. */
+.adb-backdrop {
+  position: fixed;
+  z-index: 5000;
+}
+.popup-card.adb-card {
+  width: min(100%, 340px); /* a square: as high as it is wide (it grows only if the text needs more room) */
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  padding-bottom: 16px;
+}
+.adb-card *,
+.adb-card *::before,
+.adb-card *::after {
+  box-sizing: border-box;
+}
+.adb-main {
+  flex: 1; /* the icon, title and text are centred in the room above the button */
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 10px;
+}
+.adb-icon {
+  margin-bottom: 14px; /* a clear gap between the icon and the heading */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #b3261e; /* no box behind the icon */
+}
+.adb-icon .mi {
+  font-size: 52px;
+}
+.adb-title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: #b3261e; /* the title is red */
+}
+.adb-body {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.adb-btn {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 16px; /* the button sits at the very bottom */
+  padding: 0 14px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: var(--navy);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.adb-btn:hover:not(:disabled) {
+  background: #033269;
+}
+.adb-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.adb-card :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}

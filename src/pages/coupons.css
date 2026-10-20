@@ -1,0 +1,192 @@
+/* The Coupons screen. Same palette, fonts and small text sizes as Home. */
+.coupons-page {
+  min-height: 100%;
+  display: flex; /* a column, so the banner ad can stay at the very bottom */
+  flex-direction: column;
+  padding: 0 16px;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.coupons-page *,
+.coupons-page *::before,
+.coupons-page *::after {
+  box-sizing: border-box;
+}
+
+/* two tabs, edge to edge like the ones in the location popup */
+.coupons-tabs {
+  position: sticky; /* the tab bar stays at the top while the list scrolls under it */
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0 -16px 14px;
+  border-bottom: 1px solid var(--navy);
+  background: #fff;
+}
+.coupons-tabs button {
+  min-height: 40px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.coupons-tabs button + button {
+  border-left: 1px solid var(--navy);
+}
+.coupons-tabs button.active {
+  background: #e3f1fa; /* a very light blue, so it does not clash with the navy bar above */
+  color: var(--navy);
+}
+.coupons-tabs button:not(.active):hover {
+  background: var(--mist);
+}
+
+/* search */
+.coupons-search {
+  position: relative;
+  margin-bottom: 12px;
+}
+.coupons-search > .mi {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: var(--ink-2);
+  pointer-events: none;
+}
+.coupons-search input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 38px 0 38px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.coupons-search input::-webkit-search-cancel-button {
+  display: none; /* our own clear button is used */
+}
+.coupons-search-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent; /* no box behind the X */
+  color: var(--navy);
+  cursor: pointer;
+}
+.coupons-search-clear .mi {
+  font-size: 18px;
+}
+
+/* a group of coupons sits a little apart from the next one */
+.coupons-body section + section {
+  margin-top: 4px;
+}
+
+.coupons-list,
+.coupons-stack {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* every ticket has the same width */
+  gap: 10px;
+}
+.coupons-stack {
+  gap: 12px;
+}
+.coupons-sub {
+  margin: 18px 0 10px;
+  font-family: var(--font-title);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+.coupons-sub:first-child {
+  margin-top: 4px;
+}
+.coupons-empty {
+  margin: 0;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--mist);
+  color: var(--ink-2);
+  font-size: 0.8125rem;
+}
+.coupons-msg {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.8125rem;
+  color: var(--navy);
+}
+
+/* a coupon you have, from a shop that stopped being a partner: the option to get the coins back */
+.coupons-refund {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.coupons-refund button {
+  justify-self: start;
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.coupons-refund button:hover:not(:disabled) {
+  background: var(--sky);
+}
+.coupons-refund button:disabled {
+  opacity: 0.5;
+}
+.coupons-page :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* the content takes the free height, so the banner ad stays at the very bottom of the screen, edge to edge */
+.coupons-body {
+  flex: 1;
+  padding-bottom: 16px;
+}
+.coupons-page .banner-ad {
+  margin: 0 -16px;
+  width: calc(100% + 32px);
+}

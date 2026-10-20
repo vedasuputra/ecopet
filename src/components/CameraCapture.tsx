@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useT } from '../i18n'
+import './camera.css'
 
 const MAX_SIDE = 1024
 const QUALITY = 0.8
@@ -63,19 +64,26 @@ export default function CameraCapture({
   }
 
   return (
-    <div>
+    <div className="cam">
       {error ? (
-        <p>{error}</p>
+        <p className="cam-note cam-bad">{error}</p>
       ) : (
         <>
-          <video ref={video} playsInline muted style={{ width: '100%', maxHeight: 420, background: '#000' }} />
-          {!ready && <p>{t('cameraStarting')}</p>}
+          <video ref={video} className="cam-video" playsInline muted />
+          {!ready && <p className="cam-note">{t('cameraStarting')}</p>}
         </>
       )}
-      <button onClick={snap} disabled={!ready || !!error}>
-        {t('capture')}
-      </button>
-      <button onClick={onCancel}>{t('cancel')}</button>
+      <div className="cam-row">
+        <button className="cam-btn cam-primary" onClick={snap} disabled={!ready || !!error}>
+          <span className="mi" aria-hidden="true">
+            photo_camera
+          </span>
+          {t('capture')}
+        </button>
+        <button className="cam-btn" onClick={onCancel}>
+          {t('cancel')}
+        </button>
+      </div>
     </div>
   )
 }

@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { DAY_KEY } from '../components/ShopStatus'
+import { COUPON_KINDS, type CouponCategory } from '../data/couponCategory'
 import { useT, type Key } from '../i18n'
 import { DAYS, type Day, type OpenHours } from '../lib/openHours'
 import { vendorApi } from './api'
+import { KIND_KEY } from './kinds'
 import { useVendor } from './context'
 
 type Row = { open: boolean; from: string; to: string }
@@ -23,6 +25,7 @@ export default function ShopInfo() {
   const t = useT()
   const { vendor, reload } = useVendor()
   const [address, setAddress] = useState(vendor.address ?? '')
+  const [kind, setKind] = useState<CouponCategory>(vendor.kind ?? 'other')
   const [week, setWeek] = useState<Week>(toWeek(vendor.open_hours))
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState('')
@@ -38,7 +41,7 @@ export default function ShopInfo() {
     const openHours: OpenHours = {}
     for (const d of DAYS) if (week[d].open) openHours[d] = [week[d].from, week[d].to]
     setBusy(true)
-    const r = await vendorApi('profile_save', { address, openHours })
+    const r = await vendorApi('profile_save', { address, openHours, kind })
     setBusy(false)
     if (!r.ok) return setError(t(r.error === 'bad_input' ? 'vErrHours' : ('vErrGeneric' as Key)))
     setMsg(t('vShopSaved'))
@@ -57,6 +60,17 @@ export default function ShopInfo() {
       {!vendor.open_hours && <p className="v-hint" style={{ marginBottom: 12 }}>{t('vHoursMissing')}</p>}
 
       <section className="v-card">
+        <div className="v-field">
+          <label htmlFor="s-kind">{t('vKindLabel')}</label>
+          <select id="s-kind" className="v-select" value={kind} onChange={(e) => setKind(e.target.value as CouponCategory)}>
+            {COUPON_KINDS.map((k) => (
+              <option key={k} value={k}>
+                {t(KIND_KEY[k])}
+              </option>
+            ))}
+          </select>
+          <span className="v-hint">{t('vKindHint')}</span>
+        </div>
         <div className="v-field">
           <label htmlFor="s-addr">{t('vAddress')}</label>
           <input id="s-addr" className="v-input" maxLength={120} value={address} onChange={(e) => setAddress(e.target.value)} />

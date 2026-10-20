@@ -107,7 +107,7 @@ export function VendorChrome({ vendor, ctx, onSignOut }: { vendor: VendorInfo; c
 
       <aside className={`v-side ${menu ? 'open' : ''}`}>
         <div className="v-brand">
-          <img src="/icon-192.png?v=2" alt="" />
+          <img src="/icon-192.png?v=4" alt="" />
           Eco-Pet
         </div>
         <div className="v-biz">

@@ -1,0 +1,245 @@
+/* Home screen only. Palette (see shell.css): deep blue, bright blue, pale blue, warm grey, cream. */
+.home {
+  min-height: 100%;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.home *,
+.home *::before,
+.home *::after {
+  box-sizing: border-box;
+}
+.home h3,
+.home h4,
+.home .home-say-text {
+  font-family: var(--font-title);
+  letter-spacing: -0.01em;
+}
+
+/* ---- hero: a full-width blue scene with Meilu, and the greeting as a pill over her belly */
+.home-hero {
+  position: relative;
+  padding: 8px 0 0;
+  /* the sky (HeroSky) fills this box; Meilu and the greeting sit above it */
+  background: #2f8fd6;
+  /* no overflow:hidden here: the greeting box's shadow reaches below the hero. The sky and the bird clip themselves. */
+}
+/* Meilu is shown big: the sprite is scaled up and shifted so her BODY (not the tail) is centered, the tail and the
+   sides are cropped, like in the design. */
+.home-bird {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  aspect-ratio: 1 / 0.64;
+  overflow: hidden;
+}
+.home-bird-inner {
+  width: 114%;
+  margin-left: 7.6%; /* the body centre sits at 37.2% of the drawing: 50% - 1.14 * 37.2%. The body is about 80% of the screen wide, so about 10% stays free on each side. */
+}
+.home-say {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 12px;
+  width: calc(100% - 32px); /* 16px on each side, like the cards below */
+  min-height: 40px;
+  margin: -30px auto 0;
+  padding: 0 0 0 12px;
+  overflow: hidden; /* the send box fills the right end, flush with the border */
+  border: 1px solid var(--sky); /* the same border as the quest cards */
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  text-align: left;
+  box-shadow: 0 4px 12px rgba(22, 143, 214, 0.14);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.home-say:hover {
+  transform: translateY(-1px);
+}
+.home-say-text {
+  align-self: center;
+  padding: 4px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+/* the send box touches the right, top and bottom edges: no gap */
+.home-say-go {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  background: var(--navy);
+  color: #fff;
+}
+.home-say-go .mi {
+  font-size: 20px;
+}
+
+/* ---- the sheet that slides up over the hero */
+.home-sheet {
+  position: relative;
+  margin-top: -12px;
+  padding: 8px 0 0;
+  border-radius: 12px 12px 0 0;
+  background: var(--cream);
+  color: var(--ink);
+}
+.home-section {
+  padding: 22px 16px 0;
+}
+.home-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.home-section-head h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.home-section-head a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--navy);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--navy);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+.home-section-head a:hover {
+  background: var(--sky);
+}
+.home-empty {
+  margin: 0;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--mist);
+  color: var(--ink-2);
+}
+
+/* ---- buttons and links */
+.home button {
+  font-family: inherit;
+}
+.home a:focus-visible,
+.home button:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* ---- quest and coupon rows */
+.home-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+/* ---- the day of the trip, right under the chat box */
+.home-trip {
+  padding: 16px 16px 0;
+}
+.home-trip:empty {
+  display: none;
+}
+.trip-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+.trip-card:hover {
+  border-color: var(--blue);
+}
+.trip-card-badge {
+  flex: none;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--navy);
+  color: #fff;
+}
+.trip-card-day {
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  opacity: 0.85;
+}
+.trip-card-num {
+  font-family: var(--font-title);
+  font-size: 1.1875rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.trip-card-text {
+  flex: 1;
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+.trip-card-title {
+  font-family: var(--font-title);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.trip-card-line {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: var(--ink-2);
+}
+.trip-card-main {
+  font-family: var(--font-title);
+  font-size: 0.9375rem;
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--navy);
+}
+.trip-card-go {
+  flex: none;
+  font-size: 22px;
+  color: var(--navy);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-say {
+    transition: none;
+  }
+}

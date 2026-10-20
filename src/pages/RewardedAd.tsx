@@ -4,6 +4,7 @@ import { useT } from '../i18n'
 import { IMA_AD_TAG, loadIma, withCorrelator } from '../lib/ima'
 import { claimAd, type ActionResult } from '../store/economy'
 import { AD_REWARD, useAppStore } from '../store/useAppStore'
+import { useRewardPopup } from '../store/useRewardPopup'
 
 type Phase = 'idle' | 'ima' | 'sim' | 'simdone' | 'done'
 
@@ -11,9 +12,10 @@ const IMA_START_TIMEOUT_MS = 10000
 const SIM_SECONDS = 25 // demo ad length (20-30s)
 
 // Rewarded video through Google's IMA SDK, rendered in OUR container inside the phone frame.
-// Coins are granted by us when the ad completes (AdEvent.COMPLETE); there is no X until then.
-// If the ad can't load (blocked, no fill, error, timeout) or "demo ad" is on, a simulated
-// 25s ad plays instead, with the X hidden until it finishes.
+// The ad starts by itself when this page opens (the "Watch ad" button of the popup comes straight here). Coins are
+// granted by us when the ad completes (AdEvent.COMPLETE); there is no X until then. If the ad can't load (blocked, no
+// fill, error, timeout), a simulated 25s ad plays instead, with the X hidden until it finishes. When it is over, the
+// traveler goes back to where they were, and a popup says the coins arrived.
 export default function RewardedAd() {
   const navigate = useNavigate()
   const t = useT()
@@ -23,12 +25,22 @@ export default function RewardedAd() {
   const rewardMsg = (r: ActionResult) =>
     r.ok ? t('coinsGot', { n: AD_REWARD }) : r.error === 'daily_limit' ? t('dailyLimit') : r.error === 'unreachable' ? t('unreachable') : t('serverError')
   const [phase, setPhase] = useState<Phase>('idle')
+  const [problem, setProblem] = useState(false) // something went wrong with the reward: stay and say so
   const [msg, setMsg] = useState('')
   const [simLeft, setSimLeft] = useState(SIM_SECONDS)
-  const [forceDemo, setForceDemo] = useState(false)
+  const started = useRef(false)
   const adBox = useRef<HTMLDivElement>(null)
   const videoEl = useRef<HTMLVideoElement>(null)
   const cleanup = useRef<() => void>(() => {})
+
+  // back to the page the traveler came from
+  const goBack = () => (window.history.length > 1 ? navigate(-1) : navigate('/home', { replace: true }))
+  // the coins arrived (or did not): celebrate, or keep the message on screen
+  const onClaimed = (r: ActionResult) => {
+    setMsg(rewardMsg(r))
+    if (r.ok) useRewardPopup.getState().show(AD_REWARD)
+    else setProblem(true)
+  }
 
   useEffect(() => () => cleanup.current(), [])
 
@@ -44,7 +56,7 @@ export default function RewardedAd() {
     if (phase !== 'sim') return
     if (simLeft <= 0) {
       setPhase('simdone')
-      void claimAd().then((r) => setMsg(rewardMsg(r)))
+      void claimAd().then(onClaimed)
       return
     }
     const tick = setTimeout(() => setSimLeft((s) => s - 1), 1000)
@@ -100,7 +112,7 @@ export default function RewardedAd() {
           })
           adsManager.addEventListener(ima.AdEvent.Type.COMPLETE, () => {
             if (dead) return
-            void claimAd().then((r) => setMsg(rewardMsg(r)))
+            void claimAd().then(onClaimed)
             // Auto-close shortly after completion
             setTimeout(() => {
               cleanup.current()
@@ -134,10 +146,23 @@ export default function RewardedAd() {
 
   const start = () => {
     if (adsLeftToday() <= 0) return setMsg(t('dailyLimit'))
-    if (forceDemo) return fallback('')
     setMsg('')
     setPhase('ima')
   }
+
+  // the ad starts as soon as the page opens
+  useEffect(() => {
+    if (started.current) return
+    started.current = true
+    start()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // finished: leave (unless the reward failed, then the message stays)
+  useEffect(() => {
+    if (phase === 'done' && !problem) goBack()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, problem])
 
   const progress = ((SIM_SECONDS - simLeft) / SIM_SECONDS) * 100
   const overlay: React.CSSProperties = {
@@ -150,21 +175,13 @@ export default function RewardedAd() {
 
   return (
     <div>
-      <h2>{t('adTitle')}</h2>
-      <p>{t('adsLeft', { n: adsLeftToday() })}</p>
-      {phase === 'idle' && (
-        <>
-          <button onClick={start}>{t('watchAd', { n: AD_REWARD })}</button>
-          <div>
-            <label style={{ fontSize: 12 }}>
-              <input type="checkbox" checked={forceDemo} onChange={(e) => setForceDemo(e.target.checked)} />{' '}
-              {t('demoAd')}
-            </label>
-          </div>
-        </>
+      {/* only shown when there is nothing to watch (no ads left today) or the reward failed */}
+      {(phase === 'idle' || phase === 'done') && msg && (
+        <div style={{ padding: 16 }}>
+          <p>{msg}</p>
+          <button onClick={goBack}>{t('back')}</button>
+        </div>
       )}
-      {msg && <p>{msg}</p>}
-      <button onClick={() => navigate('/home')}>{t('back')}</button>
 
       {/* Real ad (IMA): fills the phone frame, no close button until it completes */}
       {phase === 'ima' && (

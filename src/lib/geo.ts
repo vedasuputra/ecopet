@@ -14,5 +14,5 @@ export function haversine(lat1: number, lng1: number, lat2: number, lng2: number
 }
 
 export function formatDistance(m: number): string {
-  return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`
+  return m < 1000 ? `${Math.round(m)} m` : m < 10000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m / 1000)} km`
 }

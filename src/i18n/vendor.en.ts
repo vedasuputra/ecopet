@@ -157,9 +157,9 @@ const vendorEn = {
   vOfferStats: '{c} claimed · {r} redeemed',
   vErrCodeTaken: 'That short code is already used by another of your coupons.',
   vErrTooMany: 'You can have at most 12 coupons.',
-  vErrBadInput: 'Check the fields: titles 2-60 characters, discount 1-50%, price 10-500 coins, validity 1-365 days, monthly limit 1 or more.',
+  vErrBadInput: 'Check the fields: titles 2-60 characters, discount 1-50% (or an amount of 1,000-500,000 VND), price 10-500 coins, validity 1-7 days, monthly limit 1 or more.',
   vValidDays: 'Valid for (days)',
-  vValidDaysHint: 'How long a coupon works after a traveler gets it (1-365 days). After that it expires.',
+  vValidDaysHint: 'How long a coupon works after a traveler gets it (1-7 days). After that it expires.',
   vMonthlyCap: 'Monthly limit (optional)',
   vMonthlyCapHint: 'Most coupons of this kind handed out per month. Leave empty for no limit.',
   vNoLimit: 'No limit',
@@ -267,6 +267,25 @@ const vendorEn = {
   vOriginInternational: 'International travelers',
   vOriginDomestic: 'Domestic travelers (Vietnam)',
   vOriginUnknown: 'Not known (older coupons)',
+
+  // what the shop sells
+  vKindLabel: 'What does your business sell?',
+  vKindHint: 'It sets the colour and icon of your coupons, and helps travelers find a mix of coupons.',
+  vKindFood: 'Food and drink',
+  vKindShopping: 'Shopping and souvenirs',
+  vKindActivity: 'Activities and rentals',
+  vKindOther: 'Something else',
+
+  // kinds of coupon deal
+  vDealType: 'Type of offer',
+  vDealHint: 'A percentage, a fixed amount off, a free gift or a combo. Only a percentage has a number on the ticket.',
+  vDealPercent: 'Percent off',
+  vDealAmount: 'Amount off (VND)',
+  vDealFree: 'Free gift with a purchase',
+  vDealCombo: 'Combo deal',
+  vDealAmountLabel: 'Amount off (VND, 1,000 to 500,000)',
+  vDealLine: '{title} · {deal}',
+  vPreviewDeal: '{title} · {deal} · {cost} coins',
 } as const
 
 export default vendorEn

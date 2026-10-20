@@ -1,35 +1,43 @@
 import { NavLink } from 'react-router-dom'
 import { useT, type Key } from '../i18n'
 
-const left: { to: string; label: Key }[] = [
-  { to: '/home', label: 'navHome' },
-  { to: '/quests', label: 'navQuests' },
+type Item = { to: string; label: Key; icon: string }
+
+// icon = a Material Symbols name (the icon font is loaded in index.html)
+const left: Item[] = [
+  { to: '/home', label: 'navHome', icon: 'home' },
+  { to: '/quests', label: 'navQuests', icon: 'checklist' },
 ]
-const right: { to: string; label: Key }[] = [
-  { to: '/explore', label: 'navPlaces' },
-  { to: '/coupons', label: 'navCoupons' },
+const right: Item[] = [
+  { to: '/coupons', label: 'navCoupons', icon: 'confirmation_number' },
+  { to: '/profile', label: 'navProfile', icon: 'person' },
 ]
 
-// Home, Quests, [Meilu], Places, Coupons. The round Meilu button in the middle opens the chat popup
+// Home, Quests, [Meilu], Coupons, Profile. The round Meilu button in the middle opens the chat popup
 // (see MeiluPopup), which can see the screen the traveler is on.
 export default function BottomNav() {
   const t = useT()
-  const link = (i: { to: string; label: Key }) => (
+  const link = (i: Item) => (
     <NavLink key={i.to} to={i.to}>
-      {t(i.label)}
+      <span className="mi nav-icon" aria-hidden="true">
+        {i.icon}
+      </span>
+      <span>{t(i.label)}</span>
     </NavLink>
   )
   return (
-    <nav style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+    <nav className="app-nav">
       {left.map(link)}
+      <span className="nav-meilu-cell">
       <button
+        className="nav-meilu"
         onClick={() => window.dispatchEvent(new Event('meilu:open'))}
         aria-label={t('askMeiluHere')}
         title={t('askMeiluHere')}
-        style={{ width: 48, height: 48, borderRadius: '50%', border: '2px solid #000', background: '#fff', padding: 0, overflow: 'hidden', marginTop: -14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
-        <img src="/icon-192.png?v=2" alt="Meilu" width={44} height={44} style={{ display: 'block', margin: '0 auto', borderRadius: '50%' }} />
+        <img src="/icon-192.png?v=4" alt="Meilu" />
       </button>
+      </span>
       {right.map(link)}
     </nav>
   )

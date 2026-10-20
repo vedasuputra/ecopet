@@ -21,9 +21,27 @@ export const useCatalog = create<CatalogState>((set) => ({
   quests: staticQuests,
   refresh: async () => {
     if (!supabase) return
+    // A database that has not had the newest SQL files yet lacks some columns, and asking for a missing column fails the whole
+    // query. So the newest set of columns is tried first, then older ones, and the app keeps working with what exists.
+    const tryColumns = async (table: string, sets: string[]) => {
+      let last: any
+      for (const cols of sets) {
+        last = await supabase!.from(table).select(cols)
+        if (!last.error) break
+      }
+      return last as { error: unknown; data: any[] | null }
+    }
     const [v, c, q, u] = await Promise.all([
-      supabase.from('vendors').select('id,name,category_en,category_vi,lat,lng,address,open_hours,plan_paid_until'),
-      supabase.from('coupon_offers').select('id,vendor_id,title_en,title_vi,discount_pct,cost_coins,code,active,valid_days,monthly_cap'),
+      tryColumns('vendors', [
+        'id,name,category_en,category_vi,kind,lat,lng,address,open_hours,plan_paid_until',
+        'id,name,category_en,category_vi,lat,lng,address,open_hours,plan_paid_until',
+        'id,name,category_en,category_vi,lat,lng',
+      ]),
+      tryColumns('coupon_offers', [
+        'id,vendor_id,title_en,title_vi,discount_pct,deal_type,deal_value,cost_coins,code,active,valid_days,monthly_cap',
+        'id,vendor_id,title_en,title_vi,discount_pct,cost_coins,code,active,valid_days,monthly_cap',
+        'id,vendor_id,title_en,title_vi,discount_pct,cost_coins,code,active',
+      ]),
       supabase.from('quests').select('*').eq('active', true).order('sort'),
       supabase.from('offer_usage').select('offer_id,issued_this_month'),
     ])
@@ -32,13 +50,15 @@ export const useCatalog = create<CatalogState>((set) => ({
       set({
         vendors: v.data
           // only shops with a paid-up subscription show on the map and offer coupons
-          .filter((r) => r.lat != null && r.lng != null && r.plan_paid_until && new Date(r.plan_paid_until) > new Date())
+          // (an old database without the plan_paid_until column shows every shop)
+          .filter((r) => r.lat != null && r.lng != null && (!('plan_paid_until' in r) || (r.plan_paid_until && new Date(r.plan_paid_until) > new Date())))
           .map((r) => ({
             id: r.id,
             name: r.name,
             category: { en: r.category_en, vi: r.category_vi },
             lat: r.lat as number,
             lng: r.lng as number,
+            kind: r.kind ?? undefined, // older databases have no kind column yet
             address: r.address ?? undefined,
             openHours: (r.open_hours as OpenHours | null) ?? null,
           })),
@@ -55,9 +75,11 @@ export const useCatalog = create<CatalogState>((set) => ({
           title: { en: r.title_en, vi: r.title_vi },
           costCoins: r.cost_coins,
           discountPct: r.discount_pct,
+          dealType: r.deal_type ?? 'percent', // older databases have no deal_type column yet
+          dealValue: r.deal_value ?? null,
           code: r.code,
           active: r.active,
-          validDays: r.valid_days ?? 30,
+          validDays: Math.min(7, r.valid_days ?? 7), // a coupon is valid for at most 7 days after it is bought
           monthlyCap: r.monthly_cap ?? null,
           remaining: r.monthly_cap == null ? null : Math.max(0, r.monthly_cap - (used.get(r.id) ?? 0)),
         })),

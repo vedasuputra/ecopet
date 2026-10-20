@@ -1,0 +1,319 @@
+/* The quest popup (same popup card as the coupon popups). Small text, like the rest of the app. */
+.popup-backdrop:has(.qd-popup) {
+  align-items: center;
+}
+.qd-popup {
+  max-height: 100%;
+  overflow-y: auto;
+  padding-bottom: 16px;
+}
+.qd-popup *,
+.qd-popup *::before,
+.qd-popup *::after {
+  box-sizing: border-box;
+}
+.qd-popup .popup-head {
+  margin-bottom: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--mist);
+}
+.qd-hero {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.qd-icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(22, 143, 214, 0.12);
+  color: var(--navy);
+}
+.qd-icon .mi {
+  font-size: 24px;
+}
+.qd-hero-text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.qd-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-title);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+.qd-place {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.qd-place .mi {
+  flex: none;
+  font-size: 14px;
+}
+.qd-reward {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #1b7a43;
+}
+.qd-reward .mi {
+  font-size: 16px;
+}
+.qd-desc {
+  margin: 12px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.qd-section {
+  margin-top: 14px;
+}
+.qd-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 2px;
+  font-size: 0.75rem;
+  color: var(--ink);
+}
+.qd-line .mi {
+  font-size: 15px;
+  color: var(--blue);
+}
+.qd-faint {
+  color: var(--ink-2);
+}
+.qd-note {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.qd-bad {
+  color: #b3261e;
+}
+.qd-msg {
+  font-size: 0.8125rem;
+  color: var(--navy);
+}
+.qd-msg.bad {
+  color: #b3261e; /* a rejection is red */
+}
+.qd-msg.ok {
+  color: #1b7a43;
+}
+.qd-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--blue);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.qd-photo {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.qd-text {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+}
+.qd-row {
+  display: flex;
+  gap: 8px;
+}
+.qd-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  min-height: 42px;
+  margin-top: 10px;
+  padding: 0 14px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.qd-row .qd-btn {
+  flex: 1;
+}
+.qd-btn .mi {
+  font-size: 16px;
+}
+.qd-btn:hover:not(:disabled) {
+  background: var(--sky);
+}
+.qd-primary {
+  background: var(--navy);
+  color: #fff;
+}
+.qd-primary:hover:not(:disabled) {
+  background: #033269;
+}
+/* the pin sits left of the X, with no box; filled and blue when pinned */
+.qd-popup .popup-head {
+  align-items: center;
+  gap: 6px;
+}
+.qd-pinbtn {
+  margin-right: 0;
+}
+.qd-pinbtn .mi {
+  font-size: 20px;
+}
+.qd-pinbtn.on {
+  color: var(--blue);
+}
+.qd-pinbtn.on .mi {
+  font-variation-settings: 'FILL' 1;
+}
+.qd-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.qd-popup :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* the two things that have to pass: the location and the photo */
+.qd-steps {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.qd-step {
+  display: flex;
+  gap: 10px;
+}
+.qd-step-ico {
+  flex: none;
+  font-size: 20px;
+  color: var(--ink-2);
+  opacity: 0.6;
+}
+.qd-step-ico.ok {
+  color: #1b7a43;
+  opacity: 1;
+}
+.qd-step-ico.warn {
+  color: #b7791f; /* the photo is taken, but nobody has checked it yet */
+  opacity: 1;
+}
+.qd-step-ico.bad {
+  color: #b3261e;
+  opacity: 1;
+}
+.qd-step-body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.qd-step-title {
+  font-family: var(--font-title);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.qd-step-text {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.qd-step-text.qd-bad {
+  color: #b3261e;
+}
+.qd-small {
+  min-height: 34px;
+  margin-top: 4px;
+}
+/* where you are now, under the distance */
+.qd-step-place {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.qd-step-place .mi {
+  flex: none;
+  font-size: 14px;
+}
+.qd-step-place span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* the report popup lies over the quest popup */
+.qd-report-backdrop {
+  z-index: 2100;
+}
+.qd-back {
+  margin: 0 4px 0 -2px;
+}
+.qd-report-info {
+  margin-top: 12px;
+}
+.qd-report-photo {
+  margin-top: 10px;
+  max-height: 180px;
+}
+.qd-count {
+  margin-top: 2px;
+  text-align: right;
+  font-size: 0.6875rem;
+}
+.qd-msg.bad .qd-link {
+  color: #b3261e; /* the Report word is red, like the message */
+}
+
+/* while the report popup is open, the quest popup is hidden (it comes back with the back button) */
+.popup-backdrop[hidden] {
+  display: none;
+}

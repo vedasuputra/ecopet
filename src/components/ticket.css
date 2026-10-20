@@ -1,0 +1,166 @@
+/* A coupon ticket (Home and the Coupons screen): a notch on each side, a dashed tear line, the deal on the stub. The colour
+   follows what the shop sells. The shadow sits on the <li> because the notches are cut with a mask, which would also cut a
+   shadow on the ticket itself. */
+.cat-food_drink { --accent: #168fd6; --accent-dark: #0a5f99; --accent-tint: rgba(22, 143, 214, 0.12); }
+.cat-shopping { --accent: #e08a3c; --accent-dark: #9a5a14; --accent-tint: rgba(224, 138, 60, 0.15); }
+.cat-activity { --accent: #2aa198; --accent-dark: #11675f; --accent-tint: rgba(42, 161, 152, 0.14); }
+.cat-other { --accent: #044388; --accent-dark: #044388; --accent-tint: rgba(4, 67, 136, 0.08); }
+
+.ticket-wrap {
+  min-width: 0;
+  list-style: none;
+  filter: drop-shadow(0 0 0.5px var(--sky)) drop-shadow(0 1px 2px rgba(4, 67, 136, 0.1));
+}
+.ticket {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  min-height: 68px;
+  overflow: hidden; /* keeps the tinted stub inside the rounded corners */
+  background: #fff;
+  border-radius: 8px;
+  color: var(--ink);
+  text-decoration: none;
+  -webkit-mask: radial-gradient(circle 8px at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(circle 8px at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+  mask: radial-gradient(circle 8px at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(circle 8px at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+  transition: transform 0.15s;
+}
+.ticket::after {
+  /* the coloured outline, drawn above the tinted stub */
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, #fff);
+  pointer-events: none;
+}
+.ticket:hover {
+  transform: translateY(-1px);
+}
+.ticket:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+/* a used, expired or sold-out ticket is faded */
+.ticket.is-dim {
+  opacity: 0.55;
+  filter: grayscale(0.7);
+}
+
+.ticket-cat {
+  flex: none;
+  align-self: center;
+  margin-left: 16px; /* a big icon, no box behind it */
+  font-size: 34px;
+  color: var(--accent);
+}
+.ticket-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* a long shop name is cut with an ellipsis, it never widens the ticket */
+  align-content: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 12px 22px 12px 12px; /* room before the dashed line, so the shop name is cut sooner */
+}
+.ticket-title {
+  overflow: hidden; /* one line: a long title is cut with an ellipsis, so every ticket is the same height */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-title);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
+.ticket-meta {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.ticket-meta .mi {
+  flex: none;
+  font-size: 14px;
+}
+.ticket-shop {
+  min-width: 0;
+  overflow: hidden; /* only the shop name is cut with an ellipsis; the distance always stays readable */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ticket-dist {
+  flex: none;
+  margin-left: 1px;
+  white-space: nowrap;
+}
+.ticket-meta > span:not(.mi):not(.ticket-shop):not(.ticket-dist) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ticket-stub {
+  flex: none;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0;
+  width: 88px; /* the same width for every stub, whatever it says (15%, -20k, FREE, COMBO) */
+  padding: 10px 8px;
+  border-left: 2px dashed var(--accent);
+  background: var(--accent-tint);
+  color: var(--accent-dark);
+}
+.ticket-off {
+  font-family: var(--font-title);
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.ticket-off.is-word {
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+}
+.ticket-qr {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+/* the price on the stub: green when you have enough coins, red when you do not (yet) */
+.ticket-cost {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.875rem;
+}
+.ticket-cost .mi {
+  font-size: 13px;
+}
+.ticket-cost.cost-ok {
+  color: #1b7a43;
+}
+.ticket-cost.cost-short {
+  color: #b3261e;
+}
+.ticket-cost.cost-paid {
+  color: var(--accent-dark);
+  opacity: 0.45; /* already bought: faded */
+}
+/* what is left on the stub of a ticket that cannot be used: USED, EXPIRED, SOLD OUT */
+.ticket-state {
+  margin-top: 2px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticket {
+    transition: none;
+  }
+}

@@ -7,6 +7,8 @@ export interface IssuedRow {
   coupon_id: string
   vendor_id: string
   discount_pct: number
+  deal_type?: string | null
+  deal_value?: number | null
   source: 'coins' | 'welcome'
   status: 'unused' | 'used'
   issued_at: string
@@ -27,6 +29,7 @@ export interface VendorInfo {
   plan_paid_until: string | null
   address: string | null
   open_hours: OpenHours | null
+  kind?: 'food_drink' | 'shopping' | 'activity' | 'other'
 }
 
 export interface Offer {
@@ -35,6 +38,8 @@ export interface Offer {
   title_en: string
   title_vi: string
   discount_pct: number
+  deal_type?: string | null
+  deal_value?: number | null
   cost_coins: number
   code: string
   active: boolean

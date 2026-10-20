@@ -1,0 +1,73 @@
+/* The live camera inside the quest popup. Same small text and buttons as the rest of the popup. */
+.cam {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  font-family: var(--font);
+}
+.cam *,
+.cam *::before,
+.cam *::after {
+  box-sizing: border-box;
+}
+.cam-video {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #0b1d33;
+}
+.cam-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.cam-bad {
+  color: #b3261e;
+}
+.cam-row {
+  display: flex;
+  gap: 8px;
+}
+.cam-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.cam-btn .mi {
+  font-size: 16px;
+}
+.cam-btn:hover:not(:disabled) {
+  background: var(--sky);
+}
+.cam-primary {
+  background: var(--navy);
+  color: #fff;
+}
+.cam-primary:hover:not(:disabled) {
+  background: #033269;
+}
+.cam-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.cam :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}

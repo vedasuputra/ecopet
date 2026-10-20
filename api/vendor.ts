@@ -19,6 +19,8 @@ const METHODS = ['momo', 'vnpay', 'zalopay', 'card']
 const NEW_VENDOR_DISCOUNT = 0.1
 const MIN_AMOUNT = 1000
 const MAX_AMOUNT = 50_000_000
+const KINDS = ['food_drink', 'shopping', 'activity', 'other']
+const DEAL_TYPES = ['percent', 'amount', 'free', 'combo']
 const MAX_OFFERS = 12
 const REDEEM_BONUS_COINS = 10
 const REDEEM_QUEST_ID = 'q8'
@@ -30,6 +32,8 @@ interface IssuedRow {
   coupon_id: string
   vendor_id: string
   discount_pct: number
+  deal_type?: string
+  deal_value?: number | null
   source: string
   status: string
   issued_at: string
@@ -106,11 +110,12 @@ export default async function handler(req: Req, res: Res) {
       if (!name || !categoryEn || !categoryVi || !Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
         return fail(res, 400, 'bad_business')
       }
+      const kind = KINDS.includes(nb.kind) ? nb.kind : 'other'
       vendorId = `v-${randomBytes(4).toString('hex')}`
       const ins = await rest('vendors', {
         method: 'POST',
         headers: { Prefer: 'return=minimal' },
-        body: JSON.stringify({ id: vendorId, name, category_en: categoryEn, category_vi: categoryVi, lat, lng, plan, owner_id: user.id }),
+        body: JSON.stringify({ id: vendorId, name, category_en: categoryEn, category_vi: categoryVi, kind, lat, lng, plan, owner_id: user.id }),
       })
       if (!ins.ok) return fail(res, 500, 'db_error')
     } else {
@@ -149,7 +154,7 @@ export default async function handler(req: Req, res: Res) {
     if (action === 'lookup') {
       return res.json({
         ok: true,
-        coupon: { uid: row.uid, couponId: row.coupon_id, discountPct: row.discount_pct, source: row.source, issuedAt: row.issued_at },
+        coupon: { uid: row.uid, couponId: row.coupon_id, discountPct: row.discount_pct, dealType: row.deal_type ?? 'percent', dealValue: row.deal_value ?? null, source: row.source, issuedAt: row.issued_at },
       })
     }
 
@@ -177,13 +182,15 @@ export default async function handler(req: Req, res: Res) {
   if (action === 'coupon_save') {
     const titleEn = str(body.titleEn, 2, 60)
     const titleVi = str(body.titleVi, 2, 60)
-    const discount = Math.round(Number(body.discountPct))
+    const dealType = DEAL_TYPES.includes(body.dealType) ? (body.dealType as string) : 'percent'
+    const discount = dealType === 'percent' ? Math.round(Number(body.discountPct)) : 0 // only a percent deal has a percentage
+    const dealValue = dealType === 'amount' ? Math.round(Number(body.dealValue)) : null
     const cost = Math.round(Number(body.costCoins))
-    const validDays = body.validDays === undefined || body.validDays === '' ? 30 : Math.round(Number(body.validDays))
+    const validDays = body.validDays === undefined || body.validDays === '' ? 7 : Math.round(Number(body.validDays)) // at most 7 days
     const monthlyCap = body.monthlyCap === undefined || body.monthlyCap === null || body.monthlyCap === '' ? null : Math.round(Number(body.monthlyCap))
     if (
-      !titleEn || !titleVi || !(discount >= 1 && discount <= 50) || !(cost >= 10 && cost <= 500) ||
-      !(validDays >= 1 && validDays <= 365) || (monthlyCap !== null && !(monthlyCap >= 1 && monthlyCap <= 10000))
+      !titleEn || !titleVi || (dealType === 'percent' && !(discount >= 1 && discount <= 50)) || (dealType === 'amount' && !(dealValue! >= 1000 && dealValue! <= 500000)) || !(cost >= 10 && cost <= 500) ||
+      !(validDays >= 1 && validDays <= 7) || (monthlyCap !== null && !(monthlyCap >= 1 && monthlyCap <= 10000))
     ) {
       return fail(res, 400, 'bad_input')
     }
@@ -200,7 +207,7 @@ export default async function handler(req: Req, res: Res) {
     let code = typeof body.code === 'string' ? body.code.trim().toUpperCase() : ''
     if (!code) {
       // generate: two letters from the id + discount, e.g. "AB15", made unique among this vendor's coupons
-      const base = `${id.replace(/[^A-Z0-9]/gi, '').slice(0, 2)}${discount}`.toUpperCase()
+      const base = `${id.replace(/[^A-Z0-9]/gi, '').slice(0, 2)}${discount || (dealType === 'free' ? 'FR' : dealType === 'combo' ? 'CB' : 'AM')}`.toUpperCase()
       code = base
       for (let n = 2; mine.some((o) => o.id !== id && o.code === code) && n < 50; n++) code = `${base}${n}`
     }
@@ -211,7 +218,7 @@ export default async function handler(req: Req, res: Res) {
     const up = await rest('coupon_offers', {
       method: 'POST',
       headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
-      body: JSON.stringify({ id, vendor_id: myVendor, title_en: titleEn, title_vi: titleVi, discount_pct: discount, cost_coins: cost, code, active, valid_days: validDays, monthly_cap: monthlyCap }),
+      body: JSON.stringify({ id, vendor_id: myVendor, title_en: titleEn, title_vi: titleVi, discount_pct: discount, deal_type: dealType, deal_value: dealValue, cost_coins: cost, code, active, valid_days: validDays, monthly_cap: monthlyCap }),
     })
     if (!up.ok) return fail(res, up.status === 409 ? 409 : 500, up.status === 409 ? 'code_taken' : 'db_error')
     return res.json({ ok: true, id, code })
@@ -225,7 +232,7 @@ export default async function handler(req: Req, res: Res) {
     if (body.openHours !== null && !hours) return fail(res, 400, 'bad_input')
     const upd = await rest(`vendors?id=eq.${encodeURIComponent(myVendor)}`, {
       method: 'PATCH',
-      body: JSON.stringify({ address: address || null, open_hours: hours }),
+      body: JSON.stringify({ address: address || null, open_hours: hours, ...(KINDS.includes(body.kind) ? { kind: body.kind } : {}) }),
     })
     if (!upd.ok) return fail(res, 500, 'db_error')
     return res.json({ ok: true })
