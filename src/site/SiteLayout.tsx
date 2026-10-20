@@ -16,6 +16,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
           </Link>
           <nav className="s-nav">
             <Link to="/vendor/login">{t('siteNavVendors')}</Link>
+            <Link to="/admin">{t('siteNavAdmin')}</Link>
             <Link to="/privacy">{t('siteNavPrivacy')}</Link>
             <span className="s-lang" role="group" aria-label={t('language')}>
               <button className="s-btn small" aria-pressed={lang === 'en'} onClick={() => setLang('en')}>
@@ -44,6 +45,7 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
             <Link to="/">{t('siteNavHome')}</Link>
             <Link to="/login">{t('siteOpenApp')}</Link>
             <Link to="/vendor/login">{t('siteNavVendors')}</Link>
+            <Link to="/admin">{t('siteNavAdmin')}</Link>
             <Link to="/privacy">{t('siteNavPrivacy')}</Link>
           </nav>
         </div>

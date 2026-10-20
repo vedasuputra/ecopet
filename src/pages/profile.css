@@ -259,3 +259,7 @@
   outline: 3px solid var(--blue);
   outline-offset: 2px;
 }
+
+.pf-gap {
+  margin-top: 10px;
+}

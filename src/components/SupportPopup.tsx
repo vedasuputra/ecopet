@@ -33,13 +33,13 @@ interface Ticket {
 
 // Customer service, as a popup over the profile. Two views: a form to report a problem (what happened, which coupon, and a
 // reason that is required so nobody reports just like that) and the list of your reports with the answers of the team.
-export default function SupportPopup({ onClose: closeNow }: { onClose: () => void }) {
+export default function SupportPopup({ onClose: closeNow, initialCategory = 'shop_closed' }: { onClose: () => void; initialCategory?: Category }) {
   const t = useT()
   const loc = useLoc()
   const [closing, onClose] = useFadeClose(closeNow)
   const closeBtn = useRef<HTMLButtonElement>(null)
   const [view, setView] = useState<'new' | 'mine'>('new')
-  const [category, setCategory] = useState<Category>('shop_closed')
+  const [category, setCategory] = useState<Category>(initialCategory)
   const [couponUid, setCouponUid] = useState('none')
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)

@@ -12,6 +12,7 @@ import { useCatalog } from '../store/useCatalog'
 import { useLocation } from '../store/useLocation'
 import '../components/ticket.css'
 import './couponinfo.css'
+import './shoppopup.css'
 import { useFadeClose } from '../lib/useFadeClose'
 
 // Everything about a coupon before you get it, as a popup over the list of coupons (dimmed behind it): the deal and its price,
@@ -30,8 +31,10 @@ export default function CouponInfo() {
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const closeBtn = useRef<HTMLButtonElement>(null)
 
-  const fromHome = (useRoute().state as { from?: string } | null)?.from === 'home'
-  const [closing, close] = useFadeClose(() => navigate(fromHome ? '/home' : '/coupons', { replace: true }))
+  const route = useRoute()
+  const routeState = route.state as { from?: string; fromState?: unknown } | null
+  const back = routeState?.from === 'home' ? '/home' : routeState?.from?.startsWith('/') ? routeState.from : '/coupons'
+  const [closing, close] = useFadeClose(() => navigate(back, { replace: true, state: routeState?.fromState }))
   useEffect(() => {
     closeBtn.current?.focus()
     const key = (e: KeyboardEvent) => e.key === 'Escape' && close()
@@ -103,7 +106,12 @@ export default function CouponInfo() {
                 </span>
                 <div className="info-hero-text">
                   <span className="info-title">{loc(coupon.title)}</span>
-                  <span className="info-shop">{vendor.name}</span>
+                  <Link className="info-shop info-shop-link" to={`/shops/${vendor.id}`} state={{ from: route.pathname, fromState: routeState }}>
+                    <span>{vendor.name}</span>
+                    <span className="mi" aria-hidden="true">
+                      chevron_right
+                    </span>
+                  </Link>
                 </div>
                 <span className={`info-deal${coupon.dealType === 'free' || coupon.dealType === 'combo' ? ' is-word' : ''}`}>{dealShort(coupon, t)}</span>
               </div>
@@ -122,20 +130,27 @@ export default function CouponInfo() {
 
               <section className="info-section">
                 {/* the address and whether the shop is open; the square button on the left opens the map */}
-                <div className="info-where">
-                  <a className="info-map" href={mapsSearchUrl(vendor.address ? `${vendor.name}, ${vendor.address}` : `${vendor.lat},${vendor.lng}`)} target="_blank" rel="noopener noreferrer" aria-label={t('shopOpenInMaps')} title={t('shopOpenInMaps')}>
+                <a
+                  className="info-where info-where-link"
+                  href={mapsSearchUrl(vendor.address ? `${vendor.name}, ${vendor.address}` : `${vendor.lat},${vendor.lng}`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={t('shopOpenInMaps')}
+                  title={t('shopOpenInMaps')}
+                >
+                  <span className="info-map">
                     <span className="mi" aria-hidden="true">
                       map
                     </span>
-                  </a>
-                  <div className="info-place-text">
+                  </span>
+                  <span className="info-place-text">
                     <span className="info-address">{vendor.address ?? vendor.name}</span>
                     <span className="info-status">
                       <span className="info-distance">{distance} · </span>
                       <ShopStatus hours={vendor.openHours} short />
                     </span>
-                  </div>
-                </div>
+                  </span>
+                </a>
                 {vendor.openHours && (
                   <table className="info-hours">
                     <tbody>

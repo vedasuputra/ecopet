@@ -30,7 +30,7 @@ const num = (v: string | undefined, d: number) => (Number.isFinite(Number(v)) &&
 const QUESTS_PER_DAY = num(process.env.QUEST_PER_DAY, 5)
 const VERIFY_PER_MINUTE = num(process.env.VERIFY_PER_MINUTE, 4)
 const VERIFY_PER_DAY = num(process.env.VERIFY_PER_DAY, 30)
-const VERIFY_GLOBAL_PER_DAY = num(process.env.VERIFY_GLOBAL_PER_DAY, 500)
+const VERIFY_GLOBAL_PER_DAY = num(process.env.VERIFY_GLOBAL_PER_DAY, 100)
 
 // Flags that mean "do not trust this photo", whatever the confidence.
 const HARD_FLAGS = ['screen_photo', 'stock_or_internet_image', 'ai_generated', 'edited_or_overlay']

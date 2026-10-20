@@ -1,3 +1,4 @@
+import { screenOf } from '../pages/Screens'
 import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, Outlet, useLocation as useRoute, useNavigate } from 'react-router-dom'
 import AdblockGate from './AdblockGate'
@@ -19,15 +20,29 @@ import { isCouponExpired, useAppStore } from '../store/useAppStore'
 
 const PUBLIC = ['/login', '/dev']
 // screens without the coins / coupons / watch-ad bar
-const NO_BAR = ['/login', '/onboarding', '/gift', '/dev']
+const NO_BAR = ['/login', '/dev']
 // screens without the bottom navigation (an ad must not be left by a tap on the bar)
-const NO_NAV = ['/ad']
+const NO_NAV = ['/ad', '/login']
+// the sign-in screen has no top bar either
+const NO_HEADER = ['/login']
 
 export default function Layout() {
   const { pathname } = useRoute()
-  const fromHome = (useRoute().state as { from?: string } | null)?.from === 'home'
+  const routeState = useRoute().state
+  // the first set-up (the trip, the welcome gift, the plan made at the end of it) is not finished: the top bar and the bottom bar are locked
+  const flow = routeState as { onboarding?: boolean; fromState?: { onboarding?: boolean } } | null
+  // a click on the locked bars says why, in a small toast
+  const [lockToast, setLockToast] = useState(false)
+  const lockTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const sayLocked = () => {
+    setLockToast(true)
+    clearTimeout(lockTimer.current)
+    lockTimer.current = setTimeout(() => setLockToast(false), 2400)
+  }
+  const locked = pathname === '/onboarding' || pathname === '/gift' || !!flow?.onboarding || !!flow?.fromState?.onboarding
+  const screen = screenOf(pathname, routeState)
   const first = pathname.split('/')[1] ?? ''
-  const section = fromHome ? 'home' : first === 'offers' ? 'coupons' : first // a popup over a screen keeps that screen's key
+  const section = screen ?? first // a popup over a screen keeps that screen's key
   const navigate = useNavigate()
   const t = useT()
   const user = useAppStore((s) => s.user)
@@ -85,7 +100,20 @@ export default function Layout() {
   return (
     <PhoneFrame>
       <AdblockGate>
-      <header className="app-header">
+      {!NO_HEADER.includes(pathname) && (
+      <header
+        className="app-header"
+        aria-disabled={locked || undefined}
+        onClickCapture={
+          locked
+            ? (e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                sayLocked()
+              }
+            : undefined
+        }
+      >
         {user && !NO_BAR.includes(pathname) ? (
           <>
             <button className="app-profile" onClick={() => setLocOpen(true)} aria-label={t('changeLocation')} title={t('changeLocation')}>
@@ -129,12 +157,18 @@ export default function Layout() {
           </strong>
         )}
       </header>
+      )}
       {/* the screen fades in when you go to another one; <main> is only replaced when the section changes, so the popups over a
           screen (a quest, a coupon) do not make their screen fade again */}
       <main className="phone-scroll page-fade" key={section}>
         <Outlet />
       </main>
-      {!NO_NAV.includes(pathname) && <BottomNav />}
+      {!NO_NAV.includes(pathname) && <BottomNav locked={locked} onLockedClick={sayLocked} />}
+      {lockToast && (
+        <div className="lock-toast" role="status">
+          {t('lockedToast')}
+        </div>
+      )}
       <CelebrationOverlay />
       {user && !NO_BAR.includes(pathname) && <MeiluPopup />}
       <RewardPopup />

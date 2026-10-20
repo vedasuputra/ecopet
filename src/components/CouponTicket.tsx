@@ -20,8 +20,11 @@ export default function CouponTicket({
   coins,
   state,
   fromHome = false,
+  linkState,
+  lit = false,
+  faded = false,
 }: {
-  to: string
+  to?: string // without it the ticket is not a link (the welcome gift shows tickets to look at)
   title: string
   shop: string
   distance?: string
@@ -33,13 +36,16 @@ export default function CouponTicket({
   coins?: number
   state?: State
   fromHome?: boolean // opened from Home: the popup then stays over Home
+  linkState?: unknown // opened from another popup (a shop): the popup comes back there when it is closed
+  lit?: boolean // highlighted (the one the spin is on)
+  faded?: boolean // the others once the spin has landed
 }) {
   const t = useT()
   const dim = state === 'used' || state === 'expired' || state === 'soldout'
   const word = state === 'used' ? t('couponUsedWord') : state === 'expired' ? t('couponExpiredWord') : state === 'soldout' ? t('couponSoldOutWord') : null
   return (
-    <li className={`ticket-wrap cat-${category}`}>
-      <Link to={to} state={fromHome ? { from: 'home' } : undefined} className={`ticket${dim ? ' is-dim' : ''}`}>
+    <li className={`ticket-wrap cat-${category}${lit ? ' is-lit' : ''}${faded ? ' is-faded' : ''}`}>
+      <Body to={to} state={linkState ?? (fromHome ? { from: 'home' } : undefined)} className={`ticket${dim ? ' is-dim' : ''}`}>
         <span className="mi ticket-cat" aria-hidden="true">
           {COUPON_CATEGORY_ICON[category]}
         </span>
@@ -77,7 +83,18 @@ export default function CouponTicket({
             </span>
           ) : null}
         </span>
-      </Link>
+      </Body>
     </li>
+  )
+}
+
+// the ticket itself: a link when it has a place to go to, otherwise a plain box
+function Body({ to, state, className, children }: { to?: string; state?: unknown; className: string; children: React.ReactNode }) {
+  return to ? (
+    <Link to={to} state={state} className={className}>
+      {children}
+    </Link>
+  ) : (
+    <div className={className}>{children}</div>
   )
 }

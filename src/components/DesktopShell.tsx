@@ -7,13 +7,13 @@ export default function DesktopShell() {
   // the dark slate fills the whole window, also behind the page margins
   useEffect(() => {
     const prev = document.body.style.background
-    document.body.style.background = '#131720'
+    document.body.style.background = '#021a37'
     return () => {
       document.body.style.background = prev
     }
   }, [])
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#131720' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#021a37' }}>
       <iframe
         title="Eco-Pet"
         src={window.location.pathname + window.location.search}

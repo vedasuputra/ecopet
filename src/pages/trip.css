@@ -1,6 +1,8 @@
 /* My trip: the trip and its plan on one page. Same palette, fonts and small text sizes as the rest of the app. */
 .tp-page {
   min-height: 100%;
+  display: flex; /* a column, so the bottom bar is pushed to the very bottom of the screen */
+  flex-direction: column;
   padding: 16px;
   background: var(--cream);
   color: var(--ink);
@@ -76,7 +78,7 @@
 .tp-empty {
   display: grid;
   gap: 10px;
-  justify-items: center;
+  justify-items: stretch;
   margin-top: 12px;
   text-align: center;
 }
@@ -85,8 +87,17 @@
   font-size: 0.8125rem;
   color: var(--ink-2);
 }
+.tp-summary-row {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
+}
 .tp-summary {
-  margin: 14px 0 0;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
   font-size: 0.8125rem;
   line-height: 1.5;
 }
@@ -261,6 +272,8 @@ a.tp-item:hover {
   width: 100%;
 }
 .tp-btn {
+  line-height: 1.3;
+  text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -327,4 +340,295 @@ a.tp-item:hover {
 .tp-page :focus-visible {
   outline: 3px solid var(--blue);
   outline-offset: 2px;
+}
+
+/* the save bar: stays at the bottom edge of the screen while the page scrolls */
+.tp-savebar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  margin: 16px -16px -16px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--sky);
+  background: var(--cream);
+}
+.tp-savebar p {
+  margin: 0 0 8px;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #6b4a00;
+}
+
+/* the two tabs, edge to edge, sticking to the top while the page scrolls (like the tabs of Quests and Coupons) */
+.tp-top {
+  position: sticky;
+  top: 0; /* the top bar sticks to the very top (a negative top cut off its first 16px) */
+  z-index: 20;
+  margin: -16px -16px 14px;
+  background: var(--cream);
+  border-bottom: 1px solid var(--navy);
+}
+.tp-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  background: #fff;
+  border-bottom: 1px solid var(--navy);
+}
+.tp-top > .tp-jump {
+  margin: 0;
+  padding: 8px 16px;
+}
+.tp-tabs button {
+  min-height: 40px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.tp-tabs button + button {
+  border-left: 1px solid var(--navy);
+}
+.tp-tabs button.active {
+  background: #e3f1fa;
+}
+.tp-tabs button:not(.active):hover {
+  background: var(--mist);
+}
+.tp-hint {
+  margin: 0 0 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fdf3dc;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: #6b4a00;
+}
+
+.tp-shoprow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.tp-shoprow .tp-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.tp-plan-title {
+  margin: 0 0 -1px;
+  font-family: var(--font-title);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: var(--navy);
+}
+.tp-summary .tp-source {
+  margin: 0;
+  line-height: 1.3;
+}
+.tp-summary-row .tp-small {
+  align-self: stretch;
+  min-height: 44px;
+}
+.tp-jump {
+  margin-top: 0;
+}
+.tp-jump .fd-btn {
+  width: 100%;
+  max-width: none;
+  min-height: 36px;
+  border-radius: 8px;
+}
+.tp-jump .fd-label {
+  flex: 1;
+  text-align: left;
+}
+/* a day does not hide under the tabs when it is jumped to */
+.tp-day {
+  scroll-margin-top: 110px; /* under the tabs and the jump dropdown */
+}
+
+/* the bottom bar: a container with padding, and the buttons inside it with rounded corners, so it never melts into the navy bar below */
+.tp-savebar {
+  padding: 10px 16px;
+  gap: 8px;
+  border-top: 1px solid var(--sky);
+  background: var(--cream);
+  box-shadow: 0 -6px 12px -8px rgba(4, 67, 136, 0.18);
+}
+.tp-savebar p {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #fdf3dc;
+}
+.tp-savebar .tp-btn {
+  min-height: 42px;
+  border-radius: 8px;
+}
+
+/* Edit is a normal small button again (centred next to the title) */
+.tp-summary-row {
+  align-items: center;
+}
+.tp-summary-row .tp-small {
+  align-self: center;
+  min-height: 30px;
+}
+/* the jump dropdown is a full-width bar with a white background and square corners, even when a day is chosen */
+.tp-top > .tp-jump {
+  padding: 0;
+}
+.tp-jump .fd-btn,
+.tp-jump .fd-btn.active {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  color: var(--navy);
+}
+
+/* the two-column bottom bar has a negative side margin, so it must size itself (a fixed 100% left its right side 16px short) */
+.tp-savebar.tp-two {
+  width: auto;
+}
+
+/* less room between the day's title bar and its first list */
+.tp-day-body {
+  padding-top: 8px;
+}
+.tp-day-body > .tp-sub:first-child {
+  margin-top: 0;
+}
+
+/* the place of a day (edit mode): a dropdown as wide as the card, square-ish like the other fields, never a navy pill */
+.tp-where {
+  display: block;
+}
+.tp-where .fd-btn,
+.tp-where .fd-btn.active {
+  width: 100%;
+  max-width: none;
+  min-height: 36px;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--navy);
+}
+.tp-where .fd-label {
+  flex: 1;
+  text-align: left;
+}
+
+/* the toast: a small dark note that floats just above the bottom bar and fades after a moment */
+.tp-toast {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 32px);
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(4, 30, 66, 0.3);
+  animation: tp-toast 2.6s ease both;
+  pointer-events: none;
+}
+@keyframes tp-toast {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  10%,
+  85% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tp-toast {
+    animation: none;
+  }
+}
+
+/* the travel style, under the days and the places in the same card */
+.tp-style-title {
+  margin: 18px 0 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--mist);
+  font-family: var(--font-title);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.tp-style-intro {
+  margin: 0 0 14px;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+.tp-ask-title {
+  margin: 0 0 4px;
+  font-family: var(--font-title);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+/* the two ways of planning again, under the last day */
+.tp-replan {
+  margin-top: 16px;
+}
+
+/* the two ways of planning again are stacked, one under the other */
+.tp-replan {
+  grid-template-columns: 1fr;
+}
+
+.tp-day-theme.empty {
+  color: var(--ink-2);
+  font-style: italic;
+}
+.tp-add {
+  margin-top: 6px;
+}
+
+.tp-savebar {
+  margin-top: auto;
+}
+.tp-page > .tp-card,
+.tp-replan {
+  margin-bottom: 16px;
+}
+.tp-ask-title {
+  margin: 0 0 2px;
+  line-height: 1.2;
+}
+.tp-ask-title + .tp-style-intro {
+  margin: 0 0 12px;
+  line-height: 1.3;
+}
+
+.tp-page {
+  box-sizing: border-box; /* same: the padding is inside the page's height */
 }

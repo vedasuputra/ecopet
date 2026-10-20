@@ -15,7 +15,7 @@ const right: Item[] = [
 
 // Home, Quests, [Meilu], Coupons, Profile. The round Meilu button in the middle opens the chat popup
 // (see MeiluPopup), which can see the screen the traveler is on.
-export default function BottomNav() {
+export default function BottomNav({ locked = false, onLockedClick }: { locked?: boolean; onLockedClick?: () => void }) {
   const t = useT()
   const link = (i: Item) => (
     <NavLink key={i.to} to={i.to}>
@@ -26,7 +26,20 @@ export default function BottomNav() {
     </NavLink>
   )
   return (
-    <nav className="app-nav">
+    // locked: nothing in the bar works; a click only says why
+    <nav
+      className="app-nav"
+      aria-disabled={locked || undefined}
+      onClickCapture={
+        locked
+          ? (e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onLockedClick?.()
+            }
+          : undefined
+      }
+    >
       {left.map(link)}
       <span className="nav-meilu-cell">
       <button

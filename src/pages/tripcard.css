@@ -1,0 +1,658 @@
+/* The trip memory card: an Instagram story (360 x 640, saved 3x as 1080 x 1920) made like a postcard, and the tools around it. */
+.tm-page {
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 16px;
+  background: var(--cream);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.tm-page *,
+.tm-page *::before,
+.tm-page *::after {
+  box-sizing: border-box;
+}
+.tm-hint {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+
+/* the stage keeps the room of the card while it is shrunk to fit a narrow screen */
+.tm-stage {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+.tm-scale {
+  width: 360px;
+  transform-origin: top left;
+}
+
+/* ---- the story. Everything in it uses plain shapes and text, so it is saved as the picture you see. */
+.tm-story {
+  position: relative;
+  overflow: hidden;
+  padding: 24px 16px 0;
+  border-radius: 14px;
+  /* a gradient of the colour the traveler chose: the same hue, lighter towards the top */
+  background: linear-gradient(165deg, var(--tm-g1) 0%, var(--tm-g2) 52%, var(--tm-g3) 100%);
+  color: var(--tm-ink);
+  box-shadow: 0 10px 30px rgba(4, 67, 136, 0.25);
+}
+.tm-pill {
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto 12px;
+  padding: 5px 16px;
+  border: 1.5px solid var(--tm-ink);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--tm-ink);
+}
+.tm-post {
+  position: relative;
+  border-radius: 10px;
+  background: #fffdf8;
+  box-shadow: 0 5px 0 rgba(10, 40, 90, 0.16);
+}
+
+/* the front */
+.tm-front {
+  padding: 8px;
+  transform: rotate(-2deg);
+}
+.tm-photo {
+  position: relative;
+  height: 214px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f6dfa8;
+}
+.tm-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 38% center;
+}
+/* a drawing of the river, for a traveler who has not added a photo */
+.tm-scene {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#f9e6b3, #f3cf94);
+}
+.tm-sun {
+  position: absolute;
+  right: 40px;
+  top: 38px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #ffd84a;
+}
+.tm-land {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 118px;
+  height: 36px;
+  background: #82c08f;
+}
+.tm-water {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 148px;
+  bottom: 0;
+  background: #6aa8cf;
+}
+.tm-boat {
+  position: absolute;
+  left: 62px;
+  top: 168px;
+  width: 78px;
+  height: 18px;
+  border-radius: 0 0 40px 40px;
+  background: #a36a3a;
+  box-shadow: 14px -10px 0 -2px #e6a94a;
+}
+.tm-greet {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  gap: 0;
+}
+.tm-greet span {
+  font-size: 0.8125rem;
+  font-style: italic;
+  font-weight: 700;
+  color: var(--tm-fill);
+  text-shadow: -1px -1px 0 var(--tm-ink), 1px -1px 0 var(--tm-ink), -1px 1px 0 var(--tm-ink), 1px 1px 0 var(--tm-ink);
+}
+/* the name of the place: big, yellow, with a dark outline */
+.tm-greet b {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--tm-fill);
+  text-shadow: -2px -2px 0 var(--tm-ink), 2px -2px 0 var(--tm-ink), -2px 2px 0 var(--tm-ink), 2px 2px 0 var(--tm-ink), 3px 4px 0 var(--tm-ink);
+  overflow-wrap: anywhere;
+}
+/* Meilu as a sticker with a white edge */
+.tm-sticker {
+  position: absolute;
+  right: -6px;
+  bottom: -10px;
+  filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 3px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* the back */
+.tm-back {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 14px 14px 12px;
+  transform: rotate(1.6deg);
+}
+.tm-msg {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.tm-msg h3 {
+  margin: 0 0 4px;
+  font-family: var(--font-title);
+  font-size: 0.95rem;
+  font-weight: 800;
+  font-style: italic;
+  line-height: 1.2;
+  color: var(--tm-ink);
+}
+.tm-msg p {
+  margin: 0 0 4px;
+  font-size: 0.6875rem;
+  line-height: 1.35;
+}
+.tm-msg ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 3px;
+}
+.tm-msg li {
+  position: relative;
+  padding-left: 12px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.tm-msg li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--tm-ink);
+}
+.tm-msg em {
+  margin-top: 8px;
+  font-family: var(--font-title);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--tm-ink);
+}
+.tm-side {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 12px;
+  border-left: 1.5px solid var(--tm-ink);
+}
+.tm-stamp {
+  align-self: flex-end;
+  width: 54px;
+  height: 54px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  border: 2px double var(--tm-ink);
+  border-radius: 50%;
+  text-align: center;
+  line-height: 1.1;
+  transform: rotate(-8deg);
+  color: var(--tm-ink);
+}
+.tm-stamp b {
+  font-size: 0.5625rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.tm-stamp i {
+  font-size: 0.4375rem;
+  font-style: normal;
+}
+.tm-for {
+  margin: 0;
+  font-size: 0.625rem;
+  line-height: 1.3;
+}
+/* the code for friends */
+.tm-ref {
+  margin-top: auto;
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  padding: 6px 4px;
+  border: 1.5px dashed var(--tm-ink);
+  border-radius: 6px;
+  text-align: center;
+  line-height: 1.25;
+}
+.tm-ref span {
+  font-size: 0.5625rem;
+  font-weight: 600;
+}
+.tm-ref b {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--tm-ink);
+}
+.tm-ref i {
+  font-size: 0.5625rem;
+  font-style: normal;
+  font-weight: 700;
+  color: var(--tm-ink);
+}
+
+.tm-tag {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 26px;
+  text-align: center;
+  font-family: var(--font-title);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--tm-on);
+}
+.tm-fact {
+  width: fit-content; /* as wide as the message, and the message is one line */
+  max-width: calc(100% - 12px);
+  margin: 20px auto 0;
+  padding: 8px 14px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.75);
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--tm-ink);
+}
+.tm-app {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9px;
+  text-align: center;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tm-on);
+  opacity: 0.85;
+}
+
+/* ---- the tools: colour and photo */
+.tm-tools {
+  display: grid;
+  gap: 10px;
+  width: 360px;
+  max-width: 100%;
+  margin: 14px auto 0;
+  padding: 12px 14px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+}
+.tm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.tm-label {
+  font-family: var(--font-title);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.tm-colors {
+  display: inline-flex;
+  gap: 8px;
+}
+.tm-swatch {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--sky);
+  cursor: pointer;
+}
+.tm-swatch.active {
+  box-shadow: 0 0 0 2px var(--navy);
+}
+.tm-custom {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(#f5b7c8, #f7c99a, #a8dcb5, #8fc3ea, #c9b8f0, #f5b7c8);
+  color: #fff;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.tm-custom input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+.tm-photo-btns {
+  display: inline-flex;
+  gap: 8px;
+}
+.tm-small {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.tm-small:hover {
+  background: var(--sky);
+}
+
+/* ---- the buttons under the card */
+.tm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 360px;
+  max-width: 100%;
+  margin: 14px auto 0;
+}
+.tm-btn {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.tm-btn:hover:not(:disabled) {
+  background: var(--sky);
+}
+.tm-primary {
+  background: var(--navy);
+  color: #fff;
+}
+.tm-primary:hover:not(:disabled) {
+  background: #033269;
+}
+.tm-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.tm-msgline {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.tm-page :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* the line at the bottom of the story can be rewritten by the traveler */
+.tm-note-row {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+.tm-note-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  resize: none;
+}
+
+/* what Meilu says: a speech bubble next to her sticker */
+.tm-bubble {
+  position: absolute;
+  right: 92px;
+  bottom: 70px;
+  max-width: 120px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--tm-ink);
+}
+.tm-bubble::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  bottom: 10px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+
+/* ---- the tools, one field under the other */
+.tm-field {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+.tm-field .tm-colors {
+  flex-wrap: wrap;
+}
+.tm-note-input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.8125rem;
+}
+/* the photo: one big box to click */
+.tm-drop {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 18px 12px;
+  border: 1.5px dashed var(--navy);
+  border-radius: 8px;
+  background: #f7fbfe;
+  color: var(--navy);
+  font-family: inherit;
+  cursor: pointer;
+}
+.tm-drop:hover {
+  background: var(--sky);
+}
+.tm-drop .mi {
+  font-size: 28px;
+}
+.tm-drop-text {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.tm-drop-sub {
+  font-size: 0.6875rem;
+  color: var(--ink-2);
+}
+.tm-drop.has {
+  border-style: solid;
+  background: #eaf4fb;
+}
+.tm-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #b3261e;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.tm-help {
+  width: 360px;
+  max-width: 100%;
+  margin: 8px auto 0;
+  text-align: center;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+/* the favourite quest, on the back of the postcard */
+.tm-fav {
+  margin: 6px 0 4px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--tm-g2), #fff 55%);
+  line-height: 1.25;
+}
+.tm-fav span {
+  display: block;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+.tm-fav b {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+/* the favourite-quest dropdown: as wide as the box, white, never a navy pill */
+.tm-field .fd-btn,
+.tm-field .fd-btn.active {
+  width: 100%;
+  max-width: none;
+  min-height: 40px;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--navy);
+}
+.tm-field .fd-label {
+  flex: 1;
+  text-align: left;
+}
+
+.tm-actions.one {
+  grid-template-columns: 1fr;
+}
+
+/* "Going to Mekong?" in bold, and the line under it with a small gap */
+.tm-for {
+  display: grid;
+  gap: 5px;
+}
+.tm-for b {
+  font-family: var(--font-title);
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+/* the line between the two columns: the whole height of the card, and almost see-through */
+.tm-back {
+  gap: 0;
+  padding: 0;
+}
+.tm-msg {
+  padding: 14px 10px 12px 14px;
+}
+.tm-side {
+  padding: 14px 14px 12px 12px;
+  border-left: 1px solid color-mix(in srgb, var(--tm-ink) 16%, transparent);
+}
+
+/* the button to generate a fact is as wide as the box */
+.tm-field .tm-small {
+  width: 100%;
+  min-height: 40px;
+}
+/* in the favourite-quest list the description may take two lines */
+.tm-field + .tm-field .fd-opt-sub {
+  white-space: normal;
+}

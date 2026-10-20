@@ -24,7 +24,7 @@ export interface OwnedCoupon {
   couponId: string
   status: 'unused' | 'used'
   expiresAt?: string | null
-  source?: 'coins' | 'welcome' // welcome-gift coupons cost no coins, so there is nothing to refund
+  source?: 'coins' | 'welcome' | 'referral' // gifts (welcome, referral) cost no coins, so there is nothing to refund
 }
 export interface ChatMessage {
   role: 'user' | 'meilu'

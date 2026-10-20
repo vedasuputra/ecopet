@@ -47,8 +47,11 @@ export default function QuestDetail() {
   const [photo, setPhoto] = useState<(Captured & { lat: number; lng: number }) | null>(null)
 
   // always back to the list of quests (going "back" in the history could lead nowhere, e.g. after a refresh)
-  const fromHome = (useRoute().state as { from?: string } | null)?.from === 'home'
-  const [closing, close] = useFadeClose(() => navigate(fromHome ? '/home' : '/quests', { replace: true }))
+  const routeState = useRoute().state as { from?: string; fromState?: unknown } | null
+  const fromHome = routeState?.from === 'home'
+  // back to the screen it was opened from (Home, the trip page, ...), or the quests
+  const back = fromHome ? '/home' : routeState?.from?.startsWith('/') ? routeState.from : '/quests'
+  const [closing, close] = useFadeClose(() => navigate(back, { replace: true, state: routeState?.fromState }))
   useEffect(() => {
     closeBtn.current?.focus()
     const key = (e: KeyboardEvent) => e.key === 'Escape' && close()

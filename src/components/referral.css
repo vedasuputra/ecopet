@@ -1,0 +1,79 @@
+/* The referral popup. Same popup card, palette and small text as the other popups. */
+.popup-backdrop:has(.ref-popup) {
+  align-items: center;
+}
+.ref-popup *,
+.ref-popup *::before,
+.ref-popup *::after {
+  box-sizing: border-box;
+}
+.ref-popup .popup-head {
+  margin-bottom: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--mist);
+}
+.ref-body {
+  margin: 12px 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+.ref-code-box {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 14px;
+  border: 1px dashed var(--navy);
+  border-radius: 8px;
+  background: #fff;
+}
+.ref-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.ref-code {
+  font-family: var(--font-title);
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--navy);
+}
+.ref-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 30px;
+  margin-top: 4px;
+  padding: 0 12px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.ref-copy .mi {
+  font-size: 16px;
+}
+.ref-copy:hover {
+  background: var(--sky);
+}
+.ref-note {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.ref-bad {
+  color: #b3261e;
+}
+.ref-popup :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}

@@ -1,0 +1,85 @@
+/* The welcome gift popup. Same popup card, palette and small text as the other popups. */
+.popup-backdrop:has(.gift-popup) {
+  align-items: center;
+}
+.gift-popup {
+  max-height: 100%;
+  overflow-y: auto;
+  padding-bottom: 16px;
+}
+.gift-popup *,
+.gift-popup *::before,
+.gift-popup *::after {
+  box-sizing: border-box;
+}
+.gift-popup .popup-head {
+  margin-bottom: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--mist);
+}
+.gift-intro {
+  margin: 12px 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.gift-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+.gift-error {
+  margin: 10px 0 0;
+  font-size: 0.75rem;
+  color: #b3261e;
+}
+.gift-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 42px;
+  margin-top: 14px;
+  padding: 0 14px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.gift-btn:hover:not(:disabled) {
+  background: var(--sky);
+}
+.gift-primary {
+  background: var(--navy);
+  color: #fff;
+}
+.gift-primary:hover:not(:disabled) {
+  background: #033269;
+}
+.gift-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.gift-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.gift-popup :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.gift-center {
+  text-align: center;
+  padding: 0 8px;
+}

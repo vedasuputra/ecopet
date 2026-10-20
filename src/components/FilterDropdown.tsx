@@ -22,7 +22,7 @@ export default function FilterDropdown({
   label,
   matchWidth = false,
 }: {
-  icon: string
+  icon?: string // none: the button has only its text and the arrow
   prefix?: string
   value: string
   options: FilterOption[]
@@ -32,13 +32,18 @@ export default function FilterDropdown({
   matchWidth?: boolean
 }) {
   const btn = useRef<HTMLButtonElement>(null)
+  const list = useRef<HTMLUListElement>(null)
   const [pos, setPos] = useState<{ top: number; left: number; width?: number } | null>(null)
   const current = options.find((o) => o.value === value) ?? options[0]
   const active = value !== options[0]?.value
 
   useEffect(() => {
     if (!pos) return
-    const close = () => setPos(null)
+    // the screen scrolling closes the list, but scrolling the list itself (a long one) must not
+    const close = (e?: Event) => {
+      if (e?.type === 'scroll' && e.target instanceof Node && list.current?.contains(e.target)) return
+      setPos(null)
+    }
     window.addEventListener('scroll', close, true)
     window.addEventListener('resize', close)
     return () => {
@@ -63,9 +68,11 @@ export default function FilterDropdown({
         onClick={toggle}
         onBlur={() => setPos(null)}
       >
-        <span className="mi" aria-hidden="true">
-          {icon}
-        </span>
+        {icon && (
+          <span className="mi" aria-hidden="true">
+            {icon}
+          </span>
+        )}
         <span className="fd-label">
           {prefix ? `${prefix}: ` : ''}
           {current?.label}
@@ -76,7 +83,7 @@ export default function FilterDropdown({
       </button>
       {pos && (
         // mousedown must not take the focus away from the button, or the list would close before a click lands
-        <ul className="fd-list" role="listbox" style={{ top: pos.top, left: pos.left, ...(pos.width ? { width: pos.width } : {}) }} onMouseDown={(e) => e.preventDefault()}>
+        <ul ref={list} className="fd-list" role="listbox" style={{ top: pos.top, left: pos.left, ...(pos.width ? { width: pos.width } : {}) }} onMouseDown={(e) => e.preventDefault()}>
           {options.map((o) => (
             <li key={o.value}>
               <button

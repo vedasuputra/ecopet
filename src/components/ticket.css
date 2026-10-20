@@ -164,3 +164,44 @@
     transition: none;
   }
 }
+
+/* the welcome gift: when the spin starts every ticket goes dim, so the one the light is on stands out; it lands with a pop */
+.ticket-wrap {
+  transition: opacity 0.12s ease, filter 0.12s ease;
+}
+.ticket-wrap.is-faded {
+  opacity: 0.25;
+  filter: saturate(0.4);
+}
+.ticket-wrap .ticket {
+  transition: transform 0.12s ease, outline-color 0.12s ease, box-shadow 0.12s ease;
+}
+.ticket-wrap.is-lit {
+  position: relative;
+  z-index: 1;
+}
+.ticket-wrap.is-lit .ticket {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+  transform: scale(1.05);
+  box-shadow: 0 0 0 6px rgba(22, 143, 214, 0.22), 0 10px 26px rgba(22, 143, 214, 0.5);
+}
+.gift-list.landed .ticket-wrap.is-lit .ticket {
+  animation: gift-pop 0.6s ease;
+}
+@keyframes gift-pop {
+  0% {
+    transform: scale(1.05);
+  }
+  35% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gift-list.landed .ticket-wrap.is-lit .ticket {
+    animation: none;
+  }
+}

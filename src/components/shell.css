@@ -571,3 +571,46 @@
     animation: none;
   }
 }
+
+/* a click on the locked bars (the first set-up is not finished) shows this small note above the bottom bar */
+.lock-toast {
+  position: absolute;
+  left: 50%;
+  bottom: 84px;
+  z-index: 3000;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 32px);
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--navy);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(4, 30, 66, 0.3);
+  animation: lock-toast 2.4s ease both;
+  pointer-events: none;
+}
+@keyframes lock-toast {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  10%,
+  85% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lock-toast {
+    animation: none;
+  }
+}

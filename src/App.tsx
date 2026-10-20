@@ -14,8 +14,8 @@ import DevPanel from './pages/DevPanel'
 import VendorApp from './vendor/VendorApp'
 import WelcomeGift from './pages/WelcomeGift'
 import AdminApp from './admin/AdminApp'
-import ItineraryPage from './pages/Itinerary'
 import Screens from './pages/Screens'
+import ShopPopup from './pages/ShopPopup'
 import Landing from './site/Landing'
 import Privacy from './site/Privacy'
 
@@ -34,11 +34,14 @@ export default function App() {
           {/* Home, Quests and Coupons stay on screen under their popups (see Screens) */}
           <Route element={<Screens />}>
             <Route path="/home" element={null} />
+            <Route path="/gift" element={<WelcomeGift />} />
+            <Route path="/itinerary" element={null} />
             <Route path="/quests" element={null} />
             <Route path="/quests/:id" element={<QuestDetail />} />
             <Route path="/coupons" element={null} />
             <Route path="/coupons/:id" element={<CouponQR />} />
             <Route path="/offers/:id" element={<CouponInfo />} />
+            <Route path="/shops/:id" element={<ShopPopup />} />
           </Route>
           <Route path="/explore" element={<Explore />} />
           <Route path="/map" element={<Navigate to="/explore" replace />} />
@@ -47,8 +50,6 @@ export default function App() {
           <Route path="/trip-card" element={<TripCard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/dev" element={<DevPanel />} />
-          <Route path="/gift" element={<WelcomeGift />} />
-          <Route path="/itinerary" element={<ItineraryPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

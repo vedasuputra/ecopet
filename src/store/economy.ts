@@ -43,7 +43,7 @@ export function refreshEconomy(): Promise<void> {
       couponId: r.coupon_id as string,
       status: r.status as 'unused' | 'used',
       expiresAt: ((r as { expires_at?: string | null }).expires_at as string | null | undefined) ?? null,
-      source: (r as { source?: string }).source === 'welcome' ? ('welcome' as const) : ('coins' as const),
+      source: (r as { source?: string }).source === 'welcome' ? ('welcome' as const) : (r as { source?: string }).source === 'referral' ? ('referral' as const) : ('coins' as const),
     }))
     const prev = useAppStore.getState().ownedCoupons
     // a vendor just scanned one of my coupons -> celebrate
@@ -121,5 +121,17 @@ export async function claimWelcome(): Promise<ActionResult> {
 /** Dev tools (demo accounts, or any account when the server sets ALLOW_DEV_ECONOMY=1). */
 export async function devAction(action: 'dev_grant' | 'dev_reset' | 'dev_demo', extra: Record<string, unknown> = {}): Promise<ActionResult> {
   const r = await run(action, extra)
+  return r.ok ? { ok: true } : { ok: false, error: r.error ?? 'error' }
+}
+
+/** Your own referral code (made the first time it is asked for) and how many friends joined with it. */
+export async function getReferral(): Promise<{ ok: boolean; code?: string; joined?: number; error?: string }> {
+  const r = await run('my_referral')
+  return r.ok ? { ok: true, code: String(r.code), joined: Number(r.joined ?? 0) } : { ok: false, error: r.error ?? 'error' }
+}
+
+/** A new traveler uses a friend's code: 20 coins for them and a new voucher for the friend. */
+export async function applyReferral(code: string): Promise<ActionResult> {
+  const r = await run('apply_referral', { code })
   return r.ok ? { ok: true } : { ok: false, error: r.error ?? 'error' }
 }

@@ -1,0 +1,102 @@
+/* The travel style form: every question on one screen. Same palette, fonts and small text sizes as the rest of the app. */
+.tsf {
+  display: grid;
+  gap: 16px;
+  font-family: var(--font);
+}
+.tsf *,
+.tsf *::before,
+.tsf *::after {
+  box-sizing: border-box;
+}
+.tsf-q {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.tsf-q legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-family: var(--font-title);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--navy);
+}
+.tsf-q legend span {
+  font-family: var(--font);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.tsf-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.tsf-choices.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.tsf-opt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 40px;
+  padding: 6px 8px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  cursor: pointer;
+}
+.tsf-opt .mi {
+  flex: none;
+  font-size: 16px;
+}
+.tsf-opt.active {
+  background: var(--navy);
+  color: #fff;
+}
+.tsf-opt:not(.active):hover:not(:disabled) {
+  background: var(--sky);
+}
+.tsf-q:disabled {
+  opacity: 0.6;
+}
+.tsf :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* one answer per row when a question is on its own */
+.tsf-choices.one {
+  grid-template-columns: 1fr;
+}
+.tsf-choices.one .tsf-opt {
+  min-height: 46px;
+  font-size: 0.8125rem;
+}
+.tsf-progress {
+  margin: 0 0 10px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+/* a line under the question: regular weight, the normal text colour */
+.tsf-sub {
+  margin: -4px 0 10px;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--ink);
+}

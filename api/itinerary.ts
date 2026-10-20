@@ -11,9 +11,9 @@ import { questsPerDay, sanitizeStyle, styleSummary } from '../src/lib/travelerSt
 // traveler always gets an itinerary.
 
 const num = (v: string | undefined, d: number) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : d)
-const PER_MINUTE = num(process.env.ITINERARY_PER_MINUTE, 2)
-const PER_DAY = num(process.env.ITINERARY_PER_DAY, 6)
-const GLOBAL_PER_DAY = num(process.env.ITINERARY_GLOBAL_PER_DAY, 300)
+const PER_MINUTE = num(process.env.ITINERARY_PER_MINUTE, 4)
+const PER_DAY = num(process.env.ITINERARY_PER_DAY, 30)
+const GLOBAL_PER_DAY = num(process.env.ITINERARY_GLOBAL_PER_DAY, 100)
 
 export default async function handler(req: Req, res: Res) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' })
@@ -85,7 +85,7 @@ export default async function handler(req: Req, res: Res) {
         `- Fit the plan to this profile: favour quest types and partner shops that match the interests, keep to the pace, suit the people they travel with and their budget, ` +
         `and ${style.earlyRiser ? 'early starts are fine (for example a dawn floating market)' : 'do NOT plan early starts: put the floating market later in the morning or on a relaxed day'}.\n`
       : '') +
-    `- theme: at most 8 words. note: one friendly, generic tip of at most 20 words. summary: one sentence.\n` +
+    `- theme: write ONLY the destination name of that day, copied exactly as it is written in the lists above. No other words, no description, nothing invented. note: one friendly, generic tip of at most 20 words. summary: one sentence.\n` +
     `- Do NOT state opening hours, prices, distances, addresses, phone numbers or any fact that is not in the lists above.\n` +
     `- Write theme, note and summary in ${lang === 'vi' ? 'Vietnamese' : 'English'}.`
 

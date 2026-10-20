@@ -106,7 +106,7 @@ export default function Coupons({ initialTab = 'available', forceTab }: { initia
         {shopGone && (
           <p className="coupons-refund">
             {t('couponShopPaused')}
-            {oc.source !== 'welcome' && (
+            {(oc.source ?? 'coins') === 'coins' && (
               <button disabled={busy} onClick={() => void refund(oc.uid)}>
                 {t('couponRefundBtn')}
               </button>

@@ -1,5 +1,5 @@
 import { DEMO_ECONOMY } from '../src/data/demoState.js'
-import { authedUser, deleteAuthUser, getJsonRows, loadQuests, rest, rpc, supabaseConfigured } from './_supabase.js'
+import { apiHit, authedUser, deleteAuthUser, getJsonRows, loadQuests, rest, rpc, supabaseConfigured } from './_supabase.js'
 import type { Req, Res } from './_gemini.js'
 
 // The only way coins, the welcome gift and coupon purchases change. Every action is authenticated
@@ -67,6 +67,30 @@ export default async function handler(req: Req, res: Res) {
       return fail(res, 500, 'db_error')
     }
     return res.json({ ok: true, coins: r.data })
+  }
+
+  // Your own referral code (made the first time) and how many friends joined with it.
+  if (action === 'my_referral') {
+    const c = await rpc('get_referral_code', { p_user: user.id })
+    if (!c.ok) return fail(res, 500, 'db_error')
+    const joined = await getJsonRows<{ id: number }>(`referrals?referrer_id=eq.${user.id}&select=id`)
+    return res.json({ ok: true, code: c.data, joined: joined.length })
+  }
+
+  // A new traveler uses a friend's code: 20 coins for them, a new voucher for the friend. Once per traveler, never their own code.
+  if (action === 'apply_referral') {
+    const code = typeof req.body?.code === 'string' ? req.body.code.trim().slice(0, 12) : ''
+    if (!code) return fail(res, 400, 'bad_request')
+    const hit = await apiHit(user.id, 'referral', 5, 20, 2000) // a code cannot be guessed by trying many
+    if (!hit.ok) return fail(res, 429, 'referral_limit')
+    const r = await rpc('apply_referral', { p_user: user.id, p_code: code, p_voucher_uid: `ref-${Date.now()}-${Math.floor(Math.random() * 10000)}` })
+    if (!r.ok) {
+      if (r.error === 'invalid_code') return fail(res, 404, 'invalid_code')
+      if (r.error === 'own_code') return fail(res, 409, 'own_code')
+      if (r.error === 'already_used') return fail(res, 409, 'already_used')
+      return fail(res, 500, 'db_error')
+    }
+    return res.json({ ok: true, bonus: 20 })
   }
 
   if (action === 'welcome_gift') {

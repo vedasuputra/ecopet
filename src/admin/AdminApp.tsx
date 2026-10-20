@@ -54,7 +54,7 @@ const tag = (id: string) => `#${id.slice(0, 4)}`
 
 export default function AdminApp() {
   const [auth, setAuth] = useState<'loading' | 'signin' | 'denied' | 'ok'>('loading')
-  const [tab, setTab] = useState<'queue' | 'attempts' | 'support'>('queue')
+  const [tab, setTab] = useState<'queue' | 'attempts' | 'support' | 'referrals' | 'impact'>('queue')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [msg, setMsg] = useState('')
@@ -127,7 +127,7 @@ export default function AdminApp() {
 
         {auth === 'ok' && (
           <>
-            <div className="v-tabs" style={{ maxWidth: 520 }}>
+            <div className="v-tabs" style={{ maxWidth: 760 }}>
               <button className={tab === 'queue' ? 'active' : ''} onClick={() => setTab('queue')}>
                 Review queue
               </button>
@@ -137,8 +137,14 @@ export default function AdminApp() {
               <button className={tab === 'support' ? 'active' : ''} onClick={() => setTab('support')}>
                 Customer service
               </button>
+              <button className={tab === 'referrals' ? 'active' : ''} onClick={() => setTab('referrals')}>
+                Referrals
+              </button>
+              <button className={tab === 'impact' ? 'active' : ''} onClick={() => setTab('impact')}>
+                Impact
+              </button>
             </div>
-            {tab === 'queue' ? <Queue title={title} /> : tab === 'attempts' ? <Attempts title={title} /> : <Support />}
+            {tab === 'queue' ? <Queue title={title} /> : tab === 'attempts' ? <Attempts title={title} /> : tab === 'support' ? <Support /> : tab === 'referrals' ? <Referrals /> : <Impact />}
           </>
         )}
       </div>
@@ -441,6 +447,168 @@ function Support() {
           </div>
         </section>
       )}
+    </>
+  )
+}
+
+interface ReferralData {
+  totals: { codes: number; used: number; bonusCoins: number; referrers: number }
+  top: { id: string; name: string; n: number }[]
+  items: { id: number; referrer_id: string; referred_id: string; referrer_name: string; referred_name: string; code: string; bonus_coins: number; voucher_uid: string | null; created_at: string }[]
+}
+
+// Referral codes: how many were made, how many were used, the bonus coins paid, who invites the most, and every referral.
+function Referrals() {
+  const [d, setD] = useState<ReferralData | null>(null)
+  useEffect(() => {
+    void adminApi('referrals').then((r) => r.ok && setD(r as unknown as ReferralData))
+  }, [])
+  if (!d) return <p>Loading...</p>
+  return (
+    <>
+      <div className="v-grid-tiles">
+        <div className="v-tile">
+          <div className="v-label">Codes made</div>
+          <div className="v-value">{d.totals.codes}</div>
+        </div>
+        <div className="v-tile">
+          <div className="v-label">Times used</div>
+          <div className="v-value">{d.totals.used}</div>
+        </div>
+        <div className="v-tile">
+          <div className="v-label">Bonus coins paid</div>
+          <div className="v-value">{d.totals.bonusCoins}</div>
+        </div>
+        <div className="v-tile">
+          <div className="v-label">Travelers who invited</div>
+          <div className="v-value">{d.totals.referrers}</div>
+        </div>
+      </div>
+      <section className="v-card">
+        <h2>Who invites the most</h2>
+        {d.top.length === 0 ? (
+          <p className="v-hint">No referral has been used yet.</p>
+        ) : (
+          <ul className="v-list">
+            {d.top.map((x) => (
+              <li key={x.id}>
+                {x.name || tag(x.id)}: {x.n} {x.n === 1 ? 'friend' : 'friends'}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+      <section className="v-card">
+        <h2>Every referral</h2>
+        <div className="v-table-scroll">
+          <table className="v-table">
+            <thead>
+              <tr>
+                <th>When</th>
+                <th>Code</th>
+                <th>Invited by</th>
+                <th>New traveler</th>
+                <th className="v-num">Bonus</th>
+                <th>Voucher for the inviter</th>
+              </tr>
+            </thead>
+            <tbody>
+              {d.items.map((r) => (
+                <tr key={r.id}>
+                  <td>{when(r.created_at)}</td>
+                  <td>{r.code}</td>
+                  <td>{r.referrer_name || tag(r.referrer_id)}</td>
+                  <td>{r.referred_name || tag(r.referred_id)}</td>
+                  <td className="v-num">+{r.bonus_coins}</td>
+                  <td>{r.voucher_uid ?? '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </>
+  )
+}
+
+interface ImpactData {
+  travelers: number
+  questsDone: number
+  busRides: number
+  plasticFree: number
+  localQuests: number
+  outdoor: number
+  couponsRedeemed: number
+  localShopsReached: number
+  couponsBySource: Record<string, number>
+  origin: Record<string, number>
+  destinations: [string, number][]
+  kinds: [string, number][]
+}
+
+// What all the travelers together did for sustainability, and where they went in the Mekong Delta (counted from finished quests and used coupons).
+function Impact() {
+  const [d, setD] = useState<ImpactData | null>(null)
+  useEffect(() => {
+    void adminApi('impact').then((r) => r.ok && setD(r as unknown as ImpactData))
+  }, [])
+  if (!d) return <p>Loading...</p>
+  const tiles: [string, number, string][] = [
+    ['Active travelers', d.travelers, 'finished at least one quest'],
+    ['Quests finished', d.questsDone, 'all quests'],
+    ['Bus rides', d.busRides, 'a bus instead of a private vehicle'],
+    ['Plastic-free moments', d.plasticFree, 'own bottle or own utensils'],
+    ['Local-business quests', d.localQuests, 'markets, workshops, orchards, family eateries'],
+    ['On foot, bike or oar', d.outdoor, 'hiking, cycling, hand-rowed boat'],
+    ['Coupons used', d.couponsRedeemed, `at ${d.localShopsReached} local shops`],
+  ]
+  return (
+    <>
+      <div className="v-grid-tiles">
+        {tiles.map(([label, n, note]) => (
+          <div className="v-tile" key={label}>
+            <div className="v-label">{label}</div>
+            <div className="v-value">{n}</div>
+            <div className="v-note">{note}</div>
+          </div>
+        ))}
+      </div>
+      <section className="v-card">
+        <h2>Where travelers went (finished quests per place)</h2>
+        <ul className="v-list">
+          {d.destinations.length === 0 && <li>No data yet.</li>}
+          {d.destinations.map(([place, n]) => (
+            <li key={place}>
+              {place}: {n}
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section className="v-card">
+        <h2>What travelers like to do (by kind of quest)</h2>
+        <ul className="v-list">
+          {d.kinds.map(([k, n]) => (
+            <li key={k}>
+              {k.replace(/_/g, ' ')}: {n}
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section className="v-card">
+        <h2>Travelers and coupons</h2>
+        <ul className="v-list">
+          {Object.entries(d.origin).map(([k, n]) => (
+            <li key={k}>
+              {k === 'domestic' ? 'Domestic travelers' : k === 'international' ? 'International travelers' : 'Traveler type not known'}: {n}
+            </li>
+          ))}
+          {Object.entries(d.couponsBySource).map(([k, n]) => (
+            <li key={k}>
+              Coupons from {k === 'coins' ? 'coins' : k === 'welcome' ? 'the welcome gift' : 'referrals'}: {n}
+            </li>
+          ))}
+        </ul>
+      </section>
     </>
   )
 }

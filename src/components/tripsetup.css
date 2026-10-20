@@ -9,46 +9,56 @@
 .ts *::after {
   box-sizing: border-box;
 }
-.ts-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
 .ts-label {
   font-family: var(--font-title);
   font-size: 0.8125rem;
   font-weight: 700;
   color: var(--navy);
 }
-.ts-places-label {
-  margin-top: 4px;
-}
+/* [ - ]  [ 2 days ]  [ + ]: three boxes over the full width, a gap between each */
 .ts-stepper {
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
+  gap: 8px;
+}
+.ts-days {
+  display: flex;
   align-items: center;
-  overflow: hidden;
+  justify-content: center;
+  gap: 4px;
+  min-height: 36px;
   border: 1px solid var(--navy);
   border-radius: 8px;
   background: #fff;
-}
-.ts-stepper b {
-  min-width: 72px;
-  padding: 0 8px;
-  text-align: center;
+  font-family: var(--font-title);
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--navy);
+  cursor: text;
+}
+.ts-days input {
+  width: 2ch;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: right;
+  outline: none;
+}
+.ts-days:focus-within {
+  box-shadow: 0 0 0 3px rgba(22, 143, 214, 0.35);
 }
 .ts-stepper button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  min-height: 36px;
   padding: 0;
-  border: 0;
-  background: transparent;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: #fff;
   color: var(--navy);
   cursor: pointer;
 }
@@ -60,41 +70,127 @@
   cursor: default;
 }
 .ts-stepper .mi {
-  font-size: 20px;
+  font-size: 18px;
 }
-.ts-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.ts-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  min-height: 32px;
-  padding: 0 12px;
-  border: 1px solid var(--navy);
-  border-radius: 999px;
+
+/* the places as a list: a box to tick, the name, and one sentence about what the place is known for */
+.ts-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
   background: #fff;
-  color: var(--navy);
+}
+.ts-list > li + li {
+  border-top: 1px solid var(--mist);
+}
+.ts-place {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.ts-place:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--sky) 30%, #fff);
+}
+.ts-place.active {
+  background: #f0f7fc;
+}
+.ts-place:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.ts-places-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+}
+.ts-actions {
+  display: inline-flex;
+  gap: 12px;
+}
+.ts-actions button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--blue);
   font-family: inherit;
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
 }
-.ts-chip .mi {
-  font-size: 16px;
+.ts-actions button:hover:not(:disabled) {
+  text-decoration: underline;
 }
-.ts-chip.active {
-  background: var(--navy);
+.ts-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.ts-other {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.ts-other-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--blue);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.ts-box {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border: 1.5px solid var(--navy);
+  border-radius: 4px;
+  background: #fff;
   color: #fff;
 }
-.ts-chip:not(.active):hover:not(:disabled) {
-  background: var(--sky);
+.ts-place.active .ts-box {
+  background: var(--navy);
 }
-.ts-chip:disabled {
-  opacity: 0.5;
-  cursor: default;
+.ts-box .mi {
+  font-size: 16px;
+}
+.ts-place-text {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+.ts-place-name {
+  font-family: var(--font-title);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.ts-place-info {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--ink-2);
+  display: -webkit-box; /* never more than two lines */
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .ts :focus-visible {
   outline: 3px solid var(--blue);

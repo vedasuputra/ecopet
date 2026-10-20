@@ -15,7 +15,7 @@ export default function TripOverview() {
 
   if (!user) return null
   // no trip yet: an invitation to plan one (the trip lives on Home and in Profile now, not in the bottom bar)
-  if (user.destinations.length === 0) {
+  if (user.destinations.length === 0 && !itinerary) {
     return (
       <Link to="/onboarding" className="trip-card">
         <span className="trip-card-badge" aria-hidden="true">
@@ -57,7 +57,7 @@ export default function TripOverview() {
   const shops = plan ? plan.vendorIds.length : 0
   // "Cai Rang Floating Market: Cai Rang Floating Market" said the same thing twice: the theme often already names the place
   const theme = plan ? stripDayPrefix(plan.theme) : ''
-  const where = plan ? (theme.toLowerCase().includes(plan.destination.toLowerCase()) ? theme : `${plan.destination}: ${theme}`) : ''
+  const where = plan && (plan.destination || theme) ? (theme.toLowerCase().includes(plan.destination.toLowerCase()) ? theme : `${plan.destination}: ${theme}`) : ''
 
   return (
     <Link to="/itinerary" className="trip-card">
@@ -66,7 +66,7 @@ export default function TripOverview() {
         <span className="trip-card-num">{day}</span>
       </span>
       <span className="trip-card-text">
-        <span className="trip-card-line trip-card-main">{plan ? where : t('dayIn', { places: user.destinations.join(', ') })}</span>
+        <span className="trip-card-line trip-card-main">{where || t('dayIn', { places: user.destinations.join(', ') })}</span>
         <span className="trip-card-line">{plan ? t('dayCounts', { q: quests, s: shops }) : t('dayPlanNone')}</span>
       </span>
       <span className="mi trip-card-go" aria-hidden="true">

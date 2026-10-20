@@ -20,6 +20,26 @@ export interface TravelerStyle {
   earlyRiser: boolean // floating markets are best at dawn
 }
 
+/** The answers while the questions are asked: nothing is chosen at first (only the interests can stay empty, "surprise me"). */
+export interface StyleAnswers {
+  pace?: Pace
+  interests: Interest[]
+  company?: Company
+  budget?: Budget
+  earlyRiser?: boolean
+}
+export const NO_ANSWERS: StyleAnswers = { interests: [] }
+/** All five questions answered (the interests may be none). */
+export const isComplete = (a: StyleAnswers) => !!a.pace && !!a.company && !!a.budget && a.earlyRiser !== undefined
+/** The style from a finished set of answers (a missing one would fall back to the default, but the questions cannot be skipped). */
+export const toStyle = (a: StyleAnswers): TravelerStyle => ({
+  pace: a.pace ?? DEFAULT_STYLE.pace,
+  interests: a.interests,
+  company: a.company ?? DEFAULT_STYLE.company,
+  budget: a.budget ?? DEFAULT_STYLE.budget,
+  earlyRiser: a.earlyRiser ?? DEFAULT_STYLE.earlyRiser,
+})
+
 export const DEFAULT_STYLE: TravelerStyle = { pace: 'balanced', interests: [], company: 'solo', budget: 'mid', earlyRiser: true }
 
 /** How many quests one day holds: a relaxed traveler 2, balanced 3, packed 4. */

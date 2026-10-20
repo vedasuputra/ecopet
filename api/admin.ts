@@ -6,6 +6,8 @@ import type { Req, Res } from './_gemini.js'
 //   queue    photos waiting for a person (oldest first), with what the AI saw
 //   attempts the latest 100 checks + 7-day statistics (to tune the confidence thresholds)
 //   decide   approve (the traveler is paid) or reject (they can try again)
+//   referrals  who invited whom (and the bonus coins paid)
+//   impact     what travelers did for sustainability and where they went, added up for all travelers
 //   tickets / resolve_ticket   the customer service reports: coins back, more days on the coupon, or just an answer
 
 const REVIEW_EXPIRES_DAYS = 14 // a photo nobody reviewed is rejected and deleted after this long
@@ -111,6 +113,65 @@ export default async function handler(req: Req, res: Res) {
     const done = upd.ok ? ((await upd.json()) as unknown[]) : []
     if (!done.length) return fail(res, 409, 'already_decided')
     return res.json({ ok: true })
+  }
+
+  if (action === 'referrals') {
+    const rows = await getJsonRows<{ id: number; referrer_id: string; referred_id: string; code: string; bonus_coins: number; voucher_uid: string | null; created_at: string }>(
+      'referrals?select=*&order=created_at.desc&limit=200',
+    )
+    const ids = [...new Set(rows.flatMap((r) => [r.referrer_id, r.referred_id]))]
+    const profiles = ids.length
+      ? await getJsonRows<{ id: string; state: { user?: { name?: string } } | null }>(`profiles?id=in.(${ids.join(',')})&select=id,state`)
+      : []
+    const nameOf = (id: string) => profiles.find((p) => p.id === id)?.state?.user?.name ?? ''
+    const codes = await getJsonRows<{ user_id: string }>('referral_codes?select=user_id&limit=5000')
+    const byReferrer: Record<string, number> = {}
+    for (const r of rows) byReferrer[r.referrer_id] = (byReferrer[r.referrer_id] ?? 0) + 1
+    const top = Object.entries(byReferrer)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([id, n]) => ({ id, name: nameOf(id), n }))
+    return res.json({
+      ok: true,
+      totals: { codes: codes.length, used: rows.length, bonusCoins: rows.reduce((a, r) => a + r.bonus_coins, 0), referrers: Object.keys(byReferrer).length },
+      top,
+      items: rows.map((r) => ({ ...r, referrer_name: nameOf(r.referrer_id), referred_name: nameOf(r.referred_id) })),
+    })
+  }
+
+  if (action === 'impact') {
+    const types = await getJsonRows<{ id: string; type: string; destination: string | null }>('quests?select=id,type,destination&limit=500')
+    const done = await getJsonRows<{ user_id: string; quest_id: string }>('quest_progress?select=user_id,quest_id&limit=50000')
+    const typeOf = (id: string) => types.find((q) => q.id === id)
+    const n = (kinds: string[]) => done.filter((d) => kinds.includes(typeOf(d.quest_id)?.type ?? '')).length
+    const used = await getJsonRows<{ vendor_id: string; user_id: string }>('coupons_issued?status=eq.used&select=vendor_id,user_id&limit=50000')
+    const issued = await getJsonRows<{ source: string }>('coupons_issued?select=source&limit=50000')
+    const profiles = await getJsonRows<{ traveler_type: string | null }>('profiles?select=traveler_type&limit=50000').catch(() => [])
+    const dest: Record<string, number> = {}
+    for (const d of done) {
+      const place = typeOf(d.quest_id)?.destination
+      if (place) dest[place] = (dest[place] ?? 0) + 1
+    }
+    const kinds: Record<string, number> = {}
+    for (const d of done) {
+      const k = typeOf(d.quest_id)?.type ?? 'other'
+      kinds[k] = (kinds[k] ?? 0) + 1
+    }
+    return res.json({
+      ok: true,
+      travelers: new Set(done.map((d) => d.user_id)).size,
+      questsDone: done.length,
+      busRides: n(['bus']),
+      plasticFree: n(['reusable_bottle', 'reusable_utensils']),
+      localQuests: n(['floating_market', 'traditional_market', 'local_goods', 'craft', 'orchard', 'local_food', 'flowers']),
+      outdoor: n(['hiking', 'rowing', 'cycling']),
+      couponsRedeemed: used.length,
+      localShopsReached: new Set(used.map((u) => u.vendor_id)).size,
+      couponsBySource: issued.reduce<Record<string, number>>((m, r) => ({ ...m, [r.source]: (m[r.source] ?? 0) + 1 }), {}),
+      origin: profiles.reduce<Record<string, number>>((m, p) => ({ ...m, [p.traveler_type ?? 'unknown']: (m[p.traveler_type ?? 'unknown'] ?? 0) + 1 }), {}),
+      destinations: Object.entries(dest).sort((a, b) => b[1] - a[1]),
+      kinds: Object.entries(kinds).sort((a, b) => b[1] - a[1]),
+    })
   }
 
   if (action === 'tickets') {

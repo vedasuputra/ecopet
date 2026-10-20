@@ -160,6 +160,20 @@ export function rulePlan(ctx: PlanContext, fallback = 'chosen'): Itinerary {
  * a shorter stay drops the last days, a longer one adds days built from the rules out of the quests
  * that are not used yet. The old summary is replaced because it may name the old number of days.
  */
+/** A plan with every day empty (no place, no quests, no shops): "simple rules" means the traveler fills it in by hand. */
+export function emptyPlan(tripDays: number, destinations: string[]): Itinerary {
+  const n = clampDays(tripDays)
+  return {
+    source: 'rules',
+    createdAt: new Date().toISOString(),
+    tripDays: n,
+    destinations,
+    summary: '',
+    days: Array.from({ length: n }, (_, i) => ({ day: i + 1, destination: '', theme: '', questIds: [], vendorIds: [], note: '' })),
+    fallback: 'chosen',
+  }
+}
+
 export function resizeItinerary(it: Itinerary, newDays: number, ctx: Omit<PlanContext, 'days' | 'destinations'>): Itinerary {
   const n = clampDays(newDays)
   if (n === it.tripDays) return it
@@ -226,7 +240,8 @@ export function validatePlan(raw: unknown, ctx: PlanContext): Itinerary | null {
     out.push({
       day: i + 1,
       destination: dest,
-      theme: stripDayPrefix(sanitizeNote(d.theme, 70)) || (qs.length ? T.dayTheme(ctx.lang, i + 1, dest) : T.freeTheme(ctx.lang, i + 1, dest)),
+      // the title of a day is always the same as in a plan made with simple rules (the place, or free time there): the AI's own words are not used
+      theme: qs.length ? T.dayTheme(ctx.lang, i + 1, dest) : T.freeTheme(ctx.lang, i + 1, dest),
       questIds: qs,
       vendorIds: vs,
       note: sanitizeNote(d.note, 160),

@@ -94,3 +94,76 @@
   outline: 3px solid var(--blue);
   outline-offset: 2px;
 }
+
+/* Previous / Next of the style questions sit at the bottom of the screen */
+.ob-page > .ob-two:last-child {
+  margin-top: auto;
+}
+
+/* the buttons of a step sit at the bottom of the screen */
+.ob-bottom {
+  margin-top: auto;
+}
+
+/* the page itself counts its padding inside its height: with min-height 100% it was 40px taller than the screen, and its bottom button was cut off */
+.ob-page {
+  box-sizing: border-box;
+}
+
+/* "how do you want to start?" as a popup over the trip page */
+.ob-popup {
+  display: grid;
+  gap: 10px;
+  padding-bottom: 16px;
+}
+.ob-popup .popup-head {
+  margin-bottom: 2px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--mist);
+}
+.ob-popup .ob-or {
+  margin: 4px 0 0;
+  text-align: center;
+}
+
+.ob-popup .ob-lead {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.ob-popup .ob-note {
+  margin: -4px 0 4px;
+}
+
+/* "All set! How do you want to start?": bolder and a bit bigger than body text, but smaller than the popup title (1.15rem) */
+.ob-popup .ob-lead {
+  margin: 4px 0 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--ink);
+}
+/* the optional line is centred */
+.ob-popup .ob-note {
+  text-align: center;
+}
+
+/* the "All set" line is centred too, with room on both sides so it breaks into more, shorter lines */
+.ob-popup .ob-lead {
+  padding: 0 28px;
+  text-align: center;
+}
+.ob-popup .ob-note {
+  padding: 0 20px;
+}
+
+/* "All set" and the optional line under it sit close together */
+.ob-popup .ob-note {
+  margin: -8px 0 4px;
+}
+
+/* a title and the line right under it sit close together (the page has a gap between everything) */
+.ob-page > .ob-title + .ob-note {
+  margin-top: -10px;
+}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import BannerAd from '../components/BannerAd'
+import ReferralPopup from '../components/ReferralPopup'
 import SupportPopup from '../components/SupportPopup'
 import { useLang, useT, type Lang } from '../i18n'
 import { supabase } from '../lib/supabase'
@@ -15,7 +16,7 @@ const LANGUAGES: { code: Lang; label: string }[] = [
 ]
 
 // A row of a list: a small icon, a label, and an arrow (a link) or a button.
-function Row({ icon, label, to, onClick }: { icon: string; label: string; to?: string; onClick?: () => void }) {
+function Row({ icon, label, to, onClick, newTab = false }: { icon: string; label: string; to?: string; onClick?: () => void; newTab?: boolean }) {
   const inner = (
     <>
       <span className="pf-row-ico" aria-hidden="true">
@@ -30,7 +31,7 @@ function Row({ icon, label, to, onClick }: { icon: string; label: string; to?: s
   return (
     <li>
       {to ? (
-        <Link className="pf-row" to={to}>
+        <Link className="pf-row" to={to} target={newTab ? '_blank' : undefined} rel={newTab ? 'noopener noreferrer' : undefined}>
           {inner}
         </Link>
       ) : (
@@ -49,6 +50,7 @@ export default function Profile() {
   const { lang, setLang } = useLang()
   const { user, coins, questStatus, ownedCoupons, reset } = useAppStore()
   const [supportOpen, setSupportOpen] = useState(false)
+  const [referralOpen, setReferralOpen] = useState(false)
 
   const logout = async () => {
     stopSync()
@@ -145,12 +147,13 @@ export default function Profile() {
               ))}
             </span>
           </li>
+          <Row icon="group_add" label={t('refTitle')} onClick={() => setReferralOpen(true)} />
         </ul>
 
         <h3 className="pf-title">{t('profileHelp')}</h3>
         <ul className="pf-list">
           <Row icon="support_agent" label={t('profileSupport')} onClick={() => setSupportOpen(true)} />
-          <Row icon="policy" label={t('privacyPolicy')} to="/privacy" />
+          <Row icon="policy" label={t('privacyPolicy')} to="/privacy" newTab />
         </ul>
 
         <ul className="pf-list pf-account">
@@ -165,6 +168,7 @@ export default function Profile() {
       </div>
       <BannerAd />
       {supportOpen && <SupportPopup onClose={() => setSupportOpen(false)} />}
+      {referralOpen && <ReferralPopup onClose={() => setReferralOpen(false)} />}
     </div>
   )
 }

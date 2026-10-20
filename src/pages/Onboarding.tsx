@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import MeiluAvatar from '../components/MeiluAvatar'
-import TravelerQuiz from '../components/TravelerQuiz'
+import PlanningScreen from '../components/PlanningScreen'
+import TravelStyleSteps from '../components/TravelStyleSteps'
 import TripSetup from '../components/TripSetup'
 import { useLang, useT } from '../i18n'
 import { planTrip } from '../lib/itineraryClient'
-import type { TravelerStyle } from '../lib/travelerStyle'
+import { useFadeClose } from '../lib/useFadeClose'
+import { NO_ANSWERS, toStyle, type StyleAnswers, type TravelerStyle } from '../lib/travelerStyle'
 import { useAppStore } from '../store/useAppStore'
 import './onboarding.css'
 
@@ -26,7 +27,16 @@ export default function Onboarding() {
   const [days, setDays] = useState(hasPlan ? user.days : Math.max(1, user?.days ?? 2))
   const [dest, setDest] = useState<string[]>(hasPlan ? user.destinations : [])
   const [style, setStyle] = useState<TravelerStyle | undefined>(user?.style)
+  const [answers, setAnswers] = useState<StyleAnswers>(NO_ANSWERS) // nothing chosen at first
   const [busy, setBusy] = useState(false)
+  // "how do you want to start?" is a popup over the trip page
+  const [closing, closePopup, reopenPopup] = useFadeClose(() => setStep('trip'))
+  useEffect(() => {
+    if (step !== 'ready') return
+    const key = (e: KeyboardEvent) => e.key === 'Escape' && !busy && closePopup()
+    window.addEventListener('keydown', key)
+    return () => window.removeEventListener('keydown', key)
+  }, [step, busy, closePopup])
 
   // first time: the welcome coupon gacha, then quests
   const next = () => navigate(giftClaimed ? '/home' : '/gift')
@@ -48,62 +58,87 @@ export default function Onboarding() {
 
   if (step === 'quiz') {
     return (
-      <TravelerQuiz
-        initial={style}
-        intro={t('quizIntroOnboarding')}
-        doneLabel={t('quizPlanNow')}
-        onBack={() => setStep('ready')}
-        onDone={(s) => {
-          setStyle(s)
-          void planWithAi(s)
-        }}
-      />
-    )
-  }
-
-  if (step === 'ready') {
-    return (
-      <div className="ob-page ob-center">
-        <MeiluAvatar size={96} />
-        <h2 className="ob-title">{t('onboardingReady')}</h2>
-        <button className="ob-btn ob-primary" onClick={start} disabled={busy}>
-          {t('start')}
-        </button>
-        <p className="ob-note">{t('onboardingPlanHint')}</p>
-        <button className="ob-btn" onClick={() => setStep('quiz')} disabled={busy}>
-          {busy ? t('planning') : t('planWithMeilu')}
-        </button>
-        <button className="ob-link" onClick={() => setStep('trip')} disabled={busy}>
-          {t('quizBack')}
-        </button>
+      <div className="ob-page">
+        {busy && <PlanningScreen />}
+        <h2 className="ob-title">{t('yourStyle')}</h2>
+        <p className="ob-note">{t('quizIntroOnboarding')}</p>
+        <TravelStyleSteps
+          style={answers}
+          onChange={setAnswers}
+          onDone={() => {
+            const finished = toStyle(answers)
+            setStyle(finished)
+            void planWithAi(finished)
+          }}
+          onExit={() => setStep('ready')}
+          doneLabel={t('quizPlanNow')}
+          busy={busy}
+          cardClass="ob-block"
+          barClass="ob-two"
+          btnClass="ob-btn"
+          primaryClass="ob-primary"
+        />
       </div>
     )
   }
 
+  const originBlock = !origin && (
+    // accounts made before this question existed
+    <div className="ob-block">
+      <span className="ts-label">{t('originQ')}</span>
+      <div className="ob-two">
+        <button className="ob-btn" onClick={() => setOrigin('domestic')}>
+          {t('originDomesticShort')}
+        </button>
+        <button className="ob-btn" onClick={() => setOrigin('international')}>
+          {t('originInternationalShort')}
+        </button>
+      </div>
+    </div>
+  )
+
+  // how long the stay is and where to go on one page; the places can be left empty (a traveler may have no plan yet, and Meilu AI can suggest where to go)
   return (
     <div className="ob-page">
       <h2 className="ob-title">{t('tripPlan')}</h2>
-      {!origin && (
-        // accounts made before this question existed
-        <div className="ob-block">
-          <span className="ts-label">{t('originQ')}</span>
-          <div className="ob-two">
-            <button className="ob-btn" onClick={() => setOrigin('domestic')}>
-              {t('originDomesticShort')}
+      {originBlock}
+      <div className="ob-block">
+        <TripSetup days={days} onDays={setDays} places={dest} onPlaces={setDest} />
+      </div>
+      <button
+        className="ob-btn ob-primary ob-bottom"
+        onClick={() => {
+          reopenPopup()
+          setStep('ready')
+        }}
+      >
+        {t('onboardingNext')}
+      </button>
+
+      {step === 'ready' && (
+        <div className={`popup-backdrop${closing ? ' is-closing' : ''}`} role="dialog" aria-modal="true" aria-label={t('onboardingReceived')} onClick={() => !busy && closePopup()}>
+          <div className="popup-card ob-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="popup-head">
+              <div className="popup-titles">
+                <h3>{t('onboardingReceived')}</h3>
+              </div>
+              <button className="popup-close" onClick={closePopup} disabled={busy} aria-label={t('close')} title={t('close')}>
+                <span className="mi" aria-hidden="true">
+                  close
+                </span>
+              </button>
+            </div>
+            <p className="ob-lead">{t('onboardingReady')}</p>
+            <p className="ob-note">{t('onboardingPlanHint')}</p>
+            <button className="ob-btn ob-primary" onClick={start} disabled={busy}>
+              {t('start')}
             </button>
-            <button className="ob-btn" onClick={() => setOrigin('international')}>
-              {t('originInternationalShort')}
+            <button className="ob-btn" onClick={() => setStep('quiz')} disabled={busy}>
+              {busy ? t('planning') : t('planWithMeilu')}
             </button>
           </div>
         </div>
       )}
-      <div className="ob-block">
-        <TripSetup days={days} onDays={setDays} places={dest} onPlaces={setDest} />
-      </div>
-      <button className="ob-btn ob-primary" onClick={() => setStep('ready')} disabled={dest.length === 0}>
-        {t('onboardingNext')}
-      </button>
-      {dest.length === 0 && <p className="ob-note">{t('tripPickPlace')}</p>}
     </div>
   )
 }

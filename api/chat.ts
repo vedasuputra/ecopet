@@ -12,7 +12,7 @@ const LANGS: Record<string, string> = { en: 'English', vi: 'Vietnamese' }
 const num = (v: string | undefined, d: number) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : d)
 const PER_MINUTE = num(process.env.CHAT_PER_MINUTE, 8)
 const PER_DAY = num(process.env.CHAT_PER_DAY, 100)
-const GLOBAL_PER_DAY = num(process.env.CHAT_GLOBAL_PER_DAY, 1200)
+const GLOBAL_PER_DAY = num(process.env.CHAT_GLOBAL_PER_DAY, 200)
 const MAX_MESSAGE_CHARS = 500
 const MAX_HISTORY_CHARS = 600
 

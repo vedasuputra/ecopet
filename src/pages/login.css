@@ -1,0 +1,221 @@
+/* Sign in / sign up: a blue gradient over the whole screen (no top bar, no navigation) and a white card in the middle. */
+.lg-page {
+  box-sizing: border-box;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 56px 20px 28px;
+  background: linear-gradient(165deg, #044388 0%, #0a64ad 55%, #168fd6 100%);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.5;
+  position: relative;
+}
+.lg-page *,
+.lg-page *::before,
+.lg-page *::after {
+  box-sizing: border-box;
+}
+
+/* the language switch, small, in the corner */
+.lg-lang {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+}
+.lg-lang button {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.lg-lang button + button {
+  border-left: 1px solid rgba(255, 255, 255, 0.6);
+}
+.lg-lang button.active {
+  background: #fff;
+  color: var(--navy);
+}
+
+.lg-card {
+  width: 100%;
+  max-width: 360px;
+  display: grid;
+  gap: 12px;
+  padding: 22px 20px 18px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(2, 30, 66, 0.35);
+  color: var(--ink);
+}
+.lg-brand {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  text-align: center;
+}
+.lg-brand img {
+  border-radius: 50%;
+  margin-bottom: 6px;
+}
+.lg-brand h1 {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--navy);
+}
+.lg-brand p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--ink-2);
+}
+.lg-title {
+  margin: 8px 0 0;
+  font-family: var(--font-title);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.lg-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.8125rem;
+}
+.lg-input:focus {
+  border-color: var(--blue);
+  outline: 3px solid rgba(22, 143, 214, 0.25);
+}
+.lg-origin {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.lg-origin legend {
+  padding: 0;
+  margin-bottom: 6px;
+  font-family: var(--font-title);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.lg-origin div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.lg-origin button {
+  min-height: 40px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.lg-origin button.active {
+  background: var(--navy);
+  color: #fff;
+}
+.lg-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.lg-consent input {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  accent-color: var(--navy);
+}
+.lg-consent a {
+  color: var(--blue);
+  font-weight: 600;
+}
+.lg-msg {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #b3261e;
+}
+.lg-btn {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--navy);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.lg-btn:hover:not(:disabled) {
+  background: #033269;
+}
+.lg-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.lg-switch {
+  border: 0;
+  background: none;
+  color: var(--blue);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* the dashboards of the shops and of the team: small links under the card */
+.lg-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+.lg-links a {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.lg-links a:hover {
+  text-decoration: underline;
+}
+.lg-page :focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+.lg-card :focus-visible {
+  outline-color: var(--blue);
+}

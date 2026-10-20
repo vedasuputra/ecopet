@@ -29,15 +29,23 @@ export async function callGemini(payload: Record<string, unknown>): Promise<stri
   const key = process.env.GEMINI_API_KEY
   if (!key) throw new GeminiError('GEMINI_API_KEY is not set')
 
-  const r = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
-    {
+  const send = () =>
+    fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       body: JSON.stringify(payload),
-    },
-  )
-  if (r.status === 429 || r.status === 503) throw new GeminiError(RATE_LIMIT_MESSAGE, true)
+    })
+  let r = await send()
+  // 503 means the model is busy for a moment (not that the quota is used up): one more try a second later
+  if (r.status === 503) {
+    await new Promise((res) => setTimeout(res, 1200))
+    r = await send()
+  }
+  if (r.status === 429 || r.status === 503) {
+    // the real reason (which quota, how long to wait) is in the body: it is written to the server log, never sent to the client
+    console.error(`[gemini] ${r.status}`, (await r.text().catch(() => '')).slice(0, 400))
+    throw new GeminiError(RATE_LIMIT_MESSAGE, true)
+  }
   if (!r.ok) throw new GeminiError(`Gemini ${r.status}: ${(await r.text()).slice(0, 200)}`)
 
   const data = await r.json()
