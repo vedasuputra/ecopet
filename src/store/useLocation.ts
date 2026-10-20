@@ -36,8 +36,8 @@ export const useLocation = create<LocationState>()(
 
       return {
         source: 'simulated',
-        lat: 10.0452,
-        lng: 105.7469,
+        lat: 10.03369,
+        lng: 105.78843,
         placeName: 'Can Tho',
         accuracy: null,
         status: 'idle',

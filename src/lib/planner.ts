@@ -43,6 +43,8 @@ export interface Itinerary {
 
 export const MAX_QUESTS_PER_DAY = 4 // a "packed" traveler; relaxed is 2, balanced 3 (see questsPerDay)
 export const MAX_VENDORS_PER_DAY = 2
+/** How far a day may reach for extra quests when its own destination has run out (a day trip). */
+const TOP_UP_MAX_M = 20_000
 
 export const clampDays = (d: number) => Math.max(1, Math.min(14, Math.round(d)))
 
@@ -122,10 +124,12 @@ function buildDay(ctx: PlanContext, index: number, dest: string, used: Set<strin
   let chosen = pickByVariety(ctx.quests.filter((q) => q.destination === dest && !used.has(q.id)), perDay, [], bonus)
   const minimum = Math.min(2, perDay)
   if (chosen.length < minimum) {
-    // not enough quests in this destination: top up with the closest unused ones elsewhere
+    // not enough quests in this destination: top up with the closest unused ones elsewhere, but only within
+    // a day trip (a "Can Tho" day may borrow a Cai Rang quest, never one in Chau Doc 200 km away)
     const c = coordsOf(dest)
     const extra = ctx.quests
       .filter((q) => !used.has(q.id) && !chosen.some((x) => x.id === q.id))
+      .filter((q) => !c || haversine(c.lat, c.lng, q.lat, q.lng) <= TOP_UP_MAX_M)
       .sort((a, b) => (c ? haversine(c.lat, c.lng, a.lat, a.lng) - haversine(c.lat, c.lng, b.lat, b.lng) : 0))
     chosen = [...chosen, ...pickByVariety(extra, minimum - chosen.length, chosen, bonus)]
   }

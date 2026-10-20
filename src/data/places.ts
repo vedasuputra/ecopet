@@ -1,4 +1,4 @@
-// Known destinations (placeholder coordinates, replace with real OSM coordinates).
+// Known destinations (coordinates from OpenStreetMap / Wikidata).
 // Used by the dev panel's location shortcuts and to label the traveler's area in Meilu chat.
 
 import { haversine } from '../lib/geo'
@@ -10,11 +10,14 @@ export interface KnownPlace {
 }
 
 export const PLACES: KnownPlace[] = [
-  { name: 'Can Tho', lat: 10.0452, lng: 105.7469 },
-  { name: 'Cai Rang Floating Market', lat: 10.0035, lng: 105.7479 },
-  { name: 'Ben Tre', lat: 10.2434, lng: 106.3756 },
-  { name: 'Tra Su', lat: 10.5833, lng: 105.0667 },
-  { name: 'Vinh Long', lat: 10.2537, lng: 105.9722 },
+  { name: 'Can Tho', lat: 10.03369, lng: 105.78843 }, // Ninh Kieu Wharf
+  { name: 'Cai Rang Floating Market', lat: 10.0024, lng: 105.74439 },
+  { name: 'Ben Tre', lat: 10.23499, lng: 106.37597 }, // Ben Tre market
+  { name: 'Vinh Long', lat: 10.25576, lng: 105.9731 }, // Vinh Long market
+  { name: 'My Tho', lat: 10.35724, lng: 106.36789 }, // My Tho market
+  { name: 'Sa Dec', lat: 10.2912, lng: 105.76773 }, // Sa Dec market
+  { name: 'Chau Doc', lat: 10.71108, lng: 105.11888 }, // Chau Doc market
+  { name: 'Tra Su', lat: 10.5859, lng: 105.05827 },
 ]
 
 // Only treat the traveler as "at" a known destination when really close to it.
