@@ -357,6 +357,23 @@ const vi: Record<keyof typeof en, string> = {
   couponCost: 'Giá {n} xu',
   couponMoreInfo: 'Chi tiết',
   couponShopGone: 'Cửa hàng này hiện không cung cấp phiếu giảm giá.',
+
+  // a shop stopped being a partner after the traveler bought its coupon
+  couponShopPaused: 'Cửa hàng này hiện không nhận phiếu Eco-Pet (hợp tác đã hết hạn).',
+  couponRefundBtn: 'Nhận lại xu',
+  couponOrWait: 'Hoặc giữ phiếu và chờ cửa hàng quay lại.',
+  couponRefunded: 'Xong! Xu đã được hoàn vào số dư và phiếu đã bị xóa.',
+  couponRefundShopBack: 'Cửa hàng đã quay lại nên phiếu dùng được bình thường. Không cần hoàn xu.',
+  couponRefundFail: 'Không thể hoàn xu cho phiếu này. Vui lòng thử lại.',
+
+  // domestic or international traveler
+  originQ: 'Bạn đi du lịch từ đâu?',
+  originDomestic: 'Việt Nam (khách trong nước)',
+  originInternational: 'Nước khác (khách quốc tế)',
+  originRequired: 'Vui lòng chọn bạn đi du lịch từ đâu.',
+  staysDomestic: 'Đang đến: {dest}',
+  profileOrigin: 'Loại du khách: {type}',
+  switchOrigin: 'Đổi',
 }
 
 export default vi

@@ -60,3 +60,64 @@ end $$;
 
 revoke all on function public.buy_coupon(uuid, text, text) from public, anon, authenticated;
 grant execute on function public.buy_coupon(uuid, text, text) to service_role;
+
+-- The welcome gift is only drawn from coupons of shops whose subscription is paid up.
+create or replace function public.claim_welcome(p_user uuid, p_uid text)
+returns text language plpgsql security definer set search_path = public as $$
+declare o public.coupon_offers;
+begin
+  insert into public.wallets (user_id) values (p_user) on conflict (user_id) do nothing;
+  update public.wallets set welcome_claimed = true, updated_at = now()
+    where user_id = p_user and not welcome_claimed;
+  if not found then
+    raise exception 'already_claimed';
+  end if;
+  select co.* into o from public.coupon_offers co
+    join public.vendors v on v.id = co.vendor_id
+    where co.active and v.plan_paid_until > now()
+    order by random() limit 1;
+  if not found then
+    raise exception 'no_coupons';
+  end if;
+  insert into public.coupons_issued (uid, user_id, coupon_id, vendor_id, discount_pct, source)
+    values (p_uid, p_user, o.id, o.vendor_id, o.discount_pct, 'welcome');
+  return o.id;
+end $$;
+
+revoke all on function public.claim_welcome(uuid, text) from public, anon, authenticated;
+grant execute on function public.claim_welcome(uuid, text) to service_role;
+
+-- If a shop's subscription lapses, a traveler who already bought one of its coupons with coins can get the coins
+-- back (the coupon is removed). They can also just keep the coupon and wait for the shop to renew.
+-- Refunds are only possible while the shop is NOT paid up, only for unused coupons bought with coins, and only
+-- once (the coin ledger refuses a second refund of the same coupon). The amount is what the traveler paid.
+create or replace function public.refund_coupon(p_user uuid, p_uid text)
+returns int language plpgsql security definer set search_path = public as $$
+declare
+  r public.coupons_issued;
+  paid int;
+  bal int;
+begin
+  select * into r from public.coupons_issued
+    where uid = p_uid and user_id = p_user and status = 'unused' and source = 'coins' for update;
+  if not found then
+    raise exception 'not_refundable';
+  end if;
+  perform 1 from public.vendors where id = r.vendor_id and plan_paid_until > now();
+  if found then
+    raise exception 'shop_active';
+  end if;
+  select -delta into paid from public.coin_ledger where user_id = p_user and reason = 'coupon' and ref = p_uid;
+  if paid is null or paid <= 0 then
+    raise exception 'not_refundable';
+  end if;
+  delete from public.coupons_issued where uid = p_uid;
+  bal := public.apply_coins(p_user, paid, 'refund', p_uid);
+  if bal = -1 then
+    raise exception 'not_refundable';
+  end if;
+  return bal;
+end $$;
+
+revoke all on function public.refund_coupon(uuid, text) from public, anon, authenticated;
+grant execute on function public.refund_coupon(uuid, text) to service_role;

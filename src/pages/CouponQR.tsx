@@ -1,5 +1,6 @@
 import { QRCodeSVG } from 'qrcode.react'
 import { Link, useParams } from 'react-router-dom'
+import ShopStatus from '../components/ShopStatus'
 import { useLang, useLoc, useT } from '../i18n'
 import { isCouponExpired, useAppStore } from '../store/useAppStore'
 import { useCatalog } from '../store/useCatalog'
@@ -11,6 +12,7 @@ export default function CouponQR() {
   const lang = useLang((s) => s.lang)
   const oc = useAppStore((s) => s.ownedCoupons.find((x) => x.uid === id))
   const coupon = useCatalog((s) => s.coupons.find((c) => c.id === oc?.couponId))
+  const vendor = useCatalog((s) => s.vendors.find((v) => v.id === coupon?.vendorId))
   if (!oc || !coupon) {
     return (
       <p>
@@ -34,6 +36,16 @@ export default function CouponQR() {
             {t('codeLabel')}: <b>{shortCode}</b>
           </p>
         </>
+      )}
+      {vendor && (
+        <p>
+          <b>{vendor.name}</b>
+          {vendor.address && <> · {vendor.address}</>}
+          <br />
+          <small>
+            <ShopStatus hours={vendor.openHours} />
+          </small>
+        </p>
       )}
       <p>
         {t('statusLabel')}: {oc.status === 'used' ? t('statusUsed') : expired ? t('couponExpired') : t('statusUnused')}

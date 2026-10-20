@@ -42,7 +42,10 @@ async function push(userId: string) {
   const json = JSON.stringify(state)
   if (json === lastPushed) return // the economy refreshes every few seconds; don't re-save an unchanged profile
   lastPushed = json
-  await supabase.from('profiles').upsert({ id: userId, state, updated_at: new Date().toISOString() })
+  const row = { id: userId, state, updated_at: new Date().toISOString() }
+  const { error } = await supabase.from('profiles').upsert({ ...row, traveler_type: state.user?.origin ?? null })
+  // a database without the traveler_type column yet (traveler_type_schema.sql not run): still save the profile
+  if (error) await supabase.from('profiles').upsert(row)
 }
 
 /** Saves every change (debounced) until stopSync(). */

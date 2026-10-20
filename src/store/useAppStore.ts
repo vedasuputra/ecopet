@@ -4,8 +4,14 @@ import { clampDays, pickByVariety, slotsForDays, type Itinerary } from '../lib/p
 import type { TravelerStyle } from '../lib/travelerStyle'
 import { useCatalog } from './useCatalog'
 
+export type TravelerOrigin = 'domestic' | 'international'
+/** Domestic travelers are not asked how long they stay; they get this many days of quests. */
+export const DOMESTIC_DEFAULT_DAYS = 2
+
 export interface User {
   name: string
+  /** Chosen at sign-up. Domestic travelers skip the length-of-stay question. Missing on older accounts. */
+  origin?: TravelerOrigin
   days: number
   destinations: string[]
   /** What kind of traveler (asked by Meilu before planning and during onboarding). Optional. */
@@ -16,6 +22,7 @@ export interface OwnedCoupon {
   couponId: string
   status: 'unused' | 'used'
   expiresAt?: string | null
+  source?: 'coins' | 'welcome' // welcome-gift coupons cost no coins, so there is nothing to refund
 }
 export interface ChatMessage {
   role: 'user' | 'meilu'
@@ -77,7 +84,8 @@ interface AppState extends Economy {
   chatHistory: ChatMessage[]
   itinerary: Itinerary | null
 
-  login: (name: string) => void
+  login: (name: string, origin?: TravelerOrigin) => void
+  setOrigin: (origin: TravelerOrigin) => void
   setOnboarding: (days: number, destinations: string[], style?: TravelerStyle) => void
   /** Saves the answers to "what kind of traveler are you?". */
   setTravelerStyle: (style: TravelerStyle) => void
@@ -125,13 +133,16 @@ export const useAppStore = create<AppState>()(
     (set, get) => ({
       ...initial,
 
-      login: (name) => set({ user: { name, days: 1, destinations: [] } }),
+      login: (name, origin) => set({ user: { name, origin, days: origin === 'domestic' ? DOMESTIC_DEFAULT_DAYS : 1, destinations: [] } }),
+
+      setOrigin: (origin) =>
+        set((s) => ({ user: s.user ? { ...s.user, origin, days: origin === 'domestic' ? DOMESTIC_DEFAULT_DAYS : s.user.days } : s.user })),
 
       // A longer stay gets more quests; finished quests are not suggested again; a changed trip
       // makes the old itinerary stale, so it is cleared.
       setOnboarding: (days, destinations, style) =>
         set((s) => ({
-          user: { name: s.user?.name ?? 'Traveler', days, destinations, style: style ?? s.user?.style },
+          user: { name: s.user?.name ?? 'Traveler', origin: s.user?.origin, days, destinations, style: style ?? s.user?.style },
           activeQuestIds: pickQuests(destinations, Object.keys(s.questStatus), slotsForDays(days)),
           itinerary: null,
         })),

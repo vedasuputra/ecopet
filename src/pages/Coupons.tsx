@@ -1,8 +1,9 @@
+import BannerAd from '../components/BannerAd'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import ShopStatus from '../components/ShopStatus'
 import { useLang, useLoc, useT } from '../i18n'
-import { buyCoupon } from '../store/economy'
+import { buyCoupon, refundCoupon } from '../store/economy'
 import { isCouponExpired, useAppStore } from '../store/useAppStore'
 import { useCatalog } from '../store/useCatalog'
 
@@ -30,10 +31,20 @@ export default function Coupons() {
           ? t('couponSoldOutMsg')
           : r.error === 'daily_coupon_limit'
             ? t('couponDailyLimitMsg')
-            : r.error === 'unreachable'
+            : r.error === 'coupon_unavailable'
+              ? t('couponShopGone')
+              : r.error === 'unreachable'
             ? t('unreachable')
             : t('couponGetFail'),
     )
+  }
+
+  const refund = async (uid: string) => {
+    setBusy(true)
+    setMsg('')
+    const r = await refundCoupon(uid)
+    setBusy(false)
+    setMsg(r.ok ? t('couponRefunded') : r.error === 'shop_active' ? t('couponRefundShopBack') : t('couponRefundFail'))
   }
 
   return (
@@ -83,10 +94,22 @@ export default function Coupons() {
               {oc.status === 'used' ? t('statusUsed') : expired ? t('couponExpired') : t('statusUnused')}]{' '}
               {oc.status === 'unused' && oc.expiresAt && !expired && <small>({t('couponExpires', { d: date(oc.expiresAt) })}) </small>}
               {oc.status === 'unused' && !expired && <Link to={`/coupons/${oc.uid}`}>{t('showQR')}</Link>}
+              {oc.status === 'unused' && c && !vendors.some((v) => v.id === c.vendorId) && (
+                <div>
+                  <small>{t('couponShopPaused')}</small>{' '}
+                  {oc.source !== 'welcome' && (
+                    <button disabled={busy} onClick={() => void refund(oc.uid)}>
+                      {t('couponRefundBtn')}
+                    </button>
+                  )}{' '}
+                  <small>{t('couponOrWait')}</small>
+                </div>
+              )}
             </li>
           )
         })}
       </ul>
+      <BannerAd />
     </div>
   )
 }

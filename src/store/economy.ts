@@ -21,7 +21,7 @@ export function refreshEconomy(): Promise<void> {
     if (!uid) return
 
     const couponCols = async () => {
-      const full = await supabase!.from('coupons_issued').select('uid,coupon_id,status,expires_at').eq('user_id', uid).order('issued_at', { ascending: true })
+      const full = await supabase!.from('coupons_issued').select('uid,coupon_id,status,expires_at,source').eq('user_id', uid).order('issued_at', { ascending: true })
       if (!full.error) return full
       // older database without the expiry column: fall back so coins and coupons keep syncing
       return supabase!.from('coupons_issued').select('uid,coupon_id,status').eq('user_id', uid).order('issued_at', { ascending: true })
@@ -43,6 +43,7 @@ export function refreshEconomy(): Promise<void> {
       couponId: r.coupon_id as string,
       status: r.status as 'unused' | 'used',
       expiresAt: ((r as { expires_at?: string | null }).expires_at as string | null | undefined) ?? null,
+      source: (r as { source?: string }).source === 'welcome' ? ('welcome' as const) : ('coins' as const),
     }))
     const prev = useAppStore.getState().ownedCoupons
     // a vendor just scanned one of my coupons -> celebrate
@@ -102,6 +103,12 @@ export async function claimAd(): Promise<ActionResult> {
 /** Trade coins for a coupon. The server checks the price and the balance. */
 export async function buyCoupon(couponId: string): Promise<ActionResult> {
   const r = await run('buy_coupon', { couponId })
+  return r.ok ? { ok: true } : { ok: false, error: r.error ?? 'error' }
+}
+
+/** The shop stopped being a paid-up partner: give back the coins paid for an unused coupon. */
+export async function refundCoupon(uid: string): Promise<ActionResult> {
+  const r = await run('refund_coupon', { uid })
   return r.ok ? { ok: true } : { ok: false, error: r.error ?? 'error' }
 }
 

@@ -6,7 +6,7 @@ import { DESTINATIONS } from '../data/quests'
 import { useLang, useT } from '../i18n'
 import { planTrip } from '../lib/itineraryClient'
 import type { TravelerStyle } from '../lib/travelerStyle'
-import { useAppStore } from '../store/useAppStore'
+import { DOMESTIC_DEFAULT_DAYS, useAppStore } from '../store/useAppStore'
 
 // The trip (days + places), then how to start. Meilu only asks what kind of traveler you are when you
 // choose "Plan with Meilu"; starting directly skips the questions.
@@ -17,6 +17,8 @@ export default function Onboarding() {
   const user = useAppStore((s) => s.user)
   const setOnboarding = useAppStore((s) => s.setOnboarding)
   const applyItinerary = useAppStore((s) => s.applyItinerary)
+  const setOrigin = useAppStore((s) => s.setOrigin)
+  const origin = user?.origin
   const giftClaimed = useAppStore((s) => s.welcomeGiftClaimed)
   // Changing the plan later starts from what the traveler chose before
   const hasPlan = !!user && user.destinations.length > 0
@@ -26,6 +28,9 @@ export default function Onboarding() {
   const [style, setStyle] = useState<TravelerStyle | undefined>(user?.style)
   const [busy, setBusy] = useState(false)
 
+  // domestic travelers are not asked how long they stay
+  const tripDays = origin === 'domestic' ? DOMESTIC_DEFAULT_DAYS : days
+
   const toggle = (d: string) =>
     setDest((cur) => (cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d]))
 
@@ -33,15 +38,15 @@ export default function Onboarding() {
   const next = () => navigate(giftClaimed ? '/home' : '/gift')
 
   const start = () => {
-    setOnboarding(days, dest, style)
+    setOnboarding(tripDays, dest, style)
     next()
   }
 
   // Optional: one AI call builds a day-by-day plan from real quests and partner shops, fitted to the answers
   const planWithAi = async (s: TravelerStyle | undefined) => {
     setBusy(true)
-    setOnboarding(days, dest, s)
-    const plan = await planTrip({ days, destinations: dest, lang, ai: true, style: s })
+    setOnboarding(tripDays, dest, s)
+    const plan = await planTrip({ days: tripDays, destinations: dest, lang, ai: true, style: s })
     applyItinerary(plan)
     setBusy(false)
     navigate('/itinerary', { state: { onboarding: true } })
@@ -90,16 +95,25 @@ export default function Onboarding() {
   return (
     <div>
       <h2>{t('tripPlan')}</h2>
-      <label>
-        {t('daysQ')}{' '}
-        <input
-          type="number"
-          min={1}
-          max={14}
-          value={days}
-          onChange={(e) => setDays(Math.min(14, Math.max(1, Number(e.target.value) || 1)))}
-        />
-      </label>
+      {!origin && (
+        // accounts made before this question existed
+        <fieldset>
+          <legend>{t('originQ')}</legend>
+          <button onClick={() => setOrigin('domestic')}>{t('originDomestic')}</button> <button onClick={() => setOrigin('international')}>{t('originInternational')}</button>
+        </fieldset>
+      )}
+      {origin !== 'domestic' && (
+        <label>
+          {t('daysQ')}{' '}
+          <input
+            type="number"
+            min={1}
+            max={14}
+            value={days}
+            onChange={(e) => setDays(Math.min(14, Math.max(1, Number(e.target.value) || 1)))}
+          />
+        </label>
+      )}
       <p>{t('whereQ')}</p>
       {DESTINATIONS.map((d) => (
         <div key={d}>

@@ -48,8 +48,16 @@ export default function Profile() {
       <small>{t('petHint')}</small>
       <h2>{user?.name}</h2>
       <p>
-        {t('stays', { days: user?.days ?? 1, dest: user?.destinations.join(', ') || '-' })}
+        {user?.origin === 'domestic'
+          ? t('staysDomestic', { dest: user.destinations.join(', ') || '-' })
+          : t('stays', { days: user?.days ?? 1, dest: user?.destinations.join(', ') || '-' })}
       </p>
+      {user?.origin && (
+        <p>
+          {t('profileOrigin', { type: t(user.origin === 'domestic' ? 'originDomestic' : 'originInternational') })}{' '}
+          <button onClick={() => useAppStore.getState().setOrigin(user.origin === 'domestic' ? 'international' : 'domestic')}>{t('switchOrigin')}</button>
+        </p>
+      )}
       <p>{t('profileStats', { coins, quests: Object.keys(questStatus).length })}</p>
       <Link to="/trip-card">{t('tripCardLink')}</Link> | <Link to="/ad">{t('watchAdLink')}</Link> |{' '}
       <Link to="/itinerary">{t('openItinerary')}</Link> | <Link to="/onboarding">{t('changePlan')}</Link>

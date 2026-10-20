@@ -56,6 +56,8 @@ export default function CouponInfo() {
             ? t('couponSoldOutMsg')
             : r.error === 'daily_coupon_limit'
               ? t('couponDailyLimitMsg')
+              : r.error === 'coupon_unavailable'
+                ? t('couponShopGone')
               : r.error === 'unreachable'
                 ? t('unreachable')
                 : t('couponGetFail'),

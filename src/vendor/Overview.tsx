@@ -10,6 +10,7 @@ export default function Overview() {
   const lang = useLang((s) => s.lang)
   const { vendor, rows, offers } = useVendor()
   const sub = subscriptionStatus(vendor)
+  const daysLeft = vendor.plan_paid_until ? Math.ceil((new Date(vendor.plan_paid_until).getTime() - Date.now()) / 86400000) : 0
   const s = computeStats(rows)
   const recent = rows.slice(0, 6)
 
@@ -36,6 +37,17 @@ export default function Overview() {
           {t('vScan')}
         </Link>
       </div>
+
+      {sub === 'active' && daysLeft <= 7 && (
+        <section className="v-card" style={{ borderColor: 'var(--danger)' }}>
+          <div className="v-row" style={{ justifyContent: 'space-between' }}>
+            <p>{t('vRenewSoon', { n: daysLeft, d: dateLong(vendor.plan_paid_until as string, lang) })}</p>
+            <Link className="v-btn primary" to="/vendor/billing" style={{ textDecoration: 'none' }}>
+              {t('vRenewNow')}
+            </Link>
+          </div>
+        </section>
+      )}
 
       {sub !== 'active' && (
         <section className="v-card" style={{ borderColor: 'var(--danger)' }}>

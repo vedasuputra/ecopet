@@ -89,7 +89,8 @@ export default function ItineraryPage() {
     )
   }
 
-  const stayControl = (
+  // domestic travelers do not set how long they stay
+  const stayControl = user?.origin === 'domestic' ? null : (
     <p>
       {t('staysLabel')}:{' '}
       <button aria-label={t('fewerDays')} onClick={() => setStay(days - 1)} disabled={busy || days <= 1}>

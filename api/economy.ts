@@ -27,7 +27,7 @@ export default async function handler(req: Req, res: Res) {
   const user = await authedUser(req)
   if (!user) return fail(res, 401, 'unauthorized')
 
-  const { action, couponId, amount } = req.body ?? {}
+  const { action, couponId, amount, uid: couponUid } = req.body ?? {}
 
   // Right to erasure: a traveler deletes their own account and everything tied to it.
   if (action === 'delete_account') {
@@ -55,6 +55,18 @@ export default async function handler(req: Req, res: Res) {
       return fail(res, 500, 'db_error')
     }
     return res.json({ ok: true, coins: r.data, uid })
+  }
+
+  // The shop's subscription lapsed after the traveler bought the coupon: give the coins back.
+  if (action === 'refund_coupon') {
+    if (typeof couponUid !== 'string') return fail(res, 400, 'bad_request')
+    const r = await rpc('refund_coupon', { p_user: user.id, p_uid: couponUid })
+    if (!r.ok) {
+      if (r.error === 'not_refundable') return fail(res, 404, 'not_refundable')
+      if (r.error === 'shop_active') return fail(res, 409, 'shop_active')
+      return fail(res, 500, 'db_error')
+    }
+    return res.json({ ok: true, coins: r.data })
   }
 
   if (action === 'welcome_gift') {

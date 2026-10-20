@@ -374,6 +374,23 @@ const en = {
   couponCost: 'Costs {n} coins',
   couponMoreInfo: 'Details',
   couponShopGone: 'This shop is not offering coupons right now.',
+
+  // a shop stopped being a partner after the traveler bought its coupon
+  couponShopPaused: 'This shop is not accepting Eco-Pet coupons right now (its partnership has lapsed).',
+  couponRefundBtn: 'Get my coins back',
+  couponOrWait: 'Or keep the coupon and wait for the shop to come back.',
+  couponRefunded: 'Done! The coins are back in your balance and the coupon was removed.',
+  couponRefundShopBack: 'This shop is back, so the coupon works again. No refund needed.',
+  couponRefundFail: "Couldn't refund this coupon. Please try again.",
+
+  // domestic or international traveler
+  originQ: 'Where are you travelling from?',
+  originDomestic: 'Vietnam (domestic traveler)',
+  originInternational: 'Another country (international traveler)',
+  originRequired: 'Please choose where you are travelling from.',
+  staysDomestic: 'Visiting: {dest}',
+  profileOrigin: 'Traveler type: {type}',
+  switchOrigin: 'Switch',
 } as const
 
 export default en

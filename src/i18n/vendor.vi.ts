@@ -248,6 +248,9 @@ const vendorVi: Record<keyof typeof vendorEn, string> = {
   vShopSaved: 'Đã lưu! Du khách giờ đã thấy giờ mở cửa của bạn.',
   vErrHours: 'Kiểm tra giờ: giờ mở cửa phải trước giờ đóng cửa.',
   vHoursMissing: 'Bạn chưa nhập giờ mở cửa. Du khách sẽ thấy "chưa có giờ mở cửa".',
+
+  vRenewSoon: 'Gói của bạn sẽ hết hạn sau {n} ngày (vào {d}). Hãy gia hạn ngay để cửa hàng vẫn hiện trên bản đồ và phiếu giảm giá vẫn dùng được.',
+  vRenewNow: 'Gia hạn ngay',
 }
 
 export default vendorVi

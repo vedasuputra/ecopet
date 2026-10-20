@@ -6,7 +6,7 @@ import { openInBrowser } from '../lib/openExternal'
 import { supabase } from '../lib/supabase'
 import { refreshEconomy } from '../store/economy'
 import { loadRemote, startSync } from '../store/sync'
-import { useAppStore } from '../store/useAppStore'
+import { useAppStore, type TravelerOrigin } from '../store/useAppStore'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -17,6 +17,7 @@ export default function Login() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [origin, setOrigin] = useState<TravelerOrigin | ''>('')
   const [agree, setAgree] = useState(false)
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
@@ -35,13 +36,14 @@ export default function Login() {
   const submit = async () => {
     if (!supabase) return setMsg(t('supabaseMissing'))
     if (!email || password.length < 6) return setMsg(t('fillFields'))
+    if (mode === 'signup' && !origin) return setMsg(t('originRequired'))
     if (mode === 'signup' && !agree) return setMsg(t('consentRequired'))
     setBusy(true)
     setMsg('')
 
     const { data, error } =
       mode === 'signup'
-        ? await supabase.auth.signUp({ email, password, options: { data: { name, ...consentRecord() } } })
+        ? await supabase.auth.signUp({ email, password, options: { data: { name, traveler_type: origin, ...consentRecord() } } })
         : await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
@@ -57,7 +59,7 @@ export default function Login() {
     if (!had) {
       // New account: start clean so another user's cached data on this device doesn't leak in.
       reset()
-      login(name.trim() || email.split('@')[0])
+      login(name.trim() || email.split('@')[0], origin || undefined)
     }
     startSync(data.user.id)
     await refreshEconomy()
@@ -95,6 +97,17 @@ export default function Login() {
           onKeyDown={(e) => e.key === 'Enter' && submit()}
         />
       </div>
+      {mode === 'signup' && (
+        <fieldset>
+          <legend>{t('originQ')}</legend>
+          <label>
+            <input type="radio" name="origin" checked={origin === 'domestic'} onChange={() => setOrigin('domestic')} /> {t('originDomestic')}
+          </label>{' '}
+          <label>
+            <input type="radio" name="origin" checked={origin === 'international'} onChange={() => setOrigin('international')} /> {t('originInternational')}
+          </label>
+        </fieldset>
+      )}
       {mode === 'signup' && (
         <p>
           <label>

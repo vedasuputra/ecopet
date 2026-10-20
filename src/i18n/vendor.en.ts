@@ -255,6 +255,9 @@ const vendorEn = {
   vShopSaved: 'Saved! Travelers now see your hours.',
   vErrHours: 'Check the hours: opening time must be before closing time.',
   vHoursMissing: 'You have not set your opening hours yet. Travelers see "opening hours not given".',
+
+  vRenewSoon: 'Your plan ends in {n} days (on {d}). Renew now so your shop stays on the map and your coupons stay available.',
+  vRenewNow: 'Renew now',
 } as const
 
 export default vendorEn

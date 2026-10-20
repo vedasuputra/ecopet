@@ -1,3 +1,4 @@
+import BannerAd from '../components/BannerAd'
 import { Link } from 'react-router-dom'
 import { useCatalog } from '../store/useCatalog'
 import { useLoc, useT } from '../i18n'
@@ -69,6 +70,7 @@ export default function Quests() {
           </ul>
         </>
       )}
+      <BannerAd />
     </div>
   )
 }

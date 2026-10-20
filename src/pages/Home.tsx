@@ -1,3 +1,4 @@
+import BannerAd from '../components/BannerAd'
 import { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import MeiluAvatar from '../components/MeiluAvatar'
@@ -109,6 +110,7 @@ export default function Home() {
         ))}
         <Link to="/explore">{t('viewMore')}</Link>
       </section>
+      <BannerAd />
     </div>
   )
 }
