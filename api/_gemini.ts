@@ -11,8 +11,10 @@ export interface Res {
   json: (body: unknown) => void
 }
 
-// Project decision: always use Gemini 3.1 Flash Lite, no fallback model.
+// Project decision: Gemini 3.1 Flash Lite is the model for every AI call (chat, planning, photo checks). Only when it is busy (503), over its
+// quota (429) or does not answer in time, the same request is tried once on Gemini 3.5 Flash Lite.
 const MODEL = 'gemini-3.1-flash-lite'
+const BACKUP_MODEL = 'gemini-3.5-flash-lite'
 
 export const RATE_LIMIT_MESSAGE =
   'The AI is not working right now due to a rate limit caused by the free plan. Please try again in a minute.'
@@ -29,23 +31,36 @@ export async function callGemini(payload: Record<string, unknown>): Promise<stri
   const key = process.env.GEMINI_API_KEY
   if (!key) throw new GeminiError('GEMINI_API_KEY is not set')
 
-  const send = () =>
-    fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
+  // Never wait for Gemini forever: a call that hangs would end with the platform cutting the whole function (after 60 s) and the traveler
+  // seeing "can't reach the server". After 22 s a call is given up, and the next model is tried.
+  const send = (model: string) =>
+    fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(22_000),
     })
-  let r = await send()
-  // 503 means the model is busy for a moment (not that the quota is used up): one more try a second later
-  if (r.status === 503) {
-    await new Promise((res) => setTimeout(res, 1200))
-    r = await send()
+  const attempt = async (model: string): Promise<Response | null> => {
+    try {
+      return await send(model)
+    } catch (e) {
+      console.error(`[gemini] ${model}: no answer in time`, (e as Error).name)
+      return null
+    }
   }
-  if (r.status === 429 || r.status === 503) {
+  const busy = (res: Response | null) => !res || res.status === 429 || res.status === 503
+
+  let r = await attempt(MODEL)
+  if (busy(r)) {
     // the real reason (which quota, how long to wait) is in the body: it is written to the server log, never sent to the client
-    console.error(`[gemini] ${r.status}`, (await r.text().catch(() => '')).slice(0, 400))
-    throw new GeminiError(RATE_LIMIT_MESSAGE, true)
+    console.error(`[gemini] ${MODEL} ${r?.status ?? 'timeout'}`, r ? (await r.text().catch(() => '')).slice(0, 400) : '')
+    r = await attempt(BACKUP_MODEL)
+    if (busy(r)) {
+      console.error(`[gemini] ${BACKUP_MODEL} ${r?.status ?? 'timeout'}`, r ? (await r.text().catch(() => '')).slice(0, 400) : '')
+      throw new GeminiError(RATE_LIMIT_MESSAGE, true)
+    }
   }
+  if (!r) throw new GeminiError(RATE_LIMIT_MESSAGE, true)
   if (!r.ok) throw new GeminiError(`Gemini ${r.status}: ${(await r.text()).slice(0, 200)}`)
 
   const data = await r.json()

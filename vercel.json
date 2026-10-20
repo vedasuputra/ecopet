@@ -3,6 +3,6 @@
   "functions": {
     "api/itinerary.ts": { "maxDuration": 60 },
     "api/verify.ts": { "maxDuration": 60 },
-    "api/chat.ts": { "maxDuration": 30 }
+    "api/chat.ts": { "maxDuration": 60 }
   }
 }
