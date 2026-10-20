@@ -20,7 +20,7 @@
 .coupons-tabs {
   position: sticky; /* the tab bar stays at the top while the list scrolls under it */
   top: 0;
-  z-index: 20;
+  z-index: 8;
   display: grid;
   grid-template-columns: 1fr 1fr;
   margin: 0 -16px 14px;

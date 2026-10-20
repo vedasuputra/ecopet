@@ -363,7 +363,7 @@ a.tp-item:hover {
 .tp-top {
   position: sticky;
   top: 0; /* the top bar sticks to the very top (a negative top cut off its first 16px) */
-  z-index: 20;
+  z-index: 8;
   margin: -16px -16px 14px;
   background: var(--cream);
   border-bottom: 1px solid var(--navy);

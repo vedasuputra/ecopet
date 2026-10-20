@@ -614,3 +614,11 @@
     animation: none;
   }
 }
+
+/* a popup taller than the screen scrolls inside itself (its buttons are always reachable); the screen behind stays still */
+.popup-card {
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
