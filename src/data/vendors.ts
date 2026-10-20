@@ -1,4 +1,5 @@
 import type { Localized } from '../i18n'
+import type { OpenHours } from '../lib/openHours'
 
 export interface Vendor {
   id: string
@@ -6,6 +7,8 @@ export interface Vendor {
   category: Localized
   lat: number // the demo shops are made up; they sit in the towns where such a shop would be
   lng: number
+  address?: string
+  openHours?: OpenHours | null // null/undefined = the shop has not said when it is open
 }
 
 export const vendors: Vendor[] = [

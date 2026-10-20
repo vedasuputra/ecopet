@@ -210,6 +210,16 @@ const vendorEn = {
   vColPaid: 'Paid',
   vPayNowBtn: 'Pay / change plan',
   vErrPay: 'Payment failed. Please try again.',
+  vSubscribe: 'Subscribe',
+  vSubscription: 'Subscription',
+  vSubscribeNow: 'Subscribe now',
+  vIncludesTitle: 'What your subscription includes',
+  vIncl1: 'Your business shows on the Eco-Pet map that travelers use to plan their stops.',
+  vIncl2: 'You can create coupons that travelers trade their quest coins for.',
+  vIncl3: 'Quests and coupons send travelers to your shop, and the Overview shows how many came and what they spent.',
+  vIncl4: 'You pay no per-coupon fee beyond the 5% commission on coupons that are actually redeemed.',
+  vCommitAgree: 'I agree to the standard commission: {pct}% of each redeemed coupon, shown in Plan & fees.',
+  vErrCommit: 'Please agree to the commission terms to continue.',
 
   // register a business that is not listed yet
   vRegisterListed: 'My business is listed',
@@ -221,6 +231,30 @@ const vendorEn = {
   vNewLocationHint: 'Search your address or area, then pick a result.',
   vPickedLocation: 'Selected: {place}',
   vErrNewBiz: 'Enter a name (2-60 characters), both categories, and pick a location.',
+
+  // weekdays
+  dayMon: 'Monday',
+  dayTue: 'Tuesday',
+  dayWed: 'Wednesday',
+  dayThu: 'Thursday',
+  dayFri: 'Friday',
+  daySat: 'Saturday',
+  daySun: 'Sunday',
+
+  // shop info (address and opening hours)
+  vShopInfo: 'Shop info',
+  vShopInfoTitle: 'Shop address and opening hours',
+  vShopInfoSub: 'Travelers see this on your coupon page, so they know where you are and whether you are open before they get a coupon.',
+  vAddress: 'Address',
+  vAddressHint: 'For example: 12 Hai Ba Trung, Ninh Kieu, Can Tho. Up to 120 characters.',
+  vHoursTitle: 'Opening hours (Vietnam time)',
+  vOpenThisDay: 'Open',
+  vClosedDay: 'Closed',
+  vCopyToAll: 'Copy Monday to all days',
+  vSaveShop: 'Save shop info',
+  vShopSaved: 'Saved! Travelers now see your hours.',
+  vErrHours: 'Check the hours: opening time must be before closing time.',
+  vHoursMissing: 'You have not set your opening hours yet. Travelers see "opening hours not given".',
 } as const
 
 export default vendorEn

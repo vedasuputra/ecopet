@@ -3,7 +3,7 @@ import { Navigate, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
 import { supabase } from '../lib/supabase'
 import type { VendorCtx } from './context'
-import type { IssuedRow, Offer, Payment, VendorInfo } from './data'
+import { subscriptionStatus, type IssuedRow, type Offer, type Payment, type VendorInfo } from './data'
 
 const REFRESH_MS = 8000
 
@@ -89,8 +89,10 @@ export function VendorChrome({ vendor, ctx, onSignOut }: { vendor: VendorInfo; c
     { to: '/vendor', label: t('vOverview'), end: true },
     { to: '/vendor/scan', label: t('vScan') },
     { to: '/vendor/coupons', label: t('vNavCoupons') },
+    { to: '/vendor/shop', label: t('vShopInfo') },
     { to: '/vendor/redemptions', label: t('vRedemptions') },
     { to: '/vendor/fees', label: t('vFees') },
+    { to: '/vendor/billing', label: subscriptionStatus(vendor) === 'active' ? t('vSubscription') : `${t('vSubscribe')} •` },
   ]
 
   return (

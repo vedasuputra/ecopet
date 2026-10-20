@@ -355,6 +355,25 @@ const en = {
   changePlan: 'Change plan',
   logout: 'Log out',
   language: 'Language',
+
+  // coupon details (what the shop is, where, and when it is open)
+  couponDetails: 'Coupon details',
+  couponAt: 'Where to use it',
+  shopAddress: 'Address',
+  shopHours: 'Opening hours',
+  shopOpenNow: 'Open now, closes at {t}',
+  shopClosedToday: 'Closed now, opens today at {t}',
+  shopClosedLater: 'Closed now, opens {d} at {t}',
+  shopClosedAlways: 'Closed',
+  shopHoursUnknown: 'Opening hours not given',
+  shopFarAway: '{n} km from you',
+  shopOpenInMaps: 'Open in maps',
+  couponClosedNote: 'The shop is closed right now. You can still get the coupon and use it later: it stays valid for {n} days.',
+  couponUnknownHoursNote: 'This shop has not said when it is open. Ask before you go.',
+  couponDiscountLine: '{pct}% off',
+  couponCost: 'Costs {n} coins',
+  couponMoreInfo: 'Details',
+  couponShopGone: 'This shop is not offering coupons right now.',
 } as const
 
 export default en

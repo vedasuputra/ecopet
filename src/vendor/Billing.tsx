@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useLang, useT, type Key } from '../i18n'
 import { vendorApi } from './api'
 import { useVendor } from './context'
+import { COMMISSION_RATE } from '../data/coupons'
 import { FIRST_PAYMENT_DISCOUNT, invoiceNo, PLANS, subscriptionStatus, type PlanId } from './data'
 import { dateLong, num, vnd } from './format'
 
@@ -26,6 +27,7 @@ export default function Billing() {
   const [method, setMethod] = useState<Method>('momo')
   const [phase, setPhase] = useState<Phase>('form')
   const [error, setError] = useState('')
+  const [agree, setAgree] = useState(false)
   const [result, setResult] = useState<{ invoice: string; until: string } | null>(null)
 
   const first = payments.length === 0
@@ -37,6 +39,7 @@ export default function Billing() {
 
   const pay = async () => {
     setError('')
+    if (!agree) return setError(t('vErrCommit'))
     setPhase('processing')
     await sleep(1100)
     setPhase('approving')
@@ -87,6 +90,16 @@ export default function Billing() {
           </p>
 
           <section className="v-card">
+            <h2>{t('vIncludesTitle')}</h2>
+            <ul className="v-list">
+              <li>{t('vIncl1')}</li>
+              <li>{t('vIncl2')}</li>
+              <li>{t('vIncl3')}</li>
+              <li>{t('vIncl4')}</li>
+            </ul>
+          </section>
+
+          <section className="v-card">
             <h2>{t('vChoosePlan')}</h2>
             <div className="v-grid-tiles" style={{ marginBottom: 0 }}>
               {(Object.keys(PLANS) as PlanId[]).map((p) => (
@@ -134,6 +147,9 @@ export default function Billing() {
                 </tr>
               </tbody>
             </table>
+            <label style={{ display: 'block', marginTop: 12 }}>
+              <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} /> {t('vCommitAgree', { pct: String(COMMISSION_RATE * 100) })}
+            </label>
             {error && <p className="v-error">{error}</p>}
             <button className="v-btn primary" style={{ marginTop: 12 }} onClick={() => void pay()}>
               {t('vPayNow', { n: num(total, lang) })}

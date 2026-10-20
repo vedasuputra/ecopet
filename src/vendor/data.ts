@@ -1,4 +1,5 @@
 import type { Lang } from '../i18n'
+import type { OpenHours } from '../lib/openHours'
 
 export interface IssuedRow {
   uid: string
@@ -23,6 +24,8 @@ export interface VendorInfo {
   plan: PlanId
   plan_started_at: string | null
   plan_paid_until: string | null
+  address: string | null
+  open_hours: OpenHours | null
 }
 
 export interface Offer {

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { coupons as staticCoupons, type Coupon } from '../data/coupons'
 import { quests as staticQuests, type Quest, type QuestType } from '../data/quests'
 import { vendors as staticVendors, type Vendor } from '../data/vendors'
+import type { OpenHours } from '../lib/openHours'
 import { supabase } from '../lib/supabase'
 
 // Everything that is defined in the database rather than in code: the vendors, the coupons they
@@ -21,7 +22,7 @@ export const useCatalog = create<CatalogState>((set) => ({
   refresh: async () => {
     if (!supabase) return
     const [v, c, q, u] = await Promise.all([
-      supabase.from('vendors').select('id,name,category_en,category_vi,lat,lng'),
+      supabase.from('vendors').select('id,name,category_en,category_vi,lat,lng,address,open_hours,plan_paid_until'),
       supabase.from('coupon_offers').select('id,vendor_id,title_en,title_vi,discount_pct,cost_coins,code,active,valid_days,monthly_cap'),
       supabase.from('quests').select('*').eq('active', true).order('sort'),
       supabase.from('offer_usage').select('offer_id,issued_this_month'),
@@ -30,13 +31,16 @@ export const useCatalog = create<CatalogState>((set) => ({
     if (!v.error && v.data) {
       set({
         vendors: v.data
-          .filter((r) => r.lat != null && r.lng != null)
+          // only shops with a paid-up subscription show on the map and offer coupons
+          .filter((r) => r.lat != null && r.lng != null && r.plan_paid_until && new Date(r.plan_paid_until) > new Date())
           .map((r) => ({
             id: r.id,
             name: r.name,
             category: { en: r.category_en, vi: r.category_vi },
             lat: r.lat as number,
             lng: r.lng as number,
+            address: r.address ?? undefined,
+            openHours: (r.open_hours as OpenHours | null) ?? null,
           })),
       })
     }

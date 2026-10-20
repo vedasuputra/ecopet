@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto'
 import { COMMISSION_RATE } from '../src/data/coupons.js'
+import { parseOpenHours } from '../src/lib/openHours.js'
 import { authedUser, loadQuests, rest, rpc, supabaseConfigured } from './_supabase.js'
 import type { Req, Res } from './_gemini.js'
 
@@ -8,6 +9,7 @@ import type { Req, Res } from './_gemini.js'
 //   lookup       find an unredeemed coupon of MY business by QR payload or short code
 //   redeem       mark it redeemed, record the amount paid and the 5% commission, pay the traveler's bonus
 //   coupon_save  create or edit one of MY coupons (the vendor sets title, discount and coin price)
+//   profile_save set MY shop's address and opening hours
 //   pay          SIMULATED subscription checkout: records a payment, no real money moves
 // Vendors cannot touch any other business's data.
 
@@ -119,7 +121,7 @@ export default async function handler(req: Req, res: Res) {
       if (vendor.owner_id && vendor.owner_id !== user.id) return fail(res, 409, 'already_claimed')
       const upd = await rest(`vendors?id=eq.${encodeURIComponent(vendorId)}`, {
         method: 'PATCH',
-        body: JSON.stringify({ owner_id: user.id, plan }),
+        body: JSON.stringify({ owner_id: user.id, plan, plan_paid_until: null, plan_started_at: null }), // a claimed shop must pay before it shows to travelers
       })
       if (!upd.ok) return fail(res, 500, 'db_error')
     }
@@ -213,6 +215,20 @@ export default async function handler(req: Req, res: Res) {
     })
     if (!up.ok) return fail(res, up.status === 409 ? 409 : 500, up.status === 409 ? 'code_taken' : 'db_error')
     return res.json({ ok: true, id, code })
+  }
+
+  // ---- profile_save: the shop's address and opening hours, shown to travelers on the coupon page
+  if (action === 'profile_save') {
+    const address = typeof body.address === 'string' ? body.address.trim() : ''
+    if (address.length > 120) return fail(res, 400, 'bad_input')
+    const hours = body.openHours === null ? null : parseOpenHours(body.openHours)
+    if (body.openHours !== null && !hours) return fail(res, 400, 'bad_input')
+    const upd = await rest(`vendors?id=eq.${encodeURIComponent(myVendor)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ address: address || null, open_hours: hours }),
+    })
+    if (!upd.ok) return fail(res, 500, 'db_error')
+    return res.json({ ok: true })
   }
 
   // ---- pay: SIMULATED checkout. Records the payment and extends the plan; no money moves.

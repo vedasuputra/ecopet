@@ -7,6 +7,7 @@ import QuestDetail from './pages/QuestDetail'
 import Home from './pages/Home'
 import Explore from './pages/Explore'
 import MeiluChat from './pages/MeiluChat'
+import CouponInfo from './pages/CouponInfo'
 import Coupons from './pages/Coupons'
 import CouponQR from './pages/CouponQR'
 import RewardedAd from './pages/RewardedAd'
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/meilu" element={<MeiluChat />} />
           <Route path="/coupons" element={<Coupons />} />
           <Route path="/coupons/:id" element={<CouponQR />} />
+          <Route path="/offers/:id" element={<CouponInfo />} />
           <Route path="/ad" element={<RewardedAd />} />
           <Route path="/trip-card" element={<TripCard />} />
           <Route path="/profile" element={<Profile />} />

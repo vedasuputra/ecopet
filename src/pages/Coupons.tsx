@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import ShopStatus from '../components/ShopStatus'
 import { useLang, useLoc, useT } from '../i18n'
 import { buyCoupon } from '../store/economy'
 import { isCouponExpired, useAppStore } from '../store/useAppStore'
@@ -42,16 +43,23 @@ export default function Coupons() {
       {msg && <p>{msg}</p>}
       <ul>
         {coupons
-          .filter((c) => c.active !== false)
+          .filter((c) => c.active !== false && vendors.some((v) => v.id === c.vendorId))
           .map((c) => {
             const soldOut = c.remaining === 0
             return (
               <li key={c.id}>
-                {vendors.find((v) => v.id === c.vendorId)?.name}: {loc(c.title)} ({c.discountPct}%) -{' '}
+                <Link to={`/offers/${c.id}`}>
+                  {vendors.find((v) => v.id === c.vendorId)?.name}: {loc(c.title)}
+                </Link>{' '}
+                ({c.discountPct}%) -{' '}
                 {t('costCoins', { n: c.costCoins })}{' '}
                 <small>
                   ({t('couponValid', { n: c.validDays ?? 30 })}
                   {c.remaining != null && !soldOut && `, ${t('couponLeft', { n: c.remaining })}`})
+                </small>{' '}
+                <br />
+                <small>
+                  <ShopStatus hours={vendors.find((v) => v.id === c.vendorId)?.openHours} />
                 </small>{' '}
                 {soldOut ? (
                   <b>{t('couponSoldOut')}</b>

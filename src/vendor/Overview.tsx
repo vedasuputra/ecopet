@@ -46,7 +46,7 @@ export default function Overview() {
                 : t('vStatusExpired', { d: dateLong(vendor.plan_paid_until as string, lang) })}
             </p>
             <Link className="v-btn primary" to="/vendor/billing" style={{ textDecoration: 'none' }}>
-              {t('vPayNowBtn')}
+              {sub === 'inactive' ? t('vSubscribeNow') : t('vPayNowBtn')}
             </Link>
           </div>
         </section>

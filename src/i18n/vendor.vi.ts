@@ -204,6 +204,16 @@ const vendorVi: Record<keyof typeof vendorEn, string> = {
   vColPaid: 'Đã trả',
   vPayNowBtn: 'Thanh toán / đổi gói',
   vErrPay: 'Thanh toán thất bại. Vui lòng thử lại.',
+  vSubscribe: 'Đăng ký gói',
+  vSubscription: 'Gói đăng ký',
+  vSubscribeNow: 'Đăng ký ngay',
+  vIncludesTitle: 'Gói đăng ký bao gồm',
+  vIncl1: 'Cơ sở của bạn xuất hiện trên bản đồ Eco-Pet mà du khách dùng để lên kế hoạch điểm dừng.',
+  vIncl2: 'Bạn có thể tạo phiếu giảm giá để du khách đổi bằng xu nhiệm vụ.',
+  vIncl3: 'Nhiệm vụ và phiếu đưa du khách đến cửa hàng của bạn, và phần Tổng quan cho biết có bao nhiêu người đến và họ đã chi bao nhiêu.',
+  vIncl4: 'Bạn không trả phí nào khác ngoài hoa hồng 5% trên các phiếu thực sự được sử dụng.',
+  vCommitAgree: 'Tôi đồng ý với mức hoa hồng tiêu chuẩn: {pct}% mỗi phiếu được sử dụng, hiển thị trong mục Gói & phí.',
+  vErrCommit: 'Vui lòng đồng ý với điều khoản hoa hồng để tiếp tục.',
 
   vRegisterListed: 'Cửa hàng của tôi đã có trong danh sách',
   vRegisterUnlisted: 'Cửa hàng của tôi chưa có trong danh sách',
@@ -214,6 +224,30 @@ const vendorVi: Record<keyof typeof vendorEn, string> = {
   vNewLocationHint: 'Tìm địa chỉ hoặc khu vực của bạn, rồi chọn một kết quả.',
   vPickedLocation: 'Đã chọn: {place}',
   vErrNewBiz: 'Nhập tên (2-60 ký tự), cả hai loại hình, và chọn một vị trí.',
+
+  // weekdays
+  dayMon: 'Thứ hai',
+  dayTue: 'Thứ ba',
+  dayWed: 'Thứ tư',
+  dayThu: 'Thứ năm',
+  dayFri: 'Thứ sáu',
+  daySat: 'Thứ bảy',
+  daySun: 'Chủ nhật',
+
+  // shop info (address and opening hours)
+  vShopInfo: 'Thông tin cửa hàng',
+  vShopInfoTitle: 'Địa chỉ và giờ mở cửa',
+  vShopInfoSub: 'Du khách thấy thông tin này trên trang phiếu giảm giá của bạn, để biết bạn ở đâu và có đang mở cửa không trước khi nhận phiếu.',
+  vAddress: 'Địa chỉ',
+  vAddressHint: 'Ví dụ: 12 Hai Bà Trưng, Ninh Kiều, Cần Thơ. Tối đa 120 ký tự.',
+  vHoursTitle: 'Giờ mở cửa (giờ Việt Nam)',
+  vOpenThisDay: 'Mở cửa',
+  vClosedDay: 'Đóng cửa',
+  vCopyToAll: 'Sao chép thứ hai cho cả tuần',
+  vSaveShop: 'Lưu thông tin cửa hàng',
+  vShopSaved: 'Đã lưu! Du khách giờ đã thấy giờ mở cửa của bạn.',
+  vErrHours: 'Kiểm tra giờ: giờ mở cửa phải trước giờ đóng cửa.',
+  vHoursMissing: 'Bạn chưa nhập giờ mở cửa. Du khách sẽ thấy "chưa có giờ mở cửa".',
 }
 
 export default vendorVi

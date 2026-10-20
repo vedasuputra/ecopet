@@ -39,8 +39,8 @@ export default function Home() {
 
   // the coupons anyone can get with coins (the ones you already have are on the Coupons screen)
   const available = useMemo(
-    () => coupons.filter((c) => c.active !== false && c.remaining !== 0).sort((a, b) => a.costCoins - b.costCoins).slice(0, MAX_COUPONS),
-    [coupons],
+    () => coupons.filter((c) => c.active !== false && c.remaining !== 0 && vendors.some((v) => v.id === c.vendorId)).sort((a, b) => a.costCoins - b.costCoins).slice(0, MAX_COUPONS),
+    [coupons, vendors],
   )
 
   const places = useMemo(
@@ -90,7 +90,7 @@ export default function Home() {
           <ul>
             {available.map((c) => (
               <li key={c.id}>
-                <Link to="/coupons">{vendors.find((v) => v.id === c.vendorId)?.name}: {loc(c.title)}</Link>{' '}
+                <Link to={`/offers/${c.id}`}>{vendors.find((v) => v.id === c.vendorId)?.name}: {loc(c.title)}</Link>{' '}
                 <small>
                   ({c.discountPct}%) · {t('costCoins', { n: c.costCoins })}
                   {coins < c.costCoins && ` · ${t('notEnoughCoins')}`}

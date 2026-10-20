@@ -5,6 +5,7 @@ import Offers from './Offers'
 import Overview from './Overview'
 import Redemptions from './Redemptions'
 import Scan from './Scan'
+import ShopInfo from './ShopInfo'
 import VendorLogin from './VendorLogin'
 import VendorShell from './VendorShell'
 import './vendor.css'
@@ -20,6 +21,7 @@ export default function VendorApp() {
           <Route path="scan" element={<Scan />} />
           <Route path="coupons" element={<Offers />} />
           <Route path="redemptions" element={<Redemptions />} />
+          <Route path="shop" element={<ShopInfo />} />
           <Route path="fees" element={<Fees />} />
           <Route path="billing" element={<Billing />} />
         </Route>

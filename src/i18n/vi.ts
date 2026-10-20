@@ -338,6 +338,25 @@ const vi: Record<keyof typeof en, string> = {
   changePlan: 'Đổi kế hoạch',
   logout: 'Đăng xuất',
   language: 'Ngôn ngữ',
+
+  // coupon details (what the shop is, where, and when it is open)
+  couponDetails: 'Chi tiết phiếu giảm giá',
+  couponAt: 'Dùng ở đâu',
+  shopAddress: 'Địa chỉ',
+  shopHours: 'Giờ mở cửa',
+  shopOpenNow: 'Đang mở cửa, đóng lúc {t}',
+  shopClosedToday: 'Đang đóng cửa, mở lúc {t} hôm nay',
+  shopClosedLater: 'Đang đóng cửa, mở {d} lúc {t}',
+  shopClosedAlways: 'Đóng cửa',
+  shopHoursUnknown: 'Chưa có giờ mở cửa',
+  shopFarAway: 'Cách bạn {n} km',
+  shopOpenInMaps: 'Mở bản đồ',
+  couponClosedNote: 'Cửa hàng đang đóng cửa. Bạn vẫn có thể nhận phiếu và dùng sau: phiếu có hiệu lực {n} ngày.',
+  couponUnknownHoursNote: 'Cửa hàng chưa cho biết giờ mở cửa. Hãy hỏi trước khi đến.',
+  couponDiscountLine: 'Giảm {pct}%',
+  couponCost: 'Giá {n} xu',
+  couponMoreInfo: 'Chi tiết',
+  couponShopGone: 'Cửa hàng này hiện không cung cấp phiếu giảm giá.',
 }
 
 export default vi
