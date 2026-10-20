@@ -30,7 +30,7 @@ export default function Onboarding() {
     setDest((cur) => (cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d]))
 
   // first time: the welcome coupon gacha, then quests
-  const next = () => navigate(giftClaimed ? '/quests' : '/gift')
+  const next = () => navigate(giftClaimed ? '/home' : '/gift')
 
   const start = () => {
     setOnboarding(days, dest, style)

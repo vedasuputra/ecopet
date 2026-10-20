@@ -27,7 +27,7 @@ export default function Login() {
       if (!u) return
       const had = await loadRemote(u.id)
       startSync(u.id)
-      navigate(had && useAppStore.getState().activeQuestIds.length ? '/quests' : '/onboarding', { replace: true })
+      navigate(had && useAppStore.getState().activeQuestIds.length ? '/home' : '/onboarding', { replace: true })
     })
   }, [navigate])
 
@@ -61,7 +61,7 @@ export default function Login() {
     startSync(data.user.id)
     await refreshEconomy()
     setBusy(false)
-    navigate(had && useAppStore.getState().activeQuestIds.length ? '/quests' : '/onboarding')
+    navigate(had && useAppStore.getState().activeQuestIds.length ? '/home' : '/onboarding')
   }
 
   return (

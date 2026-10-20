@@ -65,11 +65,14 @@ export default function MeiluAvatar({
   nodding = false,
   celebrating = false,
   interactive = false,
+  halfBody = false,
   size = 120,
 }: {
   nodding?: boolean
   celebrating?: boolean
   interactive?: boolean
+  /** Only the top part (head and chest) shows, as if she peeks out from behind the box below her. */
+  halfBody?: boolean
   size?: number
 }) {
   const [anim, setAnim] = useState<Anim>('')
@@ -143,6 +146,8 @@ export default function MeiluAvatar({
           position: 'relative',
           display: 'inline-block',
           width: size,
+          // the sprite is 364x294: keep about the upper 62% of it for the half-body view
+          ...(halfBody ? { height: Math.round(size * (294 / 364) * 0.62), overflow: 'hidden' } : {}),
           userSelect: 'none',
           touchAction: interactive ? 'none' : undefined, // stroking must not scroll the page
           cursor: interactive ? 'pointer' : undefined,

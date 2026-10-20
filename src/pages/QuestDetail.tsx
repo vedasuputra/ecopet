@@ -131,7 +131,9 @@ export default function QuestDetail() {
           {LOC_STATUS_KEY[status] && <p>{t(LOC_STATUS_KEY[status])}</p>}
           {source === 'simulated' && !done && (
             <p>
-              <button onClick={() => useLocation.getState().setSimulated(quest.lat, quest.lng, quest.destination)}>{t('simulateAtQuest')}</button>
+              <small>
+                {t('changeLocationInSettings')} <Link to="/profile">{t('navSettings')}</Link>
+              </small>
             </p>
           )}
           <button onClick={checkLocation}>{t('checkLocation')}</button>

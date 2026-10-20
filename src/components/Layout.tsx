@@ -1,21 +1,26 @@
 import { useEffect, useRef } from 'react'
-import { Navigate, Outlet, useLocation as useRoute, useNavigate } from 'react-router-dom'
+import { Link, Navigate, Outlet, useLocation as useRoute, useNavigate } from 'react-router-dom'
 import PhoneFrame from './PhoneFrame'
-import BannerAd from './BannerAd'
 import BottomNav from './BottomNav'
 import CelebrationOverlay from './CelebrationOverlay'
+import { useT } from '../i18n'
 import { supabase } from '../lib/supabase'
 import { refreshEconomy } from '../store/economy'
 import { loadRemote, startSync } from '../store/sync'
 import { useCatalog } from '../store/useCatalog'
-import { useAppStore } from '../store/useAppStore'
+import { isCouponExpired, useAppStore } from '../store/useAppStore'
 
 const PUBLIC = ['/login', '/dev']
+// screens without the coins / coupons / watch-ad bar
+const NO_BAR = ['/login', '/onboarding', '/gift', '/dev']
 
 export default function Layout() {
   const { pathname } = useRoute()
   const navigate = useNavigate()
+  const t = useT()
   const user = useAppStore((s) => s.user)
+  const coins = useAppStore((s) => s.coins)
+  const couponCount = useAppStore((s) => s.ownedCoupons.filter((c) => c.status === 'unused' && !isCouponExpired(c)).length)
   const taps = useRef(0)
 
   // On app load with an existing Supabase session: pull the saved account state, then keep saving.
@@ -54,15 +59,21 @@ export default function Layout() {
 
   return (
     <PhoneFrame>
-      <header>
+      <header style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <strong onClick={onLogoTap} style={{ userSelect: 'none' }}>
           Eco-Pet
         </strong>
+        {user && !NO_BAR.includes(pathname) && (
+          <>
+            <span>🪙 {t('headerCoins', { n: coins })}</span>
+            <Link to="/coupons">🎟️ {t('headerCoupons', { n: couponCount })}</Link>
+            <button onClick={() => navigate('/ad')}>{t('watchAdShort')}</button>
+          </>
+        )}
       </header>
       <main className="phone-scroll">
         <Outlet />
       </main>
-      <BannerAd />
       <BottomNav />
       <CelebrationOverlay />
     </PhoneFrame>

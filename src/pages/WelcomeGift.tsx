@@ -36,7 +36,7 @@ export default function WelcomeGift() {
     setError('')
     const r = await claimWelcome()
     if (!r.ok) {
-      if (r.error === 'already_claimed') return navigate('/quests', { replace: true })
+      if (r.error === 'already_claimed') return navigate('/home', { replace: true })
       setPhase('ready')
       return setError(r.error === 'unreachable' ? t('unreachable') : t('couponGetFail'))
     }
@@ -112,7 +112,7 @@ export default function WelcomeGift() {
           </p>
           <p>{t('giftClaimed')}</p>
           <button onClick={() => navigate('/coupons')}>{t('giftViewCoupons')}</button>
-          <button onClick={() => navigate('/quests')}>{t('giftContinue')}</button>
+          <button onClick={() => navigate('/home')}>{t('giftContinue')}</button>
         </div>
       )}
     </div>

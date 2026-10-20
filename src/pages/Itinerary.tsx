@@ -224,7 +224,7 @@ export default function ItineraryPage() {
           <button
             onClick={() => {
               applyItinerary(itinerary)
-              navigate(giftClaimed ? '/quests' : '/gift')
+              navigate(giftClaimed ? '/home' : '/gift')
             }}
           >
             {t('useAndContinue')}

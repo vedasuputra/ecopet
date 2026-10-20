@@ -2,11 +2,11 @@ import { NavLink } from 'react-router-dom'
 import { useT, type Key } from '../i18n'
 
 const items: { to: string; label: Key }[] = [
-  { to: '/map', label: 'navMap' },
+  { to: '/home', label: 'navHome' },
   { to: '/quests', label: 'navQuests' },
   { to: '/meilu', label: 'navMeilu' },
   { to: '/coupons', label: 'navCoupons' },
-  { to: '/profile', label: 'navProfile' },
+  { to: '/profile', label: 'navSettings' },
 ]
 
 export default function BottomNav() {

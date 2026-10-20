@@ -164,7 +164,7 @@ export default function RewardedAd() {
         </>
       )}
       {msg && <p>{msg}</p>}
-      <button onClick={() => navigate('/quests')}>{t('back')}</button>
+      <button onClick={() => navigate('/home')}>{t('back')}</button>
 
       {/* Real ad (IMA): fills the phone frame, no close button until it completes */}
       {phase === 'ima' && (
