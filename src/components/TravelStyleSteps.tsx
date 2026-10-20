@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useT } from '../i18n'
-import type { StyleAnswers } from '../lib/travelerStyle'
+import { isComplete, type StyleAnswers } from '../lib/travelerStyle'
 import TravelStyleForm, { STYLE_STEPS } from './TravelStyleForm'
 
 // "What kind of traveler are you?" one question at a time: the question on top, and Previous / Next at the bottom (the first
@@ -29,7 +29,7 @@ export default function TravelStyleSteps({
   primaryClass: string
 }) {
   const t = useT()
-  const [i, setI] = useState(0)
+  const [i, setI] = useState(() => (isComplete(style) ? STYLE_STEPS.length - 1 : 0)) // a retry with every answer there opens at the last question
   const last = i === STYLE_STEPS.length - 1
   // nothing is chosen at first: every question but the interests needs an answer before Next
   const step = STYLE_STEPS[i]

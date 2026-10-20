@@ -9,6 +9,7 @@ import { DESTINATIONS } from '../data/quests'
 import { useLang, useLoc, useT, type Key } from '../i18n'
 import { planCatalog, planTrip } from '../lib/itineraryClient'
 import { clampDays, emptyPlan, nearestVendors, resizeItinerary, stripDayPrefix, type Itinerary, type ItineraryDay } from '../lib/planner'
+import { clearDraft, getDraft, setDraft as keepAnswers } from '../lib/styleDraft'
 import { NO_ANSWERS, toStyle, type StyleAnswers, type TravelerStyle } from '../lib/travelerStyle'
 import { useAppStore } from '../store/useAppStore'
 import { useCatalog } from '../store/useCatalog'
@@ -113,7 +114,7 @@ export default function ItineraryPage() {
     flash(t('tripSaved'))
   }
   const openAsk = () => {
-    setAnswers(NO_ANSWERS)
+    setAnswers(getDraft() ?? NO_ANSWERS) // empty the first time; the answers of a planning that failed when trying again
     setAsking(true)
   }
 
@@ -123,6 +124,9 @@ export default function ItineraryPage() {
     setTravelerStyle(finished)
     setAsking(false)
     await make(true, finished)
+    // a plan made by the AI is done; one that fell back to simple rules means the AI did not work, so the answers are kept for the next try
+    if (useAppStore.getState().itinerary?.source === 'ai') clearDraft()
+    else keepAnswers(answers)
   }
 
   const change = (fn: (d: ItineraryDay[]) => ItineraryDay[]) => {

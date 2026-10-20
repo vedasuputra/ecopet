@@ -6,6 +6,7 @@ import TripSetup from '../components/TripSetup'
 import { useLang, useT } from '../i18n'
 import { planTrip } from '../lib/itineraryClient'
 import { useFadeClose } from '../lib/useFadeClose'
+import { clearDraft, getDraft, setDraft } from '../lib/styleDraft'
 import { NO_ANSWERS, toStyle, type StyleAnswers, type TravelerStyle } from '../lib/travelerStyle'
 import { useAppStore } from '../store/useAppStore'
 import './onboarding.css'
@@ -27,7 +28,7 @@ export default function Onboarding() {
   const [days, setDays] = useState(hasPlan ? user.days : Math.max(1, user?.days ?? 2))
   const [dest, setDest] = useState<string[]>(hasPlan ? user.destinations : [])
   const [style, setStyle] = useState<TravelerStyle | undefined>(user?.style)
-  const [answers, setAnswers] = useState<StyleAnswers>(NO_ANSWERS) // nothing chosen at first
+  const [answers, setAnswers] = useState<StyleAnswers>(getDraft() ?? NO_ANSWERS) // nothing chosen at first (unless a planning failed before: then the answers are kept)
   const [busy, setBusy] = useState(false)
   // "how do you want to start?" is a popup over the trip page
   const [closing, closePopup, reopenPopup] = useFadeClose(() => setStep('trip'))
@@ -52,6 +53,8 @@ export default function Onboarding() {
     setOnboarding(days, dest, s)
     const plan = await planTrip({ days, destinations: dest, lang, ai: true, style: s })
     applyItinerary(plan)
+    if (plan.source === 'ai') clearDraft()
+    else setDraft(answers)
     setBusy(false)
     navigate('/itinerary', { state: { onboarding: true } })
   }
