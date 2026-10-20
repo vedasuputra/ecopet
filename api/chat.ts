@@ -1,4 +1,5 @@
 import { callGemini, sendError, type Req, type Res } from './_gemini.js'
+import { sanitizeStyle, styleSummary } from '../src/lib/travelerStyle.js'
 import { groundingText, loadCatalog } from './_grounding.js'
 import { authedUser, rpc, supabaseConfigured } from './_supabase.js'
 
@@ -21,7 +22,7 @@ export default async function handler(req: Req, res: Res) {
   const user = await authedUser(req)
   if (!user) return res.status(401).json({ ok: false, error: 'unauthorized' })
 
-  const { message, history, placeName, lat, lng, nearest, activeQuests, language, plan } = req.body ?? {}
+  const { message, history, placeName, lat, lng, nearest, activeQuests, language, plan, style } = req.body ?? {}
   if (typeof message !== 'string' || !message.trim()) {
     return res.status(400).json({ ok: false, message: 'Empty message' })
   }
@@ -50,6 +51,8 @@ export default async function handler(req: Req, res: Res) {
   // Facts Meilu may rely on: partner shops and quests near the traveler, from the database
   const grounding = groundingText(await loadCatalog(), typeof lat === 'number' ? lat : null, typeof lng === 'number' ? lng : null)
   const tripPlan = typeof plan === 'string' && plan.trim() ? `The traveler's itinerary: ${plan.trim().slice(0, 500)}. ` : ''
+  const travelerStyle = sanitizeStyle(style) // only known values, never free text
+  const styleLine = travelerStyle ? `The traveler told you what kind of traveler they are (${styleSummary(travelerStyle)}); tailor suggestions to it. ` : ''
 
   const system =
     `You are Meilu, a small, curious bird who is the AI travel companion of the Eco-Pet app and a local guide for the Mekong Delta in Vietnam (Can Tho, floating markets, Ben Tre, etc.). ` +
@@ -69,6 +72,7 @@ export default async function handler(req: Req, res: Res) {
       : '') +
     `Their active quests: ${Array.isArray(activeQuests) && activeQuests.length ? activeQuests.join('; ') : 'none'}. ` +
     tripPlan +
+    styleLine +
     grounding + ' ' +
     `The app language is ${lang}: reply in ${lang} by default, but if the user writes in another language, reply in the language they use. If you are not sure about a fact, say so instead of inventing it.`
 

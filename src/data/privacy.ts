@@ -1,6 +1,6 @@
 // Shared by the sign-up forms (consent record) and the /privacy page.
 // Bump PRIVACY_VERSION whenever the policy text changes in a way that needs fresh consent.
-export const PRIVACY_VERSION = '2026-10-21'
+export const PRIVACY_VERSION = '2026-10-22'
 
 // TODO before launch: replace with a real mailbox you control.
 export const CONTACT_EMAIL = 'privacy@ecopet.example'

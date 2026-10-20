@@ -62,6 +62,10 @@ export const PRIVACY: Section[] = [
         vi: 'Lịch trình: nếu bạn nhờ Meilu lên kế hoạch các ngày, số ngày và điểm đến bạn chọn được gửi đến AI, và AI chỉ được chọn trong danh sách nhiệm vụ và cửa hàng đối tác của chúng tôi. Kế hoạch được lưu trong tài khoản và bạn có thể chỉnh sửa hoặc xóa.',
       },
       {
+        en: 'Travel style: Meilu asks a few multiple-choice questions (pace, interests, who you travel with, budget, early mornings). Your answers are saved in your account and sent to the AI together with your trip so suggestions fit you. You can change them any time in My itinerary.',
+        vi: 'Phong cách du lịch: Meilu hỏi vài câu trắc nghiệm (nhịp độ, sở thích, đi cùng ai, ngân sách, dậy sớm). Câu trả lời được lưu trong tài khoản và gửi đến AI cùng chuyến đi của bạn để gợi ý hợp với bạn hơn. Bạn có thể đổi bất cứ lúc nào trong Lịch trình của tôi.',
+      },
+      {
         en: 'Chat with Meilu: your messages and Meilu\'s replies are saved in your account so Meilu remembers you when you come back.',
         vi: 'Trò chuyện với Meilu: tin nhắn của bạn và câu trả lời của Meilu được lưu trong tài khoản để Meilu nhớ bạn khi bạn quay lại.',
       },

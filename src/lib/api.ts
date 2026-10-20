@@ -59,10 +59,11 @@ export const askMeilu = (p: {
   activeQuests: string[]
   language: 'en' | 'vi'
   plan?: string
+  style?: unknown
 }) => post('/api/chat', p, true)
 
 /** Asks the server for an itinerary (one AI call). Falls back to rules on the server if the AI is unavailable. */
-export const requestItinerary = (p: { days: number; destinations: string[]; language: 'en' | 'vi' }) =>
+export const requestItinerary = (p: { days: number; destinations: string[]; language: 'en' | 'vi'; style?: unknown }) =>
   post('/api/itinerary', p, true)
 
 /** Everything that changes coins, coupons or the welcome gift goes through here (server-checked). */

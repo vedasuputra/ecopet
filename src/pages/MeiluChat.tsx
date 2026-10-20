@@ -48,6 +48,7 @@ export default function MeiluChat() {
         return quest ? quest.title.en : id
       }),
       language: lang,
+      style: useAppStore.getState().user?.style,
       plan: planSummary(
         useAppStore.getState().itinerary,
         useCatalog.getState().quests.map((x) => ({ id: x.id, title: x.title.en })),

@@ -1,7 +1,8 @@
 import { GeminiError, callGemini, type Req, type Res } from './_gemini.js'
 import { loadCatalog } from './_grounding.js'
 import { apiHit, authedUser, supabaseConfigured } from './_supabase.js'
-import { MAX_QUESTS_PER_DAY, nearestVendors, rulePlan, validatePlan, type PlanContext } from '../src/lib/planner.js'
+import { nearestVendors, rulePlan, validatePlan, type PlanContext } from '../src/lib/planner.js'
+import { questsPerDay, sanitizeStyle, styleSummary } from '../src/lib/travelerStyle.js'
 
 // "Plan my days with Meilu": ONE Gemini call per request. The model only chooses among quests,
 // vendors and destinations that exist in the database (the schema even lists them as the only
@@ -20,7 +21,7 @@ export default async function handler(req: Req, res: Res) {
   const user = await authedUser(req)
   if (!user) return res.status(401).json({ ok: false, error: 'unauthorized' })
 
-  const { days: rawDays, destinations: rawDest, language } = req.body ?? {}
+  const { days: rawDays, destinations: rawDest, language, style: rawStyle } = req.body ?? {}
   const days = Math.round(Number(rawDays))
   if (!Number.isFinite(days) || days < 1 || days > 14) return res.status(400).json({ ok: false, error: 'bad_days' })
 
@@ -30,7 +31,9 @@ export default async function handler(req: Req, res: Res) {
   const destinations = picked.length ? [...new Set(picked)] : known
   const lang = language === 'vi' ? 'vi' : 'en'
 
-  const ctx: PlanContext = { days, destinations, quests: catalog.quests, vendors: catalog.vendors, lang }
+  const style = sanitizeStyle(rawStyle) // only known values ever reach the prompt
+  const perDay = questsPerDay(style)
+  const ctx: PlanContext = { days, destinations, quests: catalog.quests, vendors: catalog.vendors, lang, style }
   const fallback = (why: string) => res.json({ ok: true, itinerary: rulePlan(ctx, why) })
 
   // limit on AI planning (free Gemini quota); a refusal still returns the rule-based plan
@@ -42,7 +45,7 @@ export default async function handler(req: Req, res: Res) {
   const dataBlock = order
     .map((dest) => {
       const qs = catalog.quests.filter((q) => q.destination === dest).map((q) => `${q.id} "${q.title}" (${q.type})`).join('; ')
-      const vs = nearestVendors(dest, catalog.vendors, 3).map((v) => `${v.id} "${v.name}" (${v.category})`).join('; ')
+      const vs = nearestVendors(dest, catalog.vendors, 3, 20, style?.interests ?? []).map((v) => `${v.id} "${v.name}" (${v.category})`).join('; ')
       return `DESTINATION ${dest}${destinations.includes(dest) ? ' [traveler is going here]' : ' [other]'}:\n  quests: ${qs || 'none'}\n  partner shops: ${vs || 'none'}`
     })
     .join('\n')
@@ -76,7 +79,12 @@ export default async function handler(req: Req, res: Res) {
     `RULES:\n` +
     `- Return exactly ${days} days, numbered 1 to ${days}.\n` +
     `- Use ONLY the quest ids, partner shop ids and destinations listed above. Never invent any.\n` +
-    `- Each quest may appear at most once in the whole plan; at most ${MAX_QUESTS_PER_DAY} quests a day; prefer a mix of quest types and the destinations the traveler is going to.\n` +
+    `- Each quest may appear at most once in the whole plan; at most ${perDay} quests a day; prefer a mix of quest types and the destinations the traveler is going to.\n` +
+    (style
+      ? `TRAVELER PROFILE (Meilu asked the traveler): ${styleSummary(style)}.\n` +
+        `- Fit the plan to this profile: favour quest types and partner shops that match the interests, keep to the pace, suit the people they travel with and their budget, ` +
+        `and ${style.earlyRiser ? 'early starts are fine (for example a dawn floating market)' : 'do NOT plan early starts: put the floating market later in the morning or on a relaxed day'}.\n`
+      : '') +
     `- theme: at most 8 words. note: one friendly, generic tip of at most 20 words. summary: one sentence.\n` +
     `- Do NOT state opening hours, prices, distances, addresses, phone numbers or any fact that is not in the lists above.\n` +
     `- Write theme, note and summary in ${lang === 'vi' ? 'Vietnamese' : 'English'}.`
