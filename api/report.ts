@@ -55,8 +55,8 @@ export default async function handler(req: Req, res: Res) {
   const hit = await apiHit(user.id, 'report', PER_MINUTE, PER_DAY, GLOBAL_PER_DAY)
   if (!hit.ok) return hit.reason === 'unavailable' ? fail(res, 500, 'server_error') : fail(res, 429, 'report_limit')
 
-  // one report per attempt, decided atomically by the filter
-  const upd = await rest(`verification_attempts?id=eq.${attempt.id}&user_id=eq.${user.id}&review_status=is.null&reported_by_user=eq.false`, {
+  // one report per attempt: only a row that has no review status yet can become pending, so a second request finds nothing
+  const upd = await rest(`verification_attempts?id=eq.${attempt.id}&user_id=eq.${user.id}&review_status=is.null`, {
     method: 'PATCH',
     headers: { Prefer: 'return=representation' },
     body: JSON.stringify({
