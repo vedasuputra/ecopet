@@ -135,7 +135,7 @@ export default function VendorLogin() {
       <div className="v-login-card">
         <div className="v-row" style={{ justifyContent: 'space-between', marginBottom: 12 }}>
           <div className="v-brand" style={{ padding: 0 }}>
-            <img src="/icon-192.png" alt="" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+            <img src="/icon-192.png?v=2" alt="" style={{ width: 32, height: 32, borderRadius: '50%' }} />
             Eco-Pet
           </div>
           <div className="v-lang" role="group">

@@ -251,6 +251,15 @@ const vendorVi: Record<keyof typeof vendorEn, string> = {
 
   vRenewSoon: 'Gói của bạn sẽ hết hạn sau {n} ngày (vào {d}). Hãy gia hạn ngay để cửa hàng vẫn hiện trên bản đồ và phiếu giảm giá vẫn dùng được.',
   vRenewNow: 'Gia hạn ngay',
+
+  // customers by origin
+  vOriginTitle: 'Khách hàng của bạn là ai',
+  vOriginNote: 'Du khách cho biết mình là khách quốc tế hay trong nước khi đăng ký. Bạn chỉ thấy các số liệu này, không biết họ là ai.',
+  vOriginCol: 'Du khách',
+  vOriginSales: 'Doanh thu',
+  vOriginInternational: 'Khách quốc tế',
+  vOriginDomestic: 'Khách trong nước (Việt Nam)',
+  vOriginUnknown: 'Chưa rõ (phiếu cũ)',
 }
 
 export default vendorVi

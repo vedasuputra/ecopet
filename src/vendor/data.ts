@@ -12,6 +12,7 @@ export interface IssuedRow {
   issued_at: string
   expires_at: string | null
   redeemed_at: string | null
+  traveler_type?: 'domestic' | 'international' | null
   amount_vnd: number | null
   commission_vnd: number | null
 }
@@ -150,4 +151,24 @@ export type SubscriptionStatus = 'active' | 'expired' | 'inactive'
 export function subscriptionStatus(v: Pick<VendorInfo, 'plan_paid_until'>): SubscriptionStatus {
   if (!v.plan_paid_until) return 'inactive'
   return new Date(v.plan_paid_until) > new Date() ? 'active' : 'expired'
+}
+
+export interface OriginRow {
+  claimed: number
+  redeemed: number
+  sales: number
+}
+
+/** Coupons and sales split by whether the traveler is domestic or international (null = not known, older coupons). */
+export function statsByOrigin(rows: IssuedRow[]): Record<'domestic' | 'international' | 'unknown', OriginRow> {
+  const out = { domestic: { claimed: 0, redeemed: 0, sales: 0 }, international: { claimed: 0, redeemed: 0, sales: 0 }, unknown: { claimed: 0, redeemed: 0, sales: 0 } }
+  for (const r of rows) {
+    const o = out[r.traveler_type === 'domestic' || r.traveler_type === 'international' ? r.traveler_type : 'unknown']
+    o.claimed++
+    if (r.status === 'used') {
+      o.redeemed++
+      o.sales += r.amount_vnd ?? 0
+    }
+  }
+  return out
 }

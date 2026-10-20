@@ -258,6 +258,15 @@ const vendorEn = {
 
   vRenewSoon: 'Your plan ends in {n} days (on {d}). Renew now so your shop stays on the map and your coupons stay available.',
   vRenewNow: 'Renew now',
+
+  // customers by origin
+  vOriginTitle: 'Who your customers are',
+  vOriginNote: 'Travelers say whether they are international or domestic when they sign up. You only see these counts, never who they are.',
+  vOriginCol: 'Traveler',
+  vOriginSales: 'Sales',
+  vOriginInternational: 'International travelers',
+  vOriginDomestic: 'Domestic travelers (Vietnam)',
+  vOriginUnknown: 'Not known (older coupons)',
 } as const
 
 export default vendorEn

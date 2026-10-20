@@ -70,6 +70,10 @@ export const PRIVACY: Section[] = [
         vi: 'Phong cách du lịch: Meilu hỏi vài câu trắc nghiệm (nhịp độ, sở thích, đi cùng ai, ngân sách, dậy sớm). Câu trả lời được lưu trong tài khoản và gửi đến AI cùng chuyến đi của bạn để gợi ý hợp với bạn hơn. Bạn có thể đổi bất cứ lúc nào trong Lịch trình của tôi.',
       },
       {
+        en: 'Where you travel from: when you sign up you say whether you are a domestic traveler (from Vietnam) or an international traveler. It is saved in your account. Domestic travelers are not asked how long they stay. You can change it in your profile.',
+        vi: 'Bạn đi từ đâu: khi đăng ký, bạn cho biết mình là khách trong nước (từ Việt Nam) hay khách quốc tế. Thông tin này được lưu trong tài khoản. Khách trong nước không bị hỏi thời gian lưu trú. Bạn có thể đổi trong hồ sơ.',
+      },
+      {
         en: 'Chat with Meilu: your messages and Meilu\'s replies are saved in your account so Meilu remembers you when you come back.',
         vi: 'Trò chuyện với Meilu: tin nhắn của bạn và câu trả lời của Meilu được lưu trong tài khoản để Meilu nhớ bạn khi bạn quay lại.',
       },
@@ -114,8 +118,8 @@ export const PRIVACY: Section[] = [
         vi: 'OpenStreetMap và Photon: cung cấp bản đồ và tìm kiếm địa điểm. Họ thấy địa chỉ IP và địa điểm bạn tìm kiếm.',
       },
       {
-        en: 'Shops: a shop sees only the coupon (its short code and when it was claimed or used). It never sees your name or email.',
-        vi: 'Cửa hàng: cửa hàng chỉ thấy phiếu (mã ngắn, thời điểm nhận và sử dụng). Họ không bao giờ thấy tên hay email của bạn.',
+        en: 'Shops: a shop sees only the coupon (its short code, when it was claimed or used, and whether the traveler is domestic or international, as a count). It never sees your name or email.',
+        vi: 'Cửa hàng: cửa hàng chỉ thấy phiếu (mã ngắn, thời điểm nhận và sử dụng, và du khách là khách trong nước hay quốc tế, dưới dạng số liệu). Họ không bao giờ thấy tên hay email của bạn.',
       },
     ],
   },

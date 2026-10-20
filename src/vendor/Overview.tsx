@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
 import { useVendor } from './context'
 import DailyChart from './DailyChart'
-import { computeStats, couponTitle, dailySeries, rowExpired, subscriptionStatus } from './data'
+import { computeStats, couponTitle, dailySeries, rowExpired, statsByOrigin, subscriptionStatus } from './data'
 import { dateLong, dateTime, pct, travelerTag, vnd } from './format'
 
 export default function Overview() {
@@ -13,6 +13,7 @@ export default function Overview() {
   const daysLeft = vendor.plan_paid_until ? Math.ceil((new Date(vendor.plan_paid_until).getTime() - Date.now()) / 86400000) : 0
   const s = computeStats(rows)
   const recent = rows.slice(0, 6)
+  const origin = statsByOrigin(rows)
 
   const tiles: { label: string; value: string; note?: string }[] = [
     { label: t('vStatClaimed'), value: String(s.claimed) },
@@ -80,6 +81,35 @@ export default function Overview() {
           </div>
         ))}
       </div>
+
+      <section className="v-card">
+        <h2>{t('vOriginTitle')}</h2>
+        <p className="v-hint">{t('vOriginNote')}</p>
+        <div className="v-table-scroll">
+          <table className="v-table">
+            <thead>
+              <tr>
+                <th>{t('vOriginCol')}</th>
+                <th className="v-num">{t('vStatClaimed')}</th>
+                <th className="v-num">{t('vStatRedeemed')}</th>
+                <th className="v-num">{t('vOriginSales')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(['international', 'domestic', 'unknown'] as const)
+                .filter((k) => k !== 'unknown' || origin.unknown.claimed > 0)
+                .map((k) => (
+                  <tr key={k}>
+                    <td>{t(k === 'international' ? 'vOriginInternational' : k === 'domestic' ? 'vOriginDomestic' : 'vOriginUnknown')}</td>
+                    <td className="v-num">{origin[k].claimed}</td>
+                    <td className="v-num">{origin[k].redeemed}</td>
+                    <td className="v-num">{vnd(origin[k].sales, lang)}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       <section className="v-card">
         <h2>{t('vChartTitle')}</h2>

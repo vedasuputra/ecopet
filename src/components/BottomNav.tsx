@@ -28,7 +28,7 @@ export default function BottomNav() {
         title={t('askMeiluHere')}
         style={{ width: 48, height: 48, borderRadius: '50%', border: '2px solid #000', background: '#fff', padding: 0, overflow: 'hidden', marginTop: -14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
-        <img src="/icon-192.png" alt="Meilu" width={44} height={44} style={{ display: 'block', margin: '0 auto', borderRadius: '50%' }} />
+        <img src="/icon-192.png?v=2" alt="Meilu" width={44} height={44} style={{ display: 'block', margin: '0 auto', borderRadius: '50%' }} />
       </button>
       {right.map(link)}
     </nav>
