@@ -1,5 +1,5 @@
 import { useLoc, useT, type Key } from '../i18n'
-import { formatDistance } from '../lib/geo'
+import { formatDistance, mapsSearchUrl } from '../lib/geo'
 import type { Ranked, Reason } from '../lib/recommend'
 
 const WHY: Record<Reason, Key> = { interest: 'whyInterest', trip: 'whyTrip', near: 'whyNear' }
@@ -45,7 +45,7 @@ export default function PlaceCard({
       </p>
       <p style={{ margin: '6px 0 0' }}>
         <a
-          href={`https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`}
+          href={mapsSearchUrl(`${place.name}, ${place.destination}, Vietnam`)}
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}

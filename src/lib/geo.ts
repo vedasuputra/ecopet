@@ -1,3 +1,6 @@
+/** Google Maps link that searches for the place by name (so the real place opens, not a bare pin). */
+export const mapsSearchUrl = (query: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+
 /** Haversine distance in meters. */
 export function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371000

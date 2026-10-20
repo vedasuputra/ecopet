@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import ShopStatus, { DAY_KEY } from '../components/ShopStatus'
 import { useLoc, useT } from '../i18n'
-import { haversine } from '../lib/geo'
+import { haversine, mapsSearchUrl } from '../lib/geo'
 import { DAYS, openStatus, todayKey } from '../lib/openHours'
 import { buyCoupon } from '../store/economy'
 import { useAppStore } from '../store/useAppStore'
@@ -88,7 +88,7 @@ export default function CouponInfo() {
         {t('shopAddress')}: {vendor.address ?? '—'}
         <br />
         <small>{t('shopFarAway', { n: km < 10 ? km.toFixed(1) : Math.round(km) })}</small>{' '}
-        <a href={`https://www.google.com/maps/search/?api=1&query=${vendor.lat},${vendor.lng}`} target="_blank" rel="noopener noreferrer">
+        <a href={mapsSearchUrl(vendor.address ? `${vendor.name}, ${vendor.address}` : `${vendor.lat},${vendor.lng}`)} target="_blank" rel="noopener noreferrer">
           {t('shopOpenInMaps')}
         </a>
       </p>
