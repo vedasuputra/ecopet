@@ -105,7 +105,7 @@ export default function Home() {
       <section>
         <h3>{t('homePlaces')}</h3>
         {places.map((p) => (
-          <PlaceCard key={p.place.id} item={p} compact />
+          <PlaceCard key={p.place.id} item={p} compact onZoom={() => navigate(`/explore?focus=${p.place.id}`)} />
         ))}
         <Link to="/explore">{t('viewMore')}</Link>
       </section>

@@ -19,8 +19,15 @@ async function post(path: string, body: unknown, withAuth = false): Promise<ApiR
       const token = (await supabase?.auth.getSession())?.data.session?.access_token
       if (token) headers.Authorization = `Bearer ${token}`
     }
-    const r = await fetch(path, { method: 'POST', headers, body: JSON.stringify(body) })
-    return await r.json()
+    // never wait forever: a hanging server must not leave the screen stuck on "typing" / "checking"
+    const ctrl = new AbortController()
+    const timer = setTimeout(() => ctrl.abort(), 30000)
+    try {
+      const r = await fetch(path, { method: 'POST', headers, body: JSON.stringify(body), signal: ctrl.signal })
+      return await r.json()
+    } finally {
+      clearTimeout(timer)
+    }
   } catch {
     return { ok: false, error: 'unreachable' }
   }
@@ -63,6 +70,7 @@ export const askMeilu = (p: {
   language: 'en' | 'vi'
   plan?: string
   style?: unknown
+  pageText?: string
 }) => post('/api/chat', p, true)
 
 /** Asks the server for an itinerary (one AI call). Falls back to rules on the server if the AI is unavailable. */

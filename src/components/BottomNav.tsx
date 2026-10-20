@@ -4,9 +4,8 @@ import { useT, type Key } from '../i18n'
 const items: { to: string; label: Key }[] = [
   { to: '/home', label: 'navHome' },
   { to: '/quests', label: 'navQuests' },
-  { to: '/meilu', label: 'navMeilu' },
+  { to: '/explore', label: 'navPlaces' },
   { to: '/coupons', label: 'navCoupons' },
-  { to: '/profile', label: 'navSettings' },
 ]
 
 export default function BottomNav() {

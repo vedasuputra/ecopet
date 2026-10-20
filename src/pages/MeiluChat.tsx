@@ -11,7 +11,7 @@ import { useLocation } from '../store/useLocation'
 
 const FAKE_TYPING_MS = 700
 
-export default function MeiluChat() {
+export default function MeiluChat({ pageText, popup = false }: { pageText?: string; popup?: boolean } = {}) {
   const t = useT()
   const lang = useLang((s) => s.lang)
   const { chatHistory, addChat, activeQuestIds } = useAppStore()
@@ -28,6 +28,16 @@ export default function MeiluChat() {
   }
 
   const send = async (override?: string) => {
+    try {
+      await sendInner(override)
+    } catch {
+      addChat({ role: 'meilu', text: t('meiluCant') })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const sendInner = async (override?: string) => {
     const q = (override ?? text).trim()
     if (!q || busy) return
     addChat({ role: 'user', text: q })
@@ -49,6 +59,7 @@ export default function MeiluChat() {
       }),
       language: lang,
       style: useAppStore.getState().user?.style,
+      pageText,
       plan: planSummary(
         useAppStore.getState().itinerary,
         useCatalog.getState().quests.map((x) => ({ id: x.id, title: x.title.en })),
@@ -73,7 +84,12 @@ export default function MeiluChat() {
 
   return (
     <div>
-      <MeiluAvatar nodding={nodding} interactive />
+      <MeiluAvatar nodding={nodding} interactive size={popup ? 80 : 120} />
+      {popup && pageText && (
+        <p>
+          <small>{t('meiluSeesPage')}</small>
+        </p>
+      )}
       <ul>
         {chatHistory.map((m, i) => (
           <li key={i} style={{ whiteSpace: 'pre-line' }}>

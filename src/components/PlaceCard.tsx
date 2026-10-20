@@ -10,12 +10,15 @@ export default function PlaceCard({
   selected = false,
   onSelect,
   compact = false,
+  onZoom,
 }: {
   item: Ranked
   selected?: boolean
   onSelect?: () => void
   /** Home shows a shorter card; Explore shows the whole description. */
   compact?: boolean
+  /** Zoom the map to this place's pin. */
+  onZoom?: () => void
 }) {
   const t = useT()
   const loc = useLoc()
@@ -39,6 +42,27 @@ export default function PlaceCard({
       )}
       <p style={compact ? { margin: '4px 0 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' } : { margin: '4px 0 0' }}>
         {loc(place.description)}
+      </p>
+      <p style={{ margin: '6px 0 0' }}>
+        <a
+          href={`https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button type="button">{t('openGoogleMaps')}</button>
+        </a>{' '}
+        {onZoom && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onZoom()
+            }}
+          >
+            {t('zoomToPin')}
+          </button>
+        )}
       </p>
     </article>
   )

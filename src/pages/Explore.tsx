@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import PlaceCard from '../components/PlaceCard'
 import PlacesMap from '../components/PlacesMap'
 import { RECOMMENDATIONS } from '../data/recommendations'
@@ -14,7 +14,8 @@ export default function Explore() {
   const t = useT()
   const user = useAppStore((s) => s.user)
   const { lat, lng, placeName } = useLocation()
-  const [selected, setSelected] = useState<string | null>(null)
+  const [params] = useSearchParams()
+  const [selected, setSelected] = useState<string | null>(params.get('focus'))
 
   const items = useMemo(
     () => recommend(RECOMMENDATIONS, { lat, lng, interests: user?.style?.interests, destinations: user?.destinations }),
@@ -40,7 +41,7 @@ export default function Explore() {
         <PlacesMap items={items} selectedId={selected} onSelect={(id) => pick(id, 'card')} />
       </div>
       {items.map((r) => (
-        <PlaceCard key={r.place.id} item={r} selected={r.place.id === selected} onSelect={() => pick(r.place.id, 'map')} />
+        <PlaceCard key={r.place.id} item={r} selected={r.place.id === selected} onSelect={() => pick(r.place.id, 'map')} onZoom={() => pick(r.place.id, 'map')} />
       ))}
     </div>
   )
