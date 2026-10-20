@@ -1,3 +1,5 @@
+import { quests as staticQuests } from '../src/data/quests.js'
+
 // Server-only Supabase access via REST, using the service_role key (bypasses RLS).
 // Never import this from src/. Falls back to in-memory if env vars are missing (local dev).
 
@@ -82,4 +84,104 @@ export async function deleteAuthUser(userId: string): Promise<boolean> {
 export async function getJsonRows<T>(path: string): Promise<T[]> {
   const r = await rest(path)
   return r.ok ? ((await r.json()) as T[]) : []
+}
+
+// --- Quests: defined in the database (edit them in Supabase -> Table Editor) ------------------------
+
+export interface ServerQuest {
+  id: string
+  lat: number
+  lng: number
+  radiusM: number
+  rewardCoins: number
+  requiredObject?: string
+  requiredScene?: string
+}
+
+let questCache: { at: number; list: ServerQuest[] } | null = null
+
+/**
+ * Active quests from the `quests` table, cached for a minute. If the table cannot be read at all
+ * (for example the migration has not been run yet) the built-in data in src/data/quests.ts is used.
+ */
+export async function loadQuests(): Promise<ServerQuest[]> {
+  const ttl = Number(process.env.QUEST_CACHE_MS ?? 60_000) // 0 = always re-read (used by tests)
+  if (questCache && Date.now() - questCache.at < ttl) return questCache.list
+  try {
+    const r = await rest('quests?active=eq.true&select=id,lat,lng,radius_m,reward_coins,required_object,required_scene&order=sort')
+    if (r.ok) {
+      const rows = (await r.json()) as { id: string; lat: number; lng: number; radius_m: number; reward_coins: number; required_object: string | null; required_scene: string | null }[]
+      const list = rows.map((q) => ({
+        id: q.id,
+        lat: q.lat,
+        lng: q.lng,
+        radiusM: q.radius_m,
+        rewardCoins: q.reward_coins,
+        requiredObject: q.required_object ?? undefined,
+        requiredScene: q.required_scene ?? undefined,
+      }))
+      questCache = { at: Date.now(), list }
+      return list
+    }
+  } catch {
+    /* fall through to the built-in quests */
+  }
+  return staticQuests.map((q) => ({ id: q.id, lat: q.lat, lng: q.lng, radiusM: q.radiusM, rewardCoins: q.rewardCoins, requiredObject: q.requiredObject, requiredScene: q.requiredScene }))
+}
+
+// --- Helpers for verification, review and rate limits ---------------------------------------------
+
+/** Midnight (Vietnam time, UTC+7, no daylight saving) of today, as an ISO string. */
+export function vnDayStartISO(now = new Date()): string {
+  const vn = new Date(now.getTime() + 7 * 3600 * 1000)
+  vn.setUTCHours(0, 0, 0, 0)
+  return new Date(vn.getTime() - 7 * 3600 * 1000).toISOString()
+}
+
+/** Counts a call against a per-user + global limit. Returns 'ok' or why it was refused. Fails CLOSED. */
+export async function apiHit(
+  userId: string,
+  kind: string,
+  perMinute: number,
+  perDay: number,
+  globalPerDay: number,
+): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const r = await rpc('api_hit', { p_user: userId, p_kind: kind, p_per_minute: perMinute, p_per_day: perDay, p_global_per_day: globalPerDay })
+  if (!r.ok) return { ok: false, reason: 'unavailable' }
+  return r.data === 'ok' ? { ok: true } : { ok: false, reason: String(r.data) }
+}
+
+export interface AttemptRow {
+  user_id: string
+  quest_id: string
+  outcome: 'verified' | 'rejected' | 'review'
+  reason: string
+  confidence?: number | null
+  quest_met?: boolean | null
+  red_flags?: string[]
+  ai_reason?: string | null
+  distance_m?: number | null
+  photo_hash?: string | null
+  photo_phash?: string | null
+  review_image?: string | null
+  review_status?: 'pending' | null
+}
+
+/** Writes one line of the verification log. Returns its id, or null if the log is unavailable. */
+export async function logAttempt(row: AttemptRow): Promise<number | null> {
+  try {
+    const r = await rest('verification_attempts', {
+      method: 'POST',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({ red_flags: [], ...row }),
+    })
+    if (!r.ok) {
+      console.error('verification_attempts insert failed', r.status, (await r.text()).slice(0, 200))
+      return null
+    }
+    return ((await r.json()) as { id: number }[])[0]?.id ?? null
+  } catch (e) {
+    console.error(e)
+    return null
+  }
 }

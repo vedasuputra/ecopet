@@ -33,6 +33,8 @@ export function errorKey(code: string | undefined): Key {
       return 'vErrUsed'
     case 'ambiguous':
       return 'vErrAmbiguous'
+    case 'expired':
+      return 'vErrExpired'
     case 'bad_amount':
       return 'vErrAmount'
     case 'already_claimed':

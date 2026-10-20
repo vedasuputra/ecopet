@@ -1,11 +1,12 @@
 // Seeds the demo into Supabase and can be re-run any time to reset it.
 //   npm run seed:demo
 // Needs VITE_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local (loaded with --env-file), and
-// all three schema files (schema.sql, vendor_schema.sql, economy_schema.sql) run in Supabase.
+// all schema files run in Supabase (schema, vendor_schema, economy_schema, limits_schema, quests_and_expiry_schema).
 // It is meant for YOUR OWN project; it deletes and recreates the @ecopet.demo accounts.
 //
 // Creates:
-//   - a demo VENDOR account that owns "Cafe Sen Xanh" (v2): two coupons it defined itself, a paid
+//   - a demo VENDOR account that owns "Cafe Sen Xanh" (v2): two coupons it defined itself (one valid 14 days with a
+//     monthly limit of 40), a paid
 //     6-month plan, and 20 days of coupon history
 //   - a demo TRAVELER account halfway through a trip: coins, two quests done, an unused v2 coupon
 //   - 12 filler traveler accounts so "unique travelers" and the history look real
@@ -110,7 +111,7 @@ await must(
   await rest('coupon_offers', {
     method: 'POST',
     headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-    body: JSON.stringify({ id: 'v2-combo', vendor_id: 'v2', title_en: 'Coffee + pastry combo', title_vi: 'Combo cà phê + bánh', discount_pct: 20, cost_coins: 70, code: 'SC20', active: true }),
+    body: JSON.stringify({ id: 'v2-combo', vendor_id: 'v2', title_en: 'Coffee + pastry combo', title_vi: 'Combo cà phê + bánh', discount_pct: 20, cost_coins: 70, code: 'SC20', active: true, valid_days: 14, monthly_cap: 40 }),
   }),
   'v2 combo offer',
 )
@@ -134,7 +135,7 @@ await must(await rest(`wallets?user_id=eq.${travelerId}`, { method: 'PATCH', bod
 const OFFERS = [
   { vendor: 'v1', id: 'c1', pct: 10, n: 14 },
   { vendor: 'v2', id: 'c2', pct: 15, n: 36 },
-  { vendor: 'v2', id: 'v2-combo', pct: 20, n: 11 },
+  { vendor: 'v2', id: 'v2-combo', pct: 20, n: 11, validDays: 14 }, // the 14-day coupon: some of these have expired
   { vendor: 'v3', id: 'c3', pct: 20, n: 18 },
   { vendor: 'v4', id: 'c4', pct: 10, n: 8 },
   { vendor: 'v5', id: 'c5', pct: 25, n: 6 },
@@ -158,6 +159,7 @@ for (const o of OFFERS) {
       source: rnd() < 0.22 ? 'welcome' : 'coins',
       status: used ? 'used' : 'unused',
       issued_at: issued.toISOString(),
+      expires_at: new Date(issued.getTime() + (o.validDays ?? 30) * DAY).toISOString(),
       redeemed_at: redeemedAt?.toISOString() ?? null,
       amount_vnd: amount,
       commission_vnd: amount ? Math.round(amount * 0.05) : null,
@@ -174,6 +176,7 @@ rows.push({
   source: 'coins',
   status: 'unused',
   issued_at: new Date(now - 3600000).toISOString(),
+  expires_at: new Date(now + 30 * DAY).toISOString(),
   redeemed_at: null,
   amount_vnd: null,
   commission_vnd: null,

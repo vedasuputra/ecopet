@@ -9,6 +9,7 @@ export interface IssuedRow {
   source: 'coins' | 'welcome'
   status: 'unused' | 'used'
   issued_at: string
+  expires_at: string | null
   redeemed_at: string | null
   amount_vnd: number | null
   commission_vnd: number | null
@@ -33,6 +34,8 @@ export interface Offer {
   cost_coins: number
   code: string
   active: boolean
+  valid_days: number
+  monthly_cap: number | null
 }
 
 export interface Payment {
@@ -66,7 +69,12 @@ export const couponTitle = (offers: Offer[], couponId: string, lang: Lang) => {
   return o ? (lang === 'vi' ? o.title_vi : o.title_en) : couponId
 }
 
+/** A coupon nobody used before its expiry date. */
+export const rowExpired = (r: Pick<IssuedRow, 'status' | 'expires_at'>) =>
+  r.status === 'unused' && !!r.expires_at && new Date(r.expires_at) < new Date()
+
 export interface Stats {
+  expired: number
   claimed: number
   redeemed: number
   rate: number
@@ -88,6 +96,7 @@ export function computeStats(rows: IssuedRow[]): Stats {
     return a + Math.round(((r.amount_vnd ?? 0) * d) / (1 - d))
   }, 0)
   return {
+    expired: rows.filter(rowExpired).length,
     claimed: rows.length,
     redeemed: used.length,
     rate: rows.length ? used.length / rows.length : 0,

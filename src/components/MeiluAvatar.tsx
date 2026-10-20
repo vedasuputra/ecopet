@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 // Meilu is a flat PNG, so every animation is a CSS transform on the whole image.
 //   nodding      head-nod while she replies in chat
 //   celebrating  happy hops (quest done, gift opened)
-//   interactive  tap = squish + hop (5 quick taps = dizzy spin), press and stroke = floating hearts
+//   interactive  tap = squish + hop, press and stroke = floating hearts
 const css = `
 @keyframes meilu-nod {
   0%, 100% { transform: rotate(0deg) translateY(0); }
@@ -32,10 +32,6 @@ const css = `
   50% { transform: translateY(0) rotate(0deg); }
   75% { transform: translateY(-16px) rotate(6deg); }
 }
-@keyframes meilu-dizzy {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(720deg); }
-}
 @keyframes meilu-heart {
   0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
   15% { opacity: 1; }
@@ -46,15 +42,14 @@ const css = `
 .meilu-squish { animation: meilu-squish 0.12s ease-out forwards; transform-origin: 50% 100%; }
 .meilu-wiggle { animation: meilu-wiggle 0.35s ease-in-out infinite; transform-origin: 50% 100%; }
 .meilu-party { animation: meilu-party 0.7s ease-in-out infinite; transform-origin: 50% 100%; }
-.meilu-dizzy { animation: meilu-dizzy 0.9s ease-in-out; }
 .meilu-heart { position: absolute; pointer-events: none; font-size: 18px; animation: meilu-heart 1.1s ease-out forwards; }
 @media (prefers-reduced-motion: reduce) {
-  .meilu-nod, .meilu-hop, .meilu-squish, .meilu-wiggle, .meilu-party, .meilu-dizzy { animation: none; }
+  .meilu-nod, .meilu-hop, .meilu-squish, .meilu-wiggle, .meilu-party { animation: none; }
   .meilu-heart { animation: none; opacity: 0.9; }
 }
 `
 
-type Anim = '' | 'hop' | 'squish' | 'wiggle' | 'dizzy'
+type Anim = '' | 'hop' | 'squish' | 'wiggle'
 interface Heart {
   id: number
   x: number // % across the image
@@ -65,8 +60,6 @@ interface Heart {
 const GLYPHS = ['💚', '💛', '🤍', '🎵']
 const TAP_MS = 250 // shorter than this (and barely moved) = a tap, otherwise it is stroking
 const HEART_EVERY_MS = 220
-const DIZZY_TAPS = 5
-const DIZZY_WINDOW_MS = 3500
 
 export default function MeiluAvatar({
   nodding = false,
@@ -82,7 +75,6 @@ export default function MeiluAvatar({
   const [anim, setAnim] = useState<Anim>('')
   const [hearts, setHearts] = useState<Heart[]>([])
   const press = useRef<{ at: number; x: number; y: number; moved: number; lastHeart: number } | null>(null)
-  const taps = useRef<number[]>([])
   const nextId = useRef(0)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
 
@@ -131,17 +123,9 @@ export default function MeiluAvatar({
     const isTap = Date.now() - p.at < TAP_MS && p.moved < 18
     if (!isTap) return setAnim('')
 
-    const now = Date.now()
-    taps.current = [...taps.current.filter((t) => now - t < DIZZY_WINDOW_MS), now]
-    if (taps.current.length >= DIZZY_TAPS) {
-      taps.current = []
-      setAnim('dizzy')
-      later(() => setAnim(''), 950)
-    } else {
-      setAnim('hop')
-      spawnHeart()
-      later(() => setAnim((a) => (a === 'hop' ? '' : a)), 520)
-    }
+    setAnim('hop')
+    spawnHeart()
+    later(() => setAnim((a) => (a === 'hop' ? '' : a)), 520)
   }
 
   const cls = nodding ? 'meilu-nod' : celebrating ? 'meilu-party' : anim ? `meilu-${anim}` : undefined

@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import MeiluAvatar from '../components/MeiluAvatar'
-import { quests } from '../data/quests'
 import { findCachedAnswer, suggestedQuestions } from '../data/meiluCache'
 import { areaLabel, nearestKnown } from '../data/places'
+import { planSummary } from '../lib/planner'
 import { useLang, useT } from '../i18n'
 import { askMeilu, failureMessage } from '../lib/api'
 import { useAppStore } from '../store/useAppStore'
+import { useCatalog } from '../store/useCatalog'
 import { useLocation } from '../store/useLocation'
 
 const FAKE_TYPING_MS = 700
@@ -43,10 +44,14 @@ export default function MeiluChat() {
       lng,
       nearest: nearestKnown(lat, lng),
       activeQuests: activeQuestIds.map((id) => {
-        const quest = quests.find((x) => x.id === id)
+        const quest = useCatalog.getState().quests.find((x) => x.id === id)
         return quest ? quest.title.en : id
       }),
       language: lang,
+      plan: planSummary(
+        useAppStore.getState().itinerary,
+        useCatalog.getState().quests.map((x) => ({ id: x.id, title: x.title.en })),
+      ),
     })
     if (r.ok) {
       setBusy(false)

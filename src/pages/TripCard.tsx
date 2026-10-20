@@ -1,13 +1,14 @@
 import { toPng } from 'html-to-image'
 import { useRef, useState } from 'react'
 import MeiluAvatar from '../components/MeiluAvatar'
-import { quests } from '../data/quests'
+import { useCatalog } from '../store/useCatalog'
 import { useLoc, useT } from '../i18n'
 import { useAppStore } from '../store/useAppStore'
 
 const MAX_LISTED = 5
 
 export default function TripCard() {
+  const quests = useCatalog((s) => s.quests)
   const t = useT()
   const loc = useLoc()
   const { user, coins, questStatus } = useAppStore()

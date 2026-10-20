@@ -50,8 +50,16 @@ export const PRIVACY: Section[] = [
         vi: 'Vị trí: chỉ khi bạn dùng tính năng cần đến. Bạn có thể cho phép dùng vị trí GPS thật, hoặc tự chọn một địa điểm (vị trí "giả lập"). Tọa độ được gửi kèm lần kiểm tra nhiệm vụ và tin nhắn trò chuyện để Meilu biết bạn ở đâu; chúng tôi không lưu lịch sử vị trí.',
       },
       {
-        en: 'Photos: when you do a photo quest, the picture is taken with the in-app camera and sent to our server and to an AI service to check that it shows what the quest asks for. We do not store the picture. We keep only a one-way fingerprint (hash) of it so the same photo cannot be reused.',
-        vi: 'Ảnh: khi làm nhiệm vụ chụp ảnh, ảnh được chụp bằng camera trong ứng dụng và gửi đến máy chủ của chúng tôi cùng một dịch vụ AI để kiểm tra có đúng yêu cầu nhiệm vụ không. Chúng tôi không lưu ảnh. Chúng tôi chỉ lưu một dấu vân tay một chiều (mã băm) của ảnh để không thể dùng lại cùng một ảnh.',
+        en: 'Photos: when you do a photo quest, the picture is taken with the in-app camera and sent to our server and to an AI service to check that it shows what the quest asks for. We do not store the picture, with one exception: if the AI is not sure, or the photo looks very much like one another traveler already sent, it is kept in a private review queue so that a member of the Eco-Pet team can look at it. It is deleted as soon as they decide, and in any case after 14 days.',
+        vi: 'Ảnh: khi làm nhiệm vụ chụp ảnh, ảnh được chụp bằng camera trong ứng dụng và gửi đến máy chủ của chúng tôi cùng một dịch vụ AI để kiểm tra có đúng yêu cầu nhiệm vụ không. Chúng tôi không lưu ảnh, trừ một trường hợp: nếu AI chưa chắc chắn, hoặc ảnh rất giống ảnh một du khách khác đã gửi, ảnh được giữ trong hàng đợi xem xét riêng tư để một thành viên của nhóm Eco-Pet xem. Ảnh bị xóa ngay khi họ quyết định, và dù thế nào cũng bị xóa sau 14 ngày.',
+      },
+      {
+        en: 'Quest check log: for every photo check we record the result, the AI\'s confidence and notes, how far you were from the quest spot (not your coordinates), the time, and two fingerprints of the photo (a hash and a perceptual fingerprint) that cannot be turned back into the picture. We use it to stop reused photos, to review unsure cases and to tune the checks.',
+        vi: 'Nhật ký kiểm tra nhiệm vụ: với mỗi lần kiểm tra ảnh, chúng tôi ghi lại kết quả, độ tin cậy và ghi chú của AI, khoảng cách từ bạn đến điểm nhiệm vụ (không phải tọa độ của bạn), thời gian, và hai dấu vân tay của ảnh (mã băm và dấu vân tay cảm nhận) không thể chuyển ngược lại thành ảnh. Chúng tôi dùng nhật ký để chặn ảnh dùng lại, xem xét các trường hợp chưa chắc chắn và điều chỉnh việc kiểm tra.',
+      },
+      {
+        en: 'Itinerary: if you ask Meilu to plan your days, your trip length and chosen destinations are sent to the AI, which may only choose from our own list of quests and partner shops. The plan is saved in your account and you can edit or delete it.',
+        vi: 'Lịch trình: nếu bạn nhờ Meilu lên kế hoạch các ngày, số ngày và điểm đến bạn chọn được gửi đến AI, và AI chỉ được chọn trong danh sách nhiệm vụ và cửa hàng đối tác của chúng tôi. Kế hoạch được lưu trong tài khoản và bạn có thể chỉnh sửa hoặc xóa.',
       },
       {
         en: 'Chat with Meilu: your messages and Meilu\'s replies are saved in your account so Meilu remembers you when you come back.',
@@ -90,8 +98,8 @@ export const PRIVACY: Section[] = [
       },
       { en: 'Vercel: hosts the website and our server functions.', vi: 'Vercel: lưu trữ website và các hàm máy chủ.' },
       {
-        en: 'Google: provides the Gemini AI used for Meilu\'s chat and photo checks, and the advertising services. Your chat messages, your location text and quest photos are processed by Google when you use these features. Under Google\'s free AI service, Google may use submitted content to improve its products, so please do not send sensitive personal information to Meilu.',
-        vi: 'Google: cung cấp AI Gemini cho trò chuyện với Meilu và kiểm tra ảnh, cùng các dịch vụ quảng cáo. Tin nhắn, thông tin vị trí và ảnh nhiệm vụ của bạn được Google xử lý khi bạn dùng các tính năng này. Với dịch vụ AI miễn phí của Google, Google có thể dùng nội dung được gửi để cải thiện sản phẩm, vì vậy xin đừng gửi thông tin cá nhân nhạy cảm cho Meilu.',
+        en: 'Google: provides the Gemini AI used for Meilu\'s chat, photo checks and itinerary planning, and the advertising services. Your chat messages, your location text, quest photos and trip plan inputs are processed by Google when you use these features. Under Google\'s free AI service, Google may use submitted content to improve its products, so please do not send sensitive personal information to Meilu.',
+        vi: 'Google: cung cấp AI Gemini cho trò chuyện với Meilu, kiểm tra ảnh và lập lịch trình, cùng các dịch vụ quảng cáo. Tin nhắn, thông tin vị trí, ảnh nhiệm vụ và dữ liệu lập kế hoạch của bạn được Google xử lý khi bạn dùng các tính năng này. Với dịch vụ AI miễn phí của Google, Google có thể dùng nội dung được gửi để cải thiện sản phẩm, vì vậy xin đừng gửi thông tin cá nhân nhạy cảm cho Meilu.',
       },
       {
         en: 'OpenStreetMap and Photon: provide the map tiles and the place search. They see your IP address and the places you search for.',
@@ -135,6 +143,14 @@ export const PRIVACY: Section[] = [
       {
         en: 'Photo fingerprints (not the photos): kept so a photo cannot be reused. They cannot be turned back into the picture.',
         vi: 'Dấu vân tay của ảnh (không phải ảnh): được giữ để không thể dùng lại ảnh. Không thể chuyển ngược lại thành ảnh.',
+      },
+      {
+        en: 'Photos waiting for review: until a person decides, and at most 14 days. Then they are deleted.',
+        vi: 'Ảnh đang chờ xem xét: cho đến khi có người quyết định, tối đa 14 ngày. Sau đó ảnh bị xóa.',
+      },
+      {
+        en: 'Quest check log (results and fingerprints, no photos): 90 days.',
+        vi: 'Nhật ký kiểm tra nhiệm vụ (kết quả và dấu vân tay, không có ảnh): 90 ngày.',
       },
     ],
   },
@@ -259,7 +275,7 @@ export const LANDING = {
     },
     {
       q: { en: 'How are quests verified?', vi: 'Nhiệm vụ được xác minh như thế nào?' },
-      a: { en: 'You take a photo with the in-app camera, and the app checks your location. An AI service then looks at the photo to confirm it shows what the quest asks for. We do not store the photo.', vi: 'Bạn chụp ảnh bằng camera trong ứng dụng, và ứng dụng kiểm tra vị trí của bạn. Sau đó dịch vụ AI xem ảnh để xác nhận đúng yêu cầu nhiệm vụ. Chúng tôi không lưu ảnh.' },
+      a: { en: 'You take a photo with the in-app camera, and the app checks your location. An AI service then looks at the photo to confirm it shows what the quest asks for. If the AI is unsure, a person on our team takes a look before you are rewarded. We do not keep the photo once the check is done.', vi: 'Bạn chụp ảnh bằng camera trong ứng dụng, và ứng dụng kiểm tra vị trí của bạn. Sau đó dịch vụ AI xem ảnh để xác nhận đúng yêu cầu nhiệm vụ. Nếu AI chưa chắc chắn, một người trong nhóm chúng tôi sẽ xem trước khi bạn nhận thưởng. Chúng tôi không giữ ảnh sau khi kiểm tra xong.' },
     },
     {
       q: { en: 'Do I have to share my location?', vi: 'Tôi có bắt buộc chia sẻ vị trí không?' },

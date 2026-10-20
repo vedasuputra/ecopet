@@ -36,6 +36,7 @@ export function failureMessage(r: ApiResult, t: T, fallback: Key): string {
   if (r.error === 'unauthorized') return t('chatLogin')
   if (r.error === 'message_too_long') return t('chatTooLong')
   if (r.error === 'chat_limit') return t(r.reason === 'per_minute' ? 'chatSlowDown' : r.reason === 'per_day' ? 'chatDailyLimit' : 'chatBusy')
+  if (r.error === 'verify_limit') return t(r.reason === 'per_minute' ? 'verifyLimit' : r.reason === 'per_day' ? 'verifyLimitDay' : 'chatBusy')
   return t(fallback)
 }
 
@@ -57,7 +58,12 @@ export const askMeilu = (p: {
   nearest?: { name: string; distanceM: number }
   activeQuests: string[]
   language: 'en' | 'vi'
+  plan?: string
 }) => post('/api/chat', p, true)
+
+/** Asks the server for an itinerary (one AI call). Falls back to rules on the server if the AI is unavailable. */
+export const requestItinerary = (p: { days: number; destinations: string[]; language: 'en' | 'vi' }) =>
+  post('/api/itinerary', p, true)
 
 /** Everything that changes coins, coupons or the welcome gift goes through here (server-checked). */
 export const economyApi = (action: string, extra: Record<string, unknown> = {}) =>

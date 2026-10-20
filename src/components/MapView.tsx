@@ -1,7 +1,6 @@
 import L from 'leaflet'
 import { useEffect } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap } from 'react-leaflet'
-import { quests } from '../data/quests'
 import { useLoc, useT } from '../i18n'
 import { haversine } from '../lib/geo'
 import { useCatalog } from '../store/useCatalog'
@@ -27,6 +26,7 @@ function Recenter({ lat, lng }: { lat: number; lng: number }) {
 
 // Pin = user (draggable in simulated mode), green = quest, orange = vendor.
 export default function MapView() {
+  const quests = useCatalog((s) => s.quests)
   const t = useT()
   const loc = useLoc()
   const vendors = useCatalog((s) => s.vendors)

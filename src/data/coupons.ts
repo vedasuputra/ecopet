@@ -8,6 +8,9 @@ export interface Coupon {
   discountPct: number
   code: string // short alphanumeric fallback code
   active?: boolean // false = paused by the vendor; default true
+  validDays?: number // days a coupon stays usable after a traveler gets it (default 30)
+  monthlyCap?: number | null // most coupons handed out per month; null/undefined = unlimited
+  remaining?: number | null // left this month (null = unlimited); filled in from the database
 }
 
 export const coupons: Coupon[] = [

@@ -1,6 +1,5 @@
 import { DEMO_ECONOMY } from '../src/data/demoState.js'
-import { quests } from '../src/data/quests.js'
-import { authedUser, deleteAuthUser, getJsonRows, rest, rpc, supabaseConfigured } from './_supabase.js'
+import { authedUser, deleteAuthUser, getJsonRows, loadQuests, rest, rpc, supabaseConfigured } from './_supabase.js'
 import type { Req, Res } from './_gemini.js'
 
 // The only way coins, the welcome gift and coupon purchases change. Every action is authenticated
@@ -51,6 +50,7 @@ export default async function handler(req: Req, res: Res) {
     if (!r.ok) {
       if (r.error === 'insufficient_coins') return fail(res, 402, 'insufficient_coins')
       if (r.error === 'coupon_unavailable') return fail(res, 404, 'coupon_unavailable')
+      if (r.error === 'sold_out') return fail(res, 409, 'sold_out')
       return fail(res, 500, 'db_error')
     }
     return res.json({ ok: true, coins: r.data, uid })
@@ -81,7 +81,7 @@ export default async function handler(req: Req, res: Res) {
 
     // dev_demo: the demo traveler's economy
     for (const id of DEMO_ECONOMY.questsDone) {
-      const q = quests.find((x) => x.id === id)
+      const q = (await loadQuests()).find((x) => x.id === id)
       if (q) await rpc('complete_quest', { p_user: user.id, p_quest: id, p_reward: q.rewardCoins })
     }
     const bal = await rpc('apply_coins', { p_user: user.id, p_delta: 0, p_reason: 'seed', p_ref: 'probe' })
@@ -103,6 +103,7 @@ export default async function handler(req: Req, res: Res) {
           vendor_id: o.vendor_id,
           discount_pct: o.discount_pct,
           source: 'coins',
+          expires_at: new Date(Date.now() + 30 * 86400000).toISOString(),
         }),
       })
     }

@@ -12,9 +12,11 @@ interface Form {
   costCoins: string
   code: string
   active: boolean
+  validDays: string
+  monthlyCap: string
 }
 
-const EMPTY: Form = { titleEn: '', titleVi: '', discountPct: '10', costCoins: '50', code: '', active: true }
+const EMPTY: Form = { titleEn: '', titleVi: '', discountPct: '10', costCoins: '50', code: '', active: true, validDays: '30', monthlyCap: '' }
 
 const toForm = (o: Offer): Form => ({
   id: o.id,
@@ -24,6 +26,8 @@ const toForm = (o: Offer): Form => ({
   costCoins: String(o.cost_coins),
   code: o.code,
   active: o.active,
+  validDays: String(o.valid_days),
+  monthlyCap: o.monthly_cap == null ? '' : String(o.monthly_cap),
 })
 
 // The vendor defines the coupons travelers can buy with coins: title (both languages), discount and
@@ -54,6 +58,8 @@ export default function Offers() {
       costCoins: Number(f.costCoins),
       code: f.code,
       active: f.active,
+      validDays: Number(f.validDays),
+      monthlyCap: f.monthlyCap === '' ? null : Number(f.monthlyCap),
     })
     setBusy(false)
     if (!r.ok) {
@@ -109,6 +115,18 @@ export default function Offers() {
               <span className="v-hint">{t('vCostHint')}</span>
             </div>
           </div>
+          <div className="v-two">
+            <div className="v-field">
+              <label htmlFor="o-days">{t('vValidDays')}</label>
+              <input id="o-days" className="v-input" inputMode="numeric" value={form.validDays} onChange={(e) => set('validDays', e.target.value.replace(/\D/g, ''))} />
+              <span className="v-hint">{t('vValidDaysHint')}</span>
+            </div>
+            <div className="v-field">
+              <label htmlFor="o-cap">{t('vMonthlyCap')}</label>
+              <input id="o-cap" className="v-input" inputMode="numeric" value={form.monthlyCap} onChange={(e) => set('monthlyCap', e.target.value.replace(/\D/g, ''))} />
+              <span className="v-hint">{t('vMonthlyCapHint')}</span>
+            </div>
+          </div>
           <div className="v-field">
             <label htmlFor="o-code">{t('vCodeLabel')}</label>
             <input id="o-code" className="v-input" maxLength={8} value={form.code} onChange={(e) => set('code', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))} />
@@ -150,6 +168,8 @@ export default function Offers() {
                   <th>{t('vColCoupon')}</th>
                   <th className="v-num">{t('vDiscount')}</th>
                   <th className="v-num">{t('vCostCoins')}</th>
+                  <th className="hide-sm">{t('vColValidity')}</th>
+                  <th className="hide-sm">{t('vColLimit')}</th>
                   <th>{t('vCodeLabel')}</th>
                   <th>{t('vColStatus')}</th>
                   <th />
@@ -166,6 +186,8 @@ export default function Offers() {
                       </td>
                       <td className="v-num">{o.discount_pct}%</td>
                       <td className="v-num">{o.cost_coins}</td>
+                      <td className="hide-sm">{t('vDays', { n: o.valid_days })}</td>
+                      <td className="hide-sm">{o.monthly_cap == null ? t('vNoLimit') : o.monthly_cap}</td>
                       <td>{o.code}</td>
                       <td>
                         <span className={`v-badge ${o.active ? 'used' : ''}`}>{o.active ? t('vActive') : t('vPaused')}</span>

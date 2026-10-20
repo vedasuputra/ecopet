@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import CameraCapture, { type Captured } from '../components/CameraCapture'
-import { quests } from '../data/quests'
+import { useCatalog } from '../store/useCatalog'
 import { useLoc, useT, type Key } from '../i18n'
 import { failureMessage, verifyQuest } from '../lib/api'
 import { formatDistance, haversine } from '../lib/geo'
@@ -17,6 +17,7 @@ const LOC_STATUS_KEY: Record<string, Key> = {
 }
 
 export default function QuestDetail() {
+  const quests = useCatalog((s) => s.quests)
   const { id } = useParams()
   const navigate = useNavigate()
   const t = useT()
@@ -24,6 +25,7 @@ export default function QuestDetail() {
   const quest = quests.find((q) => q.id === id)
   const { lat, lng, placeName, source, status, userChose, startReal } = useLocation()
   const questStatus = useAppStore((s) => s.questStatus)
+  const review = useAppStore((s) => s.reviewStatus[id ?? ''])
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
   const [cameraOpen, setCameraOpen] = useState(false)
@@ -93,6 +95,16 @@ export default function QuestDetail() {
         return setMsg(t('photoDuplicate'))
       case 'screenshot':
         return setMsg(t('photoScreenshot'))
+      case 'suspicious':
+        return setMsg(t('photoSuspicious'))
+      case 'review':
+        void refreshEconomy() // now "under review"
+        return setMsg(t('photoUnderReview'))
+      case 'review_pending':
+        void refreshEconomy()
+        return setMsg(t('photoReviewPending'))
+      case 'daily_limit':
+        return setMsg(t('photoDailyLimit'))
       case 'not_detected':
         return setMsg(t('photoNoMatch', { reason: String(r.detail ?? '') }))
       default:
@@ -110,6 +122,10 @@ export default function QuestDetail() {
       <p>{source === 'simulated' ? t('simulatedAt', { place: placeName }) : t('realAt', { place: placeName })}</p>
       {LOC_STATUS_KEY[status] && <p>{t(LOC_STATUS_KEY[status])}</p>}
       <button onClick={checkLocation}>{t('checkLocation')}</button>
+      {!done && review?.status === 'pending' && <p>{t('questUnderReview')}</p>}
+      {!done && review?.status === 'rejected' && (
+        <p>{review.note ? t('questReviewRejectedNote', { note: review.note }) : t('questReviewRejected')}</p>
+      )}
 
       {needsPhoto && !done && (
         <div>
@@ -136,7 +152,7 @@ export default function QuestDetail() {
       )}
 
       {!cameraOpen && (
-        <button onClick={verify} disabled={done || busy}>
+        <button onClick={verify} disabled={done || busy || review?.status === 'pending'}>
           {done ? t('alreadyCompleted') : t('verify')}
         </button>
       )}

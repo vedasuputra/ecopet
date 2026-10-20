@@ -9,6 +9,7 @@ const pick = (s: ReturnType<typeof useAppStore.getState>) => ({
   user: s.user,
   activeQuestIds: s.activeQuestIds,
   chatHistory: s.chatHistory,
+  itinerary: s.itinerary,
 })
 
 let timer: ReturnType<typeof setTimeout> | undefined
@@ -28,6 +29,7 @@ export async function loadRemote(userId: string): Promise<boolean> {
     ...(s.user ? { user: s.user } : {}),
     ...(s.activeQuestIds ? { activeQuestIds: s.activeQuestIds } : {}),
     ...(s.chatHistory ? { chatHistory: s.chatHistory } : {}),
+    ...(s.itinerary ? { itinerary: s.itinerary } : {}),
   })
   applying = false
   lastPushed = JSON.stringify(pick(useAppStore.getState()))

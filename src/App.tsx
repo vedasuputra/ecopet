@@ -14,6 +14,8 @@ import Profile from './pages/Profile'
 import DevPanel from './pages/DevPanel'
 import VendorApp from './vendor/VendorApp'
 import WelcomeGift from './pages/WelcomeGift'
+import AdminApp from './admin/AdminApp'
+import ItineraryPage from './pages/Itinerary'
 import Landing from './site/Landing'
 import Privacy from './site/Privacy'
 
@@ -24,6 +26,7 @@ export default function App() {
         {/* Public website pages and the vendor dashboard: normal responsive web pages, outside the phone frame */}
         <Route path="/" element={<Landing />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/admin/*" element={<AdminApp />} />
         <Route path="/vendor/*" element={<VendorApp />} />
         <Route element={<Layout />}>
           <Route path="/login" element={<Login />} />
@@ -39,6 +42,7 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/dev" element={<DevPanel />} />
           <Route path="/gift" element={<WelcomeGift />} />
+          <Route path="/itinerary" element={<ItineraryPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

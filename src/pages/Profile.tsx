@@ -45,7 +45,7 @@ export default function Profile() {
       </p>
       <p>{t('profileStats', { coins, quests: Object.keys(questStatus).length })}</p>
       <Link to="/trip-card">{t('tripCardLink')}</Link> | <Link to="/ad">{t('watchAdLink')}</Link> |{' '}
-      <Link to="/onboarding">{t('changePlan')}</Link>
+      <Link to="/itinerary">{t('openItinerary')}</Link> | <Link to="/onboarding">{t('changePlan')}</Link>
 
       <div>
         <p>{t('language')}:</p>

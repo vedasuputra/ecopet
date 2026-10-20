@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useLang, useT } from '../i18n'
 import { useVendor } from './context'
 import DailyChart from './DailyChart'
-import { computeStats, couponTitle, dailySeries, subscriptionStatus } from './data'
+import { computeStats, couponTitle, dailySeries, rowExpired, subscriptionStatus } from './data'
 import { dateLong, dateTime, pct, travelerTag, vnd } from './format'
 
 export default function Overview() {
@@ -16,6 +16,7 @@ export default function Overview() {
   const tiles: { label: string; value: string; note?: string }[] = [
     { label: t('vStatClaimed'), value: String(s.claimed) },
     { label: t('vStatRedeemed'), value: String(s.redeemed) },
+    { label: t('vStatExpired'), value: String(s.expired) },
     { label: t('vStatRate'), value: pct(s.rate) },
     { label: t('vStatTravelers'), value: String(s.travelers) },
     { label: t('vStatAvg'), value: s.redeemed ? vnd(s.avgBill, lang) : '—' },
@@ -95,7 +96,7 @@ export default function Overview() {
                       </td>
                       <td className="v-num">
                         <span className={`v-badge ${r.status === 'used' ? 'used' : ''}`}>
-                          {r.status === 'used' ? t('vStatusUsed') : t('vStatusUnused')}
+                          {r.status === 'used' ? t('vStatusUsed') : rowExpired(r) ? t('vCouponExpired') : t('vStatusUnused')}
                         </span>
                       </td>
                     </tr>

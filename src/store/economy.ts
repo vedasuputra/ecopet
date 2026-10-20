@@ -1,7 +1,8 @@
 import { translate, useLang } from '../i18n'
 import { economyApi } from '../lib/api'
 import { supabase } from '../lib/supabase'
-import { useAppStore, vnDay } from './useAppStore'
+import { useAppStore, vnDay, type ReviewInfo } from './useAppStore'
+import { useCatalog } from './useCatalog'
 import { useCelebration } from './useCelebration'
 
 // The traveler's coins, completed quests, coupons and welcome gift live on the server.
@@ -9,6 +10,7 @@ import { useCelebration } from './useCelebration'
 // through /api/economy (or /api/verify, /api/vendor), which validate it and apply it atomically.
 
 let inFlight: Promise<void> | null = null
+let loadedOnce = false // the first load must not celebrate quests that were already done
 
 export function refreshEconomy(): Promise<void> {
   if (inFlight) return inFlight
@@ -18,11 +20,19 @@ export function refreshEconomy(): Promise<void> {
     const uid = sess.session?.user.id
     if (!uid) return
 
-    const [wallet, quests, coupons, ads] = await Promise.all([
+    const couponCols = async () => {
+      const full = await supabase!.from('coupons_issued').select('uid,coupon_id,status,expires_at').eq('user_id', uid).order('issued_at', { ascending: true })
+      if (!full.error) return full
+      // older database without the expiry column: fall back so coins and coupons keep syncing
+      return supabase!.from('coupons_issued').select('uid,coupon_id,status').eq('user_id', uid).order('issued_at', { ascending: true })
+    }
+    const [wallet, quests, coupons, ads, attempts] = await Promise.all([
       supabase.from('wallets').select('coins,welcome_claimed').eq('user_id', uid).maybeSingle(),
       supabase.from('quest_progress').select('quest_id').eq('user_id', uid),
-      supabase.from('coupons_issued').select('uid,coupon_id,status').eq('user_id', uid).order('issued_at', { ascending: true }),
+      couponCols(),
       supabase.from('coin_ledger').select('created_at').eq('user_id', uid).eq('reason', 'ad').order('created_at', { ascending: false }).limit(10),
+      // optional: the photo-review log (an older database simply has no such table)
+      supabase.from('verification_attempts').select('quest_id,outcome,review_status,review_note,created_at').eq('user_id', uid).order('created_at', { ascending: false }).limit(60),
     ])
     // on any error keep what we have rather than flashing zeros
     if (wallet.error || quests.error || coupons.error || ads.error) return
@@ -32,19 +42,43 @@ export function refreshEconomy(): Promise<void> {
       uid: r.uid as string,
       couponId: r.coupon_id as string,
       status: r.status as 'unused' | 'used',
+      expiresAt: ((r as { expires_at?: string | null }).expires_at as string | null | undefined) ?? null,
     }))
     const prev = useAppStore.getState().ownedCoupons
     // a vendor just scanned one of my coupons -> celebrate
     const newlyUsed = next.some((n) => n.status === 'used' && prev.find((p) => p.uid === n.uid)?.status === 'unused')
 
+    const questStatus = Object.fromEntries((quests.data ?? []).map((r) => [r.quest_id as string, 'done' as const]))
+    // newest attempt per quest: still waiting for a person, or looked at and not approved
+    const reviewStatus: Record<string, ReviewInfo> = {}
+    const seen = new Set<string>()
+    for (const a of attempts.error ? [] : (attempts.data ?? [])) {
+      const qid = a.quest_id as string
+      if (seen.has(qid)) continue
+      seen.add(qid)
+      if (questStatus[qid]) continue
+      if (a.outcome === 'review' && a.review_status === 'pending') reviewStatus[qid] = { status: 'pending' }
+      else if (a.outcome === 'review' && a.review_status === 'rejected') reviewStatus[qid] = { status: 'rejected', note: a.review_note as string | null }
+    }
+    // a quest became done without the traveler doing anything here (a reviewer approved the photo)
+    const prevQuests = useAppStore.getState().questStatus
+    const newlyDone = Object.keys(questStatus).filter((id) => !(id in prevQuests))
+
     useAppStore.getState().setEconomy({
       coins: wallet.data?.coins ?? 0,
       welcomeGiftClaimed: wallet.data?.welcome_claimed ?? false,
-      questStatus: Object.fromEntries((quests.data ?? []).map((r) => [r.quest_id as string, 'done' as const])),
+      questStatus,
+      reviewStatus,
       ownedCoupons: next,
       adWatch: { date: today, count: (ads.data ?? []).filter((r) => vnDay(new Date(r.created_at as string)) === today).length },
     })
+    const celebrate = useCelebration.getState()
+    if (loadedOnce && newlyDone.length && Date.now() - celebrate.id > 8000) {
+      const reward = useCatalog.getState().quests.find((q) => q.id === newlyDone[0])?.rewardCoins ?? 0
+      celebrate.show(translate(useLang.getState().lang, 'celebrateQuest', { n: reward }))
+    }
     if (newlyUsed) useCelebration.getState().show(translate(useLang.getState().lang, 'celebrateCoupon'))
+    loadedOnce = true
   })().finally(() => {
     inFlight = null
   })

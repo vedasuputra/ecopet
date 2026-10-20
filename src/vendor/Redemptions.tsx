@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useLang, useT } from '../i18n'
 import { useVendor } from './context'
-import { couponTitle, type IssuedRow } from './data'
+import { couponTitle, rowExpired, type IssuedRow } from './data'
 import { dateTime, num, travelerTag, vnd } from './format'
 
-type Filter = 'all' | 'used' | 'unused'
+type Filter = 'all' | 'used' | 'unused' | 'expired'
+const statusOf = (r: IssuedRow): 'used' | 'unused' | 'expired' => (r.status === 'used' ? 'used' : rowExpired(r) ? 'expired' : 'unused')
 
 export default function Redemptions() {
   const t = useT()
@@ -12,7 +13,7 @@ export default function Redemptions() {
   const { rows, offers } = useVendor()
   const [filter, setFilter] = useState<Filter>('all')
 
-  const shown = useMemo(() => (filter === 'all' ? rows : rows.filter((r) => r.status === filter)), [rows, filter])
+  const shown = useMemo(() => (filter === 'all' ? rows : rows.filter((r) => statusOf(r) === filter)), [rows, filter])
   const used = shown.filter((r) => r.status === 'used')
   const totalAmount = used.reduce((a, r) => a + (r.amount_vnd ?? 0), 0)
   const totalCommission = used.reduce((a, r) => a + (r.commission_vnd ?? 0), 0)
@@ -21,7 +22,7 @@ export default function Redemptions() {
     const esc = (v: string | number | null) => `"${String(v ?? '').replaceAll('"', '""')}"`
     const head = ['coupon', 'traveler', 'source', 'status', 'claimed_at', 'redeemed_at', 'amount_vnd', 'commission_vnd']
     const lines = shown.map((r: IssuedRow) =>
-      [couponTitle(offers, r.coupon_id, 'en'), travelerTag(r.uid), r.source, r.status, r.issued_at, r.redeemed_at, r.amount_vnd, r.commission_vnd]
+      [couponTitle(offers, r.coupon_id, 'en'), travelerTag(r.uid), r.source, statusOf(r), r.issued_at, r.redeemed_at, r.amount_vnd, r.commission_vnd]
         .map(esc)
         .join(','),
     )
@@ -37,6 +38,7 @@ export default function Redemptions() {
     { id: 'all', label: t('vFilterAll') },
     { id: 'used', label: t('vStatusUsed') },
     { id: 'unused', label: t('vStatusUnused') },
+    { id: 'expired', label: t('vCouponExpired') },
   ]
 
   return (
@@ -85,7 +87,7 @@ export default function Redemptions() {
                     <td className="hide-md">{r.source === 'welcome' ? t('vSourceWelcome') : t('vSourceCoins')}</td>
                     <td>
                       <span className={`v-badge ${r.status === 'used' ? 'used' : ''}`}>
-                        {r.status === 'used' ? t('vStatusUsed') : t('vStatusUnused')}
+                        {statusOf(r) === 'used' ? t('vStatusUsed') : statusOf(r) === 'expired' ? t('vCouponExpired') : t('vStatusUnused')}
                       </span>
                     </td>
                     <td className="hide-sm">{dateTime(r.issued_at, lang)}</td>

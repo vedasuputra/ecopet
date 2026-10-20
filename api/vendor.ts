@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto'
 import { COMMISSION_RATE } from '../src/data/coupons.js'
-import { authedUser, rest, rpc, supabaseConfigured } from './_supabase.js'
+import { authedUser, loadQuests, rest, rpc, supabaseConfigured } from './_supabase.js'
 import type { Req, Res } from './_gemini.js'
 
 // Vendor-only actions, all authenticated with the caller's Supabase access token:
@@ -19,7 +19,8 @@ const MIN_AMOUNT = 1000
 const MAX_AMOUNT = 50_000_000
 const MAX_OFFERS = 12
 const REDEEM_BONUS_COINS = 10
-const REDEEM_QUEST = { id: 'q8', reward: 25 }
+const REDEEM_QUEST_ID = 'q8'
+const REDEEM_QUEST_FALLBACK_REWARD = 25
 
 interface IssuedRow {
   uid: string
@@ -30,7 +31,9 @@ interface IssuedRow {
   source: string
   status: string
   issued_at: string
+  expires_at: string | null
 }
+const isExpired = (r: IssuedRow) => !!r.expires_at && new Date(r.expires_at) < new Date()
 interface Offer {
   id: string
   vendor_id: string
@@ -47,7 +50,7 @@ const str = (v: unknown, min: number, max: number) => (typeof v === 'string' && 
 async function findCoupon(
   vendorId: string,
   raw: string,
-): Promise<{ row: IssuedRow } | { error: 'not_found' | 'wrong_vendor' | 'already_used' | 'ambiguous' }> {
+): Promise<{ row: IssuedRow } | { error: 'not_found' | 'wrong_vendor' | 'already_used' | 'ambiguous' | 'expired' }> {
   const code = raw.trim()
   if (!code) return { error: 'not_found' }
 
@@ -57,6 +60,7 @@ async function findCoupon(
     const row = uidRows[0]
     if (row.vendor_id !== vendorId) return { error: 'wrong_vendor' }
     if (row.status === 'used') return { error: 'already_used' }
+    if (isExpired(row)) return { error: 'expired' }
     return { row }
   }
 
@@ -66,8 +70,10 @@ async function findCoupon(
   const all = await getJson<IssuedRow>(`coupons_issued?vendor_id=eq.${encodeURIComponent(vendorId)}&select=*&limit=5000`)
   const matches = all.filter((r) => `${codeOf.get(r.coupon_id) ?? ''}-${r.uid.slice(-4)}`.toUpperCase() === code.toUpperCase())
   const unused = matches.filter((r) => r.status === 'unused')
-  if (unused.length === 1) return { row: unused[0] }
-  if (unused.length > 1) return { error: 'ambiguous' }
+  const live = unused.filter((r) => !isExpired(r))
+  if (live.length === 1) return { row: live[0] }
+  if (live.length > 1) return { error: 'ambiguous' }
+  if (unused.length) return { error: 'expired' } // only expired ones match
   // nothing unused matches: tell the vendor if it is a coupon that was already redeemed
   return { error: matches.length ? 'already_used' : 'not_found' }
 }
@@ -160,7 +166,8 @@ export default async function handler(req: Req, res: Res) {
 
     // The traveler's reward for using a coupon: bonus coins, plus the "redeem a coupon" quest (once).
     await rpc('apply_coins', { p_user: row.user_id, p_delta: REDEEM_BONUS_COINS, p_reason: 'redeem_bonus', p_ref: row.uid })
-    await rpc('complete_quest', { p_user: row.user_id, p_quest: REDEEM_QUEST.id, p_reward: REDEEM_QUEST.reward })
+    const redeemQuest = (await loadQuests()).find((q) => q.id === REDEEM_QUEST_ID)
+    await rpc('complete_quest', { p_user: row.user_id, p_quest: REDEEM_QUEST_ID, p_reward: redeemQuest?.rewardCoins ?? REDEEM_QUEST_FALLBACK_REWARD })
     return res.json({ ok: true, amountVnd: amount, commissionVnd: commission })
   }
 
@@ -170,7 +177,14 @@ export default async function handler(req: Req, res: Res) {
     const titleVi = str(body.titleVi, 2, 60)
     const discount = Math.round(Number(body.discountPct))
     const cost = Math.round(Number(body.costCoins))
-    if (!titleEn || !titleVi || !(discount >= 1 && discount <= 50) || !(cost >= 10 && cost <= 500)) return fail(res, 400, 'bad_input')
+    const validDays = body.validDays === undefined || body.validDays === '' ? 30 : Math.round(Number(body.validDays))
+    const monthlyCap = body.monthlyCap === undefined || body.monthlyCap === null || body.monthlyCap === '' ? null : Math.round(Number(body.monthlyCap))
+    if (
+      !titleEn || !titleVi || !(discount >= 1 && discount <= 50) || !(cost >= 10 && cost <= 500) ||
+      !(validDays >= 1 && validDays <= 365) || (monthlyCap !== null && !(monthlyCap >= 1 && monthlyCap <= 10000))
+    ) {
+      return fail(res, 400, 'bad_input')
+    }
 
     const mine = await getJson<Offer>(`coupon_offers?vendor_id=eq.${encodeURIComponent(myVendor)}&select=id,code,vendor_id`)
     let id = typeof body.id === 'string' ? body.id : ''
@@ -195,7 +209,7 @@ export default async function handler(req: Req, res: Res) {
     const up = await rest('coupon_offers', {
       method: 'POST',
       headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
-      body: JSON.stringify({ id, vendor_id: myVendor, title_en: titleEn, title_vi: titleVi, discount_pct: discount, cost_coins: cost, code, active }),
+      body: JSON.stringify({ id, vendor_id: myVendor, title_en: titleEn, title_vi: titleVi, discount_pct: discount, cost_coins: cost, code, active, valid_days: validDays, monthly_cap: monthlyCap }),
     })
     if (!up.ok) return fail(res, up.status === 409 ? 409 : 500, up.status === 409 ? 'code_taken' : 'db_error')
     return res.json({ ok: true, id, code })
