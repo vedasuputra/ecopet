@@ -31,37 +31,65 @@ export async function callGemini(payload: Record<string, unknown>): Promise<stri
   const key = process.env.GEMINI_API_KEY
   if (!key) throw new GeminiError('GEMINI_API_KEY is not set')
 
-  // Never wait for Gemini forever: a call that hangs would end with the platform cutting the whole function (after 60 s) and the traveler
-  // seeing "can't reach the server". After 22 s a call is given up, and the next model is tried.
-  const send = (model: string) =>
-    fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(22_000),
-    })
-  const attempt = async (model: string): Promise<Response | null> => {
-    try {
-      return await send(model)
-    } catch (e) {
-      console.error(`[gemini] ${model}: no answer in time`, (e as Error).name)
-      return null
+  // Gemini is sometimes slow (10 s or more for a small request) or busy. So the backup model is not waited for until the first one has failed:
+// if the first model has not answered after 12 s, or answers 503 / 429 / nothing, the backup is asked too, and the first good answer wins
+// (the other call is cancelled). A call is given up after 40 s, so the platform never has to cut the whole function (60 s).
+  const r = await new Promise<Response>((resolve, reject) => {
+    const ctrls = [new AbortController(), new AbortController()]
+    let pending = 0
+    let backupStarted = false
+    let done = false
+    let busy = false // some call was busy, over quota or too slow
+    let lastError = ''
+    const start = (i: number, model: string) => {
+      pending++
+      fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.any([ctrls[i].signal, AbortSignal.timeout(40_000)]),
+      })
+        .then(async (res) => {
+          if (res.ok) return finish(res, i)
+          const body = (await res.text().catch(() => '')).slice(0, 300)
+          // the real reason (which quota, how long to wait) goes to the server log, never to the client
+          console.error(`[gemini] ${model} ${res.status}`, body)
+          if (res.status === 429 || res.status === 503) busy = true
+          else lastError = `Gemini ${res.status}: ${body.slice(0, 200)}`
+          failed(i)
+        })
+        .catch((e: Error) => {
+          if (done) return // the call that lost the race was cancelled
+          console.error(`[gemini] ${model}: no answer in time`, e.name)
+          busy = true
+          failed(i)
+        })
     }
-  }
-  const busy = (res: Response | null) => !res || res.status === 429 || res.status === 503
-
-  let r = await attempt(MODEL)
-  if (busy(r)) {
-    // the real reason (which quota, how long to wait) is in the body: it is written to the server log, never sent to the client
-    console.error(`[gemini] ${MODEL} ${r?.status ?? 'timeout'}`, r ? (await r.text().catch(() => '')).slice(0, 400) : '')
-    r = await attempt(BACKUP_MODEL)
-    if (busy(r)) {
-      console.error(`[gemini] ${BACKUP_MODEL} ${r?.status ?? 'timeout'}`, r ? (await r.text().catch(() => '')).slice(0, 400) : '')
-      throw new GeminiError(RATE_LIMIT_MESSAGE, true)
+    const startBackup = () => {
+      if (backupStarted || done) return
+      backupStarted = true
+      start(1, BACKUP_MODEL)
     }
-  }
-  if (!r) throw new GeminiError(RATE_LIMIT_MESSAGE, true)
-  if (!r.ok) throw new GeminiError(`Gemini ${r.status}: ${(await r.text()).slice(0, 200)}`)
+    const timer = setTimeout(startBackup, 12_000)
+    const finish = (res: Response, winner: number) => {
+      if (done) return
+      done = true
+      clearTimeout(timer)
+      ctrls.forEach((c, j) => j !== winner && c.abort())
+      resolve(res)
+    }
+    const failed = (i: number) => {
+      pending--
+      if (done) return
+      if (i === 0) startBackup() // the first model failed: the backup is asked now
+      if (pending === 0 && backupStarted) {
+        done = true
+        clearTimeout(timer)
+        reject(busy ? new GeminiError(RATE_LIMIT_MESSAGE, true) : new GeminiError(lastError || 'Gemini failed'))
+      }
+    }
+    start(0, MODEL)
+  })
 
   const data = await r.json()
   const text = data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text ?? '').join('')

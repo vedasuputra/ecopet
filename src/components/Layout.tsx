@@ -4,7 +4,6 @@ import { Link, Navigate, Outlet, useLocation as useRoute, useNavigate } from 're
 import AdblockGate from './AdblockGate'
 import PhoneFrame from './PhoneFrame'
 import BottomNav from './BottomNav'
-import CelebrationOverlay from './CelebrationOverlay'
 import LocationPopup from './LocationPopup'
 import RewardPopup from './RewardPopup'
 import MeiluPopup from './MeiluPopup'
@@ -169,7 +168,6 @@ export default function Layout() {
           {t('lockedToast')}
         </div>
       )}
-      <CelebrationOverlay />
       {user && !NO_BAR.includes(pathname) && <MeiluPopup />}
       <RewardPopup />
       {locOpen && <LocationPopup onClose={() => setLocOpen(false)} />}
