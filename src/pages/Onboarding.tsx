@@ -8,7 +8,8 @@ import { planTrip } from '../lib/itineraryClient'
 import type { TravelerStyle } from '../lib/travelerStyle'
 import { useAppStore } from '../store/useAppStore'
 
-// Three steps: the trip (days + places), Meilu asking what kind of traveler you are, then how to start.
+// The trip (days + places), then how to start. Meilu only asks what kind of traveler you are when you
+// choose "Plan with Meilu"; starting directly skips the questions.
 export default function Onboarding() {
   const navigate = useNavigate()
   const t = useT()
@@ -37,10 +38,10 @@ export default function Onboarding() {
   }
 
   // Optional: one AI call builds a day-by-day plan from real quests and partner shops, fitted to the answers
-  const planWithAi = async () => {
+  const planWithAi = async (s: TravelerStyle | undefined) => {
     setBusy(true)
-    setOnboarding(days, dest, style)
-    const plan = await planTrip({ days, destinations: dest, lang, ai: true, style })
+    setOnboarding(days, dest, s)
+    const plan = await planTrip({ days, destinations: dest, lang, ai: true, style: s })
     applyItinerary(plan)
     setBusy(false)
     navigate('/itinerary', { state: { onboarding: true } })
@@ -51,12 +52,12 @@ export default function Onboarding() {
       <TravelerQuiz
         initial={style}
         intro={t('quizIntroOnboarding')}
-        onBack={() => setStep('trip')}
+        doneLabel={t('quizPlanNow')}
+        onBack={() => setStep('ready')}
         onDone={(s) => {
           setStyle(s)
-          setStep('ready')
+          void planWithAi(s)
         }}
-        onSkip={() => setStep('ready')}
       />
     )
   }
@@ -65,7 +66,6 @@ export default function Onboarding() {
     return (
       <div>
         <MeiluAvatar size={90} />
-        <p>{style ? t('quizThanks') : ''}</p>
         <h2>{t('onboardingReady')}</h2>
         <div>
           <button onClick={start} disabled={busy}>
@@ -75,11 +75,11 @@ export default function Onboarding() {
         <p>
           <small>{t('onboardingPlanHint')}</small>
         </p>
-        <button onClick={() => void planWithAi()} disabled={busy}>
+        <button onClick={() => setStep('quiz')} disabled={busy}>
           {busy ? t('planning') : t('planWithMeilu')}
         </button>
         <p>
-          <button onClick={() => setStep('quiz')} disabled={busy}>
+          <button onClick={() => setStep('trip')} disabled={busy}>
             {t('quizBack')}
           </button>
         </p>
@@ -109,7 +109,7 @@ export default function Onboarding() {
         </div>
       ))}
       <p>
-        <button onClick={() => setStep('quiz')}>{t('onboardingNext')}</button>
+        <button onClick={() => setStep('ready')}>{t('onboardingNext')}</button>
       </p>
     </div>
   )

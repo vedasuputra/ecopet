@@ -4,7 +4,7 @@ import TravelerQuiz, { styleLabel } from '../components/TravelerQuiz'
 import { DESTINATIONS } from '../data/quests'
 import { useLang, useLoc, useT, type Key } from '../i18n'
 import { planCatalog, planTrip } from '../lib/itineraryClient'
-import { clampDays, resizeItinerary, type Itinerary, type ItineraryDay } from '../lib/planner'
+import { clampDays, resizeItinerary, stripDayPrefix, type Itinerary, type ItineraryDay } from '../lib/planner'
 import type { TravelerStyle } from '../lib/travelerStyle'
 import { useAppStore } from '../store/useAppStore'
 import { useCatalog } from '../store/useCatalog'
@@ -60,7 +60,6 @@ export default function ItineraryPage() {
   }
   const patchDay = (i: number, p: Partial<ItineraryDay>) => change((ds) => ds.map((d, j) => (j === i ? { ...d, ...p } : d)))
 
-  const used = new Set(itinerary?.days.flatMap((d) => d.questIds) ?? [])
   const questName = (id: string) => {
     const q = quests.find((x) => x.id === id)
     return q ? loc(q.title) : id
@@ -154,7 +153,7 @@ export default function ItineraryPage() {
       {itinerary.days.map((d, i) => (
         <section key={d.day} style={{ border: '1px solid #999', padding: 8, margin: '8px 0' }}>
           <h3>
-            {t('dayLabel', { n: d.day })}: {d.theme}
+            {t('dayLabel', { n: d.day })}: {stripDayPrefix(d.theme)}
           </h3>
           {editing ? (
             <select value={d.destination} onChange={(e) => patchDay(i, { destination: e.target.value })}>
@@ -168,29 +167,15 @@ export default function ItineraryPage() {
             <p>{d.destination}</p>
           )}
 
-          <b>{t('tripQuests')}</b>
+          <b>{t('tripQuests')}</b> <small>{t('tripQuestsHint')}</small>
           <ul>
             {d.questIds.length === 0 && <li>{t('freeTime')}</li>}
             {d.questIds.map((id) => (
               <li key={id}>
                 <Link to={`/quests/${id}`}>{questName(id)}</Link> {questStatus[id] === 'done' && '✓'}
-                {editing && <button onClick={() => patchDay(i, { questIds: d.questIds.filter((x) => x !== id) })}>{t('removeItem')}</button>}
               </li>
             ))}
           </ul>
-          {editing && (
-            <select
-              value=""
-              onChange={(e) => e.target.value && patchDay(i, { questIds: [...d.questIds, e.target.value] })}
-            >
-              <option value="">{t('addQuest')}</option>
-              {quests.filter((q) => !used.has(q.id)).map((q) => (
-                <option key={q.id} value={q.id}>
-                  {loc(q.title)}
-                </option>
-              ))}
-            </select>
-          )}
 
           {d.vendorIds.length > 0 && (
             <>
@@ -235,18 +220,27 @@ export default function ItineraryPage() {
         {t('planWithRules')}
       </button>
       <div>
-        <button
-          onClick={() => {
-            applyItinerary(itinerary)
-            setMsg(t('questsFollowPlan'))
-          }}
-        >
-          {t('useThisPlan')}
-        </button>
         {fromOnboarding ? (
-          <button onClick={() => navigate(giftClaimed ? '/quests' : '/gift')}>{t('itineraryContinue')}</button>
+          <button
+            onClick={() => {
+              applyItinerary(itinerary)
+              navigate(giftClaimed ? '/quests' : '/gift')
+            }}
+          >
+            {t('useAndContinue')}
+          </button>
         ) : (
-          <button onClick={() => navigate('/quests')}>{t('back')}</button>
+          <>
+            <button
+              onClick={() => {
+                applyItinerary(itinerary)
+                setMsg(t('questsFollowPlan'))
+              }}
+            >
+              {t('useThisPlan')}
+            </button>
+            <button onClick={() => navigate('/quests')}>{t('back')}</button>
+          </>
         )}
       </div>
     </div>

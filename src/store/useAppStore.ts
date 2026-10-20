@@ -91,6 +91,8 @@ interface AppState extends Economy {
   /** Saves an itinerary and makes the active quests follow it (day by day, skipping finished ones). */
   applyItinerary: (it: Itinerary) => void
   skipQuest: (id: string) => void
+  /** Adds any quest (also one outside the plan) to the active quests. */
+  takeQuest: (id: string) => void
   addChat: (m: ChatMessage) => void
   adsLeftToday: () => number
   /** Replace the mirror of the server's economy (see store/economy.ts). */
@@ -164,6 +166,9 @@ export const useAppStore = create<AppState>()(
             .filter((x): x is string => !!x)
           return { activeQuestIds }
         }),
+
+      takeQuest: (id) =>
+        set((s) => (s.activeQuestIds.includes(id) || s.questStatus[id] ? s : { activeQuestIds: [...s.activeQuestIds, id] })),
 
       addChat: (m) => set((s) => ({ chatHistory: [...s.chatHistory, m] })),
 

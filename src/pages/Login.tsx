@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { consentRecord } from '../data/privacy'
-import { useT } from '../i18n'
+import { useLang, useT } from '../i18n'
 import { supabase } from '../lib/supabase'
 import { refreshEconomy } from '../store/economy'
 import { loadRemote, startSync } from '../store/sync'
@@ -10,6 +10,7 @@ import { useAppStore } from '../store/useAppStore'
 export default function Login() {
   const navigate = useNavigate()
   const t = useT()
+  const { lang, setLang } = useLang()
   const { login, reset } = useAppStore()
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [name, setName] = useState('')
@@ -65,6 +66,15 @@ export default function Login() {
 
   return (
     <div>
+      <p>
+        {t('language')}:{' '}
+        <button onClick={() => setLang('en')} disabled={lang === 'en'}>
+          English
+        </button>
+        <button onClick={() => setLang('vi')} disabled={lang === 'vi'}>
+          Tiếng Việt
+        </button>
+      </p>
       <h1>Eco-Pet</h1>
       <p>{t('loginTagline')}</p>
       {mode === 'signup' && (

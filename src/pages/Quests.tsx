@@ -7,10 +7,11 @@ export default function Quests() {
   const quests = useCatalog((s) => s.quests)
   const t = useT()
   const loc = useLoc()
-  const { activeQuestIds, questStatus, reviewStatus, skipQuest, coins } = useAppStore()
+  const { activeQuestIds, questStatus, reviewStatus, skipQuest, takeQuest, coins } = useAppStore()
   const active = activeQuestIds
     .map((id) => quests.find((q) => q.id === id))
     .filter((q) => !!q)
+  const others = quests.filter((q) => !activeQuestIds.includes(q.id) && questStatus[q.id] !== 'done')
 
   return (
     <div>
@@ -34,6 +35,19 @@ export default function Quests() {
           )
         })}
       </ul>
+      {others.length > 0 && (
+        <>
+          <h3>{t('otherQuests')}</h3>
+          <ul>
+            {others.map((q) => (
+              <li key={q.id}>
+                <Link to={`/quests/${q.id}`}>{loc(q.title)}</Link> ({q.destination}) {t('rewardCoins', { n: q.rewardCoins })}{' '}
+                <button onClick={() => takeQuest(q.id)}>{t('takeQuest')}</button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   )
 }

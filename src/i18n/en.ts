@@ -157,6 +157,10 @@ const en = {
   useThisPlan: 'Use this plan for my quests',
   questsFollowPlan: 'Your quests now follow this plan.',
   itineraryContinue: 'Continue',
+  useAndContinue: 'Use this plan and continue',
+  tripQuestsHint: '(what you can do here; you can also take any other quest)',
+  otherQuests: 'Other quests you can take',
+  takeQuest: 'Take this quest',
   // "what kind of traveler are you?" (Meilu asks)
   quizTitle: 'What kind of traveler are you?',
   quizIntroOnboarding: "Hi, I'm Meilu! Before we start, tell me a little about how you like to travel, so I can suggest things that suit you.",

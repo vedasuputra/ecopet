@@ -97,8 +97,8 @@ export function nearestVendors(dest: string, vendors: PlanVendor[], n = MAX_VEND
 }
 
 const T = {
-  dayTheme: (lang: string, n: number, dest: string) => (lang === 'vi' ? `Ngày ${n}: ${dest}` : `Day ${n}: ${dest}`),
-  freeTheme: (lang: string, n: number, dest: string) => (lang === 'vi' ? `Ngày ${n}: tự do khám phá ${dest}` : `Day ${n}: free time in ${dest}`),
+  dayTheme: (_lang: string, _n: number, dest: string) => dest,
+  freeTheme: (lang: string, _n: number, dest: string) => (lang === 'vi' ? `Tự do khám phá ${dest}` : `Free time in ${dest}`),
   summary: (lang: string, days: number, dests: string[]) =>
     lang === 'vi' ? `Kế hoạch ${days} ngày: ${dests.join(', ')}` : `${days}-day plan: ${dests.join(', ')}`,
 }
@@ -173,6 +173,9 @@ export function resizeItinerary(it: Itinerary, newDays: number, ctx: Omit<PlanCo
  * so facts that tend to be invented (opening hours, prices, phone numbers, links) are removed.
  * Returns '' when the text looks like it states one.
  */
+/** The day number is shown by the page, so a theme never starts with "Day 1:" / "Ngày 1:" (older plans and AI text sometimes do). */
+export const stripDayPrefix = (theme: string) => theme.replace(/^\s*(day|ngày)\s*\d+\s*[:\-–]\s*/i, '').trim()
+
 export function sanitizeNote(s: unknown, max: number): string {
   if (typeof s !== 'string') return ''
   const t = s.replace(/\s+/g, ' ').trim()
@@ -219,7 +222,7 @@ export function validatePlan(raw: unknown, ctx: PlanContext): Itinerary | null {
     out.push({
       day: i + 1,
       destination: dest,
-      theme: sanitizeNote(d.theme, 70) || (qs.length ? T.dayTheme(ctx.lang, i + 1, dest) : T.freeTheme(ctx.lang, i + 1, dest)),
+      theme: stripDayPrefix(sanitizeNote(d.theme, 70)) || (qs.length ? T.dayTheme(ctx.lang, i + 1, dest) : T.freeTheme(ctx.lang, i + 1, dest)),
       questIds: qs,
       vendorIds: vs,
       note: sanitizeNote(d.note, 160),
