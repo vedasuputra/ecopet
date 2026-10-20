@@ -51,6 +51,7 @@ export default async function handler(req: Req, res: Res) {
       if (r.error === 'insufficient_coins') return fail(res, 402, 'insufficient_coins')
       if (r.error === 'coupon_unavailable') return fail(res, 404, 'coupon_unavailable')
       if (r.error === 'sold_out') return fail(res, 409, 'sold_out')
+      if (r.error === 'daily_coupon_limit') return fail(res, 429, 'daily_coupon_limit')
       return fail(res, 500, 'db_error')
     }
     return res.json({ ok: true, coins: r.data, uid })

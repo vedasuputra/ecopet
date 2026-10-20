@@ -51,7 +51,7 @@ export default function MapView() {
       >
         <Popup>{source === 'simulated' ? t('simulatedAt', { place: placeName }) : t('mapYou', { place: placeName })}</Popup>
       </Marker>
-      {quests.map((q) => (
+      {quests.filter((q) => q.scope !== 'general').map((q) => (
         <CircleMarker key={q.id} center={[q.lat, q.lng]} radius={7} pathOptions={{ color: 'green' }}>
           <Popup>{t('mapQuest', { title: loc(q.title) })}</Popup>
         </CircleMarker>

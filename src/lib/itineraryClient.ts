@@ -7,7 +7,8 @@ import { useCatalog } from '../store/useCatalog'
 export function planCatalog(): { quests: PlanQuest[]; vendors: PlanVendor[] } {
   const { quests, vendors } = useCatalog.getState()
   return {
-    quests: quests.map((q) => ({ id: q.id, type: q.type, destination: q.destination, title: q.title.en, lat: q.lat, lng: q.lng })),
+    // only place-specific quests belong in an itinerary; general quests are always in the Quests tab
+    quests: quests.filter((q) => q.scope !== 'general').map((q) => ({ id: q.id, type: q.type, destination: q.destination, title: q.title.en, lat: q.lat, lng: q.lng })),
     vendors: vendors.map((v) => ({ id: v.id, name: v.name, category: v.category.en, lat: v.lat, lng: v.lng })),
   }
 }

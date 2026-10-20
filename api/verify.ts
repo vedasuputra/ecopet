@@ -42,9 +42,10 @@ const schema = {
     confidence: { type: 'NUMBER' },
     is_screenshot_or_screen: { type: 'BOOLEAN' },
     red_flags: { type: 'ARRAY', items: { type: 'STRING', enum: RED_FLAGS } },
+    evidence_shown: { type: 'BOOLEAN' },
     reason: { type: 'STRING' },
   },
-  required: ['quest_met', 'confidence', 'is_screenshot_or_screen', 'red_flags', 'reason'],
+  required: ['quest_met', 'confidence', 'is_screenshot_or_screen', 'red_flags', 'evidence_shown', 'reason'],
 }
 
 interface AiResult {
@@ -52,6 +53,8 @@ interface AiResult {
   confidence: number
   is_screenshot_or_screen: boolean
   red_flags: string[]
+  /** The photo also shows the evidence the quest asks for (the item bought, the bicycle, the boat...). */
+  evidence_shown: boolean
   reason: string
 }
 
@@ -69,7 +72,8 @@ export default async function handler(req: Req, res: Res) {
   if (!quest.requiredObject && !quest.requiredScene) {
     return res.status(400).json({ ok: false, message: 'This quest has no photo verification' })
   }
-  if (typeof image !== 'string' || typeof lat !== 'number' || typeof lng !== 'number') {
+  // a general quest can be done anywhere, so it needs no location
+  if (typeof image !== 'string' || (!quest.general && (typeof lat !== 'number' || typeof lng !== 'number'))) {
     return res.status(400).json({ ok: false, message: 'Missing image or location' })
   }
   const base64 = image.replace(/^data:image\/\w+;base64,/, '')
@@ -91,28 +95,29 @@ export default async function handler(req: Req, res: Res) {
     return res.json({ ok: false, reason: 'review_pending', message: 'Your photo for this quest is waiting for a review' })
   }
 
-  // Layer 1: location (repeated on the server, never trust the client's check)
-  const dist = haversine(lat, lng, quest.lat, quest.lng)
-  if (dist > quest.radiusM) {
-    await reject('too_far', { distance_m: Math.round(dist) })
+  // Layer 1: location (repeated on the server, never trust the client's check). Skipped for general quests.
+  const dist = quest.general ? null : haversine(lat, lng, quest.lat, quest.lng)
+  const distM = dist == null ? null : Math.round(dist)
+  if (dist != null && dist > quest.radiusM) {
+    await reject('too_far', { distance_m: distM })
     return res.json({
       ok: false,
       reason: 'too_far',
-      distanceM: Math.round(dist),
+      distanceM: distM,
       message: `You are still ${(dist / 1000).toFixed(1)} km from the quest location`,
     })
   }
 
   // Anti-cheat: stale photo
   if (typeof timestamp !== 'number' || Math.abs(Date.now() - timestamp) > MAX_PHOTO_AGE_MS) {
-    await reject('stale', { distance_m: Math.round(dist) })
+    await reject('stale', { distance_m: distM })
     return res.json({ ok: false, reason: 'stale', message: 'The photo is too old, take a new one' })
   }
 
   // Anti-cheat: the exact same photo
   const hash = createHash('sha256').update(image).digest('hex')
   if (await hashExists(hash)) {
-    await reject('duplicate', { distance_m: Math.round(dist), photo_hash: hash })
+    await reject('duplicate', { distance_m: distM, photo_hash: hash })
     return res.json({ ok: false, reason: 'duplicate', message: 'This photo has already been used' })
   }
 
@@ -120,7 +125,7 @@ export default async function handler(req: Req, res: Res) {
   const today = await rest(`quest_progress?user_id=eq.${user.id}&completed_at=gte.${encodeURIComponent(vnDayStartISO())}&select=quest_id`)
   const doneToday = today.ok ? ((await today.json()) as unknown[]).length : 0
   if (doneToday >= QUESTS_PER_DAY) {
-    await reject('daily_limit', { distance_m: Math.round(dist), photo_hash: hash })
+    await reject('daily_limit', { distance_m: distM, photo_hash: hash })
     return res.json({ ok: false, reason: 'daily_limit', limit: QUESTS_PER_DAY, message: 'Daily quest limit reached' })
   }
 
@@ -151,6 +156,9 @@ export default async function handler(req: Req, res: Res) {
     `quest_met is true only if the photo genuinely shows it. confidence (0 to 1) is how sure you are that the requirement is met. ` +
     `Set is_screenshot_or_screen=true if the photo is a screenshot or a picture of a screen/monitor/printed photo. ` +
     `red_flags lists every problem you see, using only the allowed values (empty list if none): screen_photo, stock_or_internet_image, ai_generated, edited_or_overlay, wrong_object, wrong_place, blurry, too_dark, no_context, other. ` +
+    (quest.photoProof
+      ? `The photo must ALSO clearly show this evidence: ${quest.photoProof}. evidence_shown is true only if that evidence is really visible; a photo of the place alone, without the evidence, is false. `
+      : `evidence_shown is true. `) +
     `reason is one short sentence in English.`
 
   let ai: AiResult
@@ -165,6 +173,7 @@ export default async function handler(req: Req, res: Res) {
       confidence: Math.min(1, Math.max(0, Number(parsed.confidence) || 0)),
       is_screenshot_or_screen: parsed.is_screenshot_or_screen === true,
       red_flags: (Array.isArray(parsed.red_flags) ? parsed.red_flags : []).filter((f) => RED_FLAGS.includes(f)),
+      evidence_shown: quest.photoProof ? parsed.evidence_shown === true : true,
       reason: String(parsed.reason ?? '').slice(0, 300),
     }
   } catch (e) {
@@ -178,6 +187,10 @@ export default async function handler(req: Req, res: Res) {
   if (hard) {
     outcome = 'rejected'
     reason = ai.is_screenshot_or_screen || ai.red_flags.includes('screen_photo') ? 'screenshot' : 'suspicious'
+  } else if (ai.quest_met && !ai.evidence_shown) {
+    // the place or object looks right, but there is no sign of the purchase / the bike / the boat
+    outcome = 'rejected'
+    reason = 'no_evidence'
   } else if (ai.quest_met && ai.confidence >= PASS_CONFIDENCE) {
     outcome = similar ? 'review' : 'verified'
     reason = similar ? 'similar_photo' : 'verified'
@@ -196,7 +209,7 @@ export default async function handler(req: Req, res: Res) {
     quest_met: ai.quest_met,
     red_flags: ai.red_flags,
     ai_reason: ai.reason,
-    distance_m: Math.round(dist),
+    distance_m: distM,
     photo_hash: hash,
     photo_phash: phash,
   }
@@ -224,7 +237,7 @@ export default async function handler(req: Req, res: Res) {
   }
 
   await logAttempt({ ...base, outcome, reason })
-  const reasonCode = reason === 'screenshot' ? 'screenshot' : reason === 'suspicious' ? 'suspicious' : 'not_detected'
+  const reasonCode = reason === 'screenshot' ? 'screenshot' : reason === 'suspicious' ? 'suspicious' : reason === 'no_evidence' ? 'no_evidence' : 'not_detected'
   return res.json({
     ok: false,
     reason: reasonCode,

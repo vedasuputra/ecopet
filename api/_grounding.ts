@@ -17,7 +17,10 @@ export interface Offer {
 export interface GroundingCatalog {
   vendors: PlanVendor[]
   offers: Offer[]
+  /** Place-specific quests only: these are what the itinerary and the "near you" list are built from. */
   quests: PlanQuest[]
+  /** Quests that can be done anywhere (not part of an itinerary). */
+  general: { id: string; title: string }[]
 }
 
 let cache: { at: number; data: GroundingCatalog } | null = null
@@ -39,7 +42,7 @@ export async function loadCatalog(): Promise<GroundingCatalog> {
   const [v, o, q] = await Promise.all([
     getRows<{ id: string; name: string; category_en: string; lat: number | null; lng: number | null }>('vendors?select=id,name,category_en,lat,lng'),
     getRows<{ vendor_id: string; title_en: string; discount_pct: number }>('coupon_offers?active=eq.true&select=vendor_id,title_en,discount_pct'),
-    getRows<{ id: string; type: string; title_en: string; destination: string; lat: number; lng: number }>('quests?active=eq.true&select=id,type,title_en,destination,lat,lng&order=sort'),
+    getRows<{ id: string; type: string; title_en: string; scope?: string; destination: string | null; lat: number | null; lng: number | null }>('quests?active=eq.true&select=*&order=sort'),
   ])
 
   const data: GroundingCatalog = {
@@ -50,8 +53,13 @@ export async function loadCatalog(): Promise<GroundingCatalog> {
       ? o.map((x) => ({ vendorId: x.vendor_id, title: x.title_en, pct: x.discount_pct }))
       : staticCoupons.filter((c) => c.active !== false).map((c) => ({ vendorId: c.vendorId, title: c.title.en, pct: c.discountPct })),
     quests: q
-      ? q.map((x) => ({ id: x.id, type: x.type, title: x.title_en, destination: x.destination, lat: x.lat, lng: x.lng }))
-      : staticQuests.map((x) => ({ id: x.id, type: x.type, title: x.title.en, destination: x.destination, lat: x.lat, lng: x.lng })),
+      ? q
+          .filter((x) => x.scope !== 'general' && x.destination && x.lat != null && x.lng != null)
+          .map((x) => ({ id: x.id, type: x.type, title: x.title_en, destination: x.destination as string, lat: x.lat as number, lng: x.lng as number }))
+      : staticQuests.filter((x) => x.scope !== 'general').map((x) => ({ id: x.id, type: x.type, title: x.title.en, destination: x.destination, lat: x.lat, lng: x.lng })),
+    general: q
+      ? q.filter((x) => x.scope === 'general').map((x) => ({ id: x.id, title: x.title_en }))
+      : staticQuests.filter((x) => x.scope === 'general').map((x) => ({ id: x.id, title: x.title.en })),
   }
   cache = { at: Date.now(), data }
   return data
@@ -90,6 +98,7 @@ export function groundingText(cat: GroundingCatalog, lat: number | null, lng: nu
   return (
     `PARTNER SHOPS NEAR THE TRAVELER (these are the ONLY shops, cafes or vendors you may name):\n${shops}\n` +
     (quests ? `QUESTS NEAR THE TRAVELER:\n${quests}\n` : '') +
+    (cat.general.length ? `GENERAL QUESTS (can be done anywhere, pay fewer coins):\n${cat.general.map((q) => `- ${q.title}`).join('\n')}\n` : '') +
     `FACTS POLICY: you do NOT have opening hours, prices, addresses or phone numbers, so never state them; ` +
     `say you don't have exact information and suggest checking locally. Never invent the name of a shop, restaurant, hotel or tour operator. ` +
     `For places that are not partner shops, only mention widely known landmarks or dishes, and say so if you are unsure.`

@@ -27,7 +27,9 @@ export default function Coupons() {
         ? t('notEnoughCoins')
         : r.error === 'sold_out'
           ? t('couponSoldOutMsg')
-          : r.error === 'unreachable'
+          : r.error === 'daily_coupon_limit'
+            ? t('couponDailyLimitMsg')
+            : r.error === 'unreachable'
             ? t('unreachable')
             : t('couponGetFail'),
     )

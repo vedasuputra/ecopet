@@ -41,8 +41,10 @@ export default function QuestDetail() {
   }
   const done = questStatus[quest.id] === 'done'
   const needsPhoto = !!(quest.requiredObject || quest.requiredScene)
+  const general = quest.scope === 'general'
 
   const checkLocation = () => {
+    if (general) return true // doable anywhere
     const d = haversine(lat, lng, quest.lat, quest.lng)
     if (d > quest.radiusM) {
       setMsg(t('tooFar', { d: formatDistance(d) }))
@@ -91,6 +93,8 @@ export default function QuestDetail() {
       case 'already_done':
         void refreshEconomy()
         return setMsg(t('photoAlreadyDone'))
+      case 'no_evidence':
+        return setMsg(t('photoNoEvidence', { reason: String(r.detail ?? '') }))
       case 'duplicate':
         return setMsg(t('photoDuplicate'))
       case 'screenshot':
@@ -117,11 +121,22 @@ export default function QuestDetail() {
       <h2>{loc(quest.title)}</h2>
       <p>{loc(quest.description)}</p>
       <p>
-        {t('destination')}: {quest.destination} | {t('radius')} {quest.radiusM} m | {t('rewardCoins', { n: quest.rewardCoins })}
+        {general
+          ? `${t('anywhere')} | ${t('rewardCoins', { n: quest.rewardCoins })}`
+          : `${t('destination')}: ${quest.destination} | ${t('radius')} ${quest.radiusM} m | ${t('rewardCoins', { n: quest.rewardCoins })}`}
       </p>
-      <p>{source === 'simulated' ? t('simulatedAt', { place: placeName }) : t('realAt', { place: placeName })}</p>
-      {LOC_STATUS_KEY[status] && <p>{t(LOC_STATUS_KEY[status])}</p>}
-      <button onClick={checkLocation}>{t('checkLocation')}</button>
+      {!general && (
+        <>
+          <p>{source === 'simulated' ? t('simulatedAt', { place: placeName }) : t('realAt', { place: placeName })}</p>
+          {LOC_STATUS_KEY[status] && <p>{t(LOC_STATUS_KEY[status])}</p>}
+          {source === 'simulated' && !done && (
+            <p>
+              <button onClick={() => useLocation.getState().setSimulated(quest.lat, quest.lng, quest.destination)}>{t('simulateAtQuest')}</button>
+            </p>
+          )}
+          <button onClick={checkLocation}>{t('checkLocation')}</button>
+        </>
+      )}
       {!done && review?.status === 'pending' && <p>{t('questUnderReview')}</p>}
       {!done && review?.status === 'rejected' && (
         <p>{review.note ? t('questReviewRejectedNote', { note: review.note }) : t('questReviewRejected')}</p>

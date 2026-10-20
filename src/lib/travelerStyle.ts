@@ -27,12 +27,12 @@ export const questsPerDay = (s?: Pick<TravelerStyle, 'pace'> | null) => (s?.pace
 
 // Which quest types suit which interest (the types in the quests table)
 const QUEST_TYPES: Record<Interest, string[]> = {
-  nature: ['hiking', 'nature'],
-  food: ['traditional_market', 'floating_market', 'redeem_coupon', 'reusable_utensils'],
-  markets: ['floating_market', 'traditional_market', 'redeem_coupon'],
-  culture: ['traditional_market', 'floating_market'],
-  adventure: ['hiking', 'nature', 'bus'],
-  relax: ['nature', 'reusable_bottle', 'reusable_utensils'],
+  nature: ['hiking', 'rowing', 'cycling', 'orchard'],
+  food: ['local_food', 'local_goods', 'orchard', 'traditional_market', 'floating_market', 'redeem_coupon', 'reusable_utensils'],
+  markets: ['floating_market', 'traditional_market', 'local_goods', 'redeem_coupon'],
+  culture: ['craft', 'traditional_market', 'floating_market', 'local_food'],
+  adventure: ['hiking', 'cycling', 'rowing', 'bus'],
+  relax: ['rowing', 'orchard', 'reusable_bottle', 'reusable_utensils'],
 }
 
 // Which partner-shop categories (English names) suit which interest

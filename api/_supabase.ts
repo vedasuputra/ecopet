@@ -90,12 +90,16 @@ export async function getJsonRows<T>(path: string): Promise<T[]> {
 
 export interface ServerQuest {
   id: string
+  /** General quests can be done anywhere: no location check. */
+  general: boolean
   lat: number
   lng: number
   radiusM: number
   rewardCoins: number
   requiredObject?: string
   requiredScene?: string
+  /** What the photo must show as evidence (purchase, bicycle, hand-rowed boat...). */
+  photoProof?: string
 }
 
 let questCache: { at: number; list: ServerQuest[] } | null = null
@@ -108,17 +112,20 @@ export async function loadQuests(): Promise<ServerQuest[]> {
   const ttl = Number(process.env.QUEST_CACHE_MS ?? 60_000) // 0 = always re-read (used by tests)
   if (questCache && Date.now() - questCache.at < ttl) return questCache.list
   try {
-    const r = await rest('quests?active=eq.true&select=id,lat,lng,radius_m,reward_coins,required_object,required_scene&order=sort')
+    // select=* so a database that has not got the "scope" column yet still works (all quests are then place-specific)
+    const r = await rest('quests?active=eq.true&select=*&order=sort')
     if (r.ok) {
-      const rows = (await r.json()) as { id: string; lat: number; lng: number; radius_m: number; reward_coins: number; required_object: string | null; required_scene: string | null }[]
+      const rows = (await r.json()) as { id: string; scope?: string; lat: number | null; lng: number | null; radius_m: number | null; reward_coins: number; required_object: string | null; required_scene: string | null; photo_proof?: string | null }[]
       const list = rows.map((q) => ({
         id: q.id,
-        lat: q.lat,
-        lng: q.lng,
-        radiusM: q.radius_m,
+        general: q.scope === 'general',
+        lat: q.lat ?? 0,
+        lng: q.lng ?? 0,
+        radiusM: q.radius_m ?? 0,
         rewardCoins: q.reward_coins,
         requiredObject: q.required_object ?? undefined,
         requiredScene: q.required_scene ?? undefined,
+        photoProof: q.photo_proof ?? undefined,
       }))
       questCache = { at: Date.now(), list }
       return list
@@ -126,7 +133,7 @@ export async function loadQuests(): Promise<ServerQuest[]> {
   } catch {
     /* fall through to the built-in quests */
   }
-  return staticQuests.map((q) => ({ id: q.id, lat: q.lat, lng: q.lng, radiusM: q.radiusM, rewardCoins: q.rewardCoins, requiredObject: q.requiredObject, requiredScene: q.requiredScene }))
+  return staticQuests.map((q) => ({ id: q.id, general: q.scope === 'general', lat: q.lat, lng: q.lng, radiusM: q.radiusM, rewardCoins: q.rewardCoins, requiredObject: q.requiredObject, requiredScene: q.requiredScene, photoProof: q.photoProof }))
 }
 
 // --- Helpers for verification, review and rate limits ---------------------------------------------

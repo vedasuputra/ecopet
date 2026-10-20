@@ -40,7 +40,7 @@ export const AD_DAILY_LIMIT = 3
  * `exclude` (active or done) are never picked, and `have` are the active quests that variety is judged against.
  */
 function pickQuests(destinations: string[], exclude: string[], count: number, have: string[] = []): string[] {
-  const all = useCatalog.getState().quests
+  const all = useCatalog.getState().quests.filter((q) => q.scope !== 'general') // general quests are always available, never a slot
   const haveQ = all.filter((q) => have.includes(q.id))
   const available = all.filter((q) => !exclude.includes(q.id))
   const mine = available.filter((q) => destinations.includes(q.destination))
