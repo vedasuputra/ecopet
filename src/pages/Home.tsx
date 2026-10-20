@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import MeiluAvatar from '../components/MeiluAvatar'
 import PlaceCard from '../components/PlaceCard'
 import { RECOMMENDATIONS } from '../data/recommendations'
 import { useLoc, useT } from '../i18n'
 import { recommend } from '../lib/recommend'
-import { isCouponExpired, useAppStore } from '../store/useAppStore'
+import { useAppStore } from '../store/useAppStore'
 import { useCatalog } from '../store/useCatalog'
 import { useLocation } from '../store/useLocation'
 
@@ -13,8 +13,8 @@ const MAX_QUESTS = 4
 const MAX_COUPONS = 3
 const MAX_PLACES = 3
 
-// Home: Meilu and a box to message her, then the quests you can do, the coupons you have, and
-// places to visit in the Mekong (chosen from where you are and what you like).
+// Home: Meilu asks what we will do today (the button opens the chat), then the quests you can do,
+// the coupons you can get, and places to visit in the Mekong (chosen from where you are and what you like).
 export default function Home() {
   const t = useT()
   const loc = useLoc()
@@ -23,16 +23,11 @@ export default function Home() {
   const activeQuestIds = useAppStore((s) => s.activeQuestIds)
   const questStatus = useAppStore((s) => s.questStatus)
   const reviewStatus = useAppStore((s) => s.reviewStatus)
-  const ownedCoupons = useAppStore((s) => s.ownedCoupons)
+  const coins = useAppStore((s) => s.coins)
   const quests = useCatalog((s) => s.quests)
   const coupons = useCatalog((s) => s.coupons)
+  const vendors = useCatalog((s) => s.vendors)
   const { lat, lng } = useLocation()
-  const [text, setText] = useState('')
-
-  const ask = () => {
-    const q = text.trim()
-    if (q) navigate('/meilu', { state: { ask: q } })
-  }
 
   // quests you can do now: your own (at your places) first, then the general ones that can be done anywhere
   const todo = useMemo(() => {
@@ -42,7 +37,11 @@ export default function Home() {
     return [...mine, ...general].slice(0, MAX_QUESTS)
   }, [activeQuestIds, quests, questStatus])
 
-  const myCoupons = ownedCoupons.filter((c) => c.status === 'unused' && !isCouponExpired(c)).slice(0, MAX_COUPONS)
+  // the coupons anyone can get with coins (the ones you already have are on the Coupons screen)
+  const available = useMemo(
+    () => coupons.filter((c) => c.active !== false && c.remaining !== 0).sort((a, b) => a.costCoins - b.costCoins).slice(0, MAX_COUPONS),
+    [coupons],
+  )
 
   const places = useMemo(
     () => recommend(RECOMMENDATIONS, { lat, lng, interests: user?.style?.interests, destinations: user?.destinations }).slice(0, MAX_PLACES),
@@ -52,20 +51,15 @@ export default function Home() {
   return (
     <div>
       <section>
-        <MeiluAvatar interactive halfBody size={170} />
-        <div>
-          <input
-            value={text}
-            maxLength={500}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && ask()}
-            placeholder={t('homeAskPlaceholder')}
-            style={{ width: '70%' }}
-          />{' '}
-          <button onClick={ask} disabled={!text.trim()}>
-            {t('send')}
-          </button>
+        <div style={{ border: '2px solid #000', borderRadius: 16, padding: '10px 14px', margin: '8px 12px 0', position: 'relative' }}>
+          <p style={{ margin: '0 0 8px' }}>
+            <b>{t('homeGreeting', { name: user?.name ?? '' })}</b>
+          </p>
+          <button onClick={() => navigate('/meilu')}>{t('homeChatButton')}</button>
+          {/* the bubble's tail, pointing down at Meilu */}
+          <span style={{ position: 'absolute', left: '50%', bottom: -11, width: 18, height: 18, background: '#fff', borderRight: '2px solid #000', borderBottom: '2px solid #000', transform: 'translateX(-50%) rotate(45deg)' }} />
         </div>
+        <MeiluAvatar interactive halfBody fluid />
       </section>
 
       <section>
@@ -90,21 +84,22 @@ export default function Home() {
 
       <section>
         <h3>{t('homeCoupons')}</h3>
-        {myCoupons.length === 0 ? (
+        {available.length === 0 ? (
           <p>{t('homeNoCoupons')}</p>
         ) : (
           <ul>
-            {myCoupons.map((oc) => {
-              const c = coupons.find((x) => x.id === oc.couponId)
-              return (
-                <li key={oc.uid}>
-                  {c ? loc(c.title) : oc.couponId} <Link to={`/coupons/${oc.uid}`}>{t('showQR')}</Link>
-                </li>
-              )
-            })}
+            {available.map((c) => (
+              <li key={c.id}>
+                <Link to="/coupons">{vendors.find((v) => v.id === c.vendorId)?.name}: {loc(c.title)}</Link>{' '}
+                <small>
+                  ({c.discountPct}%) · {t('costCoins', { n: c.costCoins })}
+                  {coins < c.costCoins && ` · ${t('notEnoughCoins')}`}
+                </small>
+              </li>
+            ))}
           </ul>
         )}
-        <Link to="/coupons">{myCoupons.length === 0 ? t('getCoupons') : t('viewAll')}</Link>
+        <Link to="/coupons">{t('viewAll')}</Link>
       </section>
 
       <section>

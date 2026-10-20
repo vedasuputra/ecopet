@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
-import { useLocation as useRoute, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import MeiluAvatar from '../components/MeiluAvatar'
 import { findCachedAnswer, suggestedQuestions } from '../data/meiluCache'
 import { areaLabel, nearestKnown } from '../data/places'
@@ -17,9 +16,6 @@ export default function MeiluChat() {
   const lang = useLang((s) => s.lang)
   const { chatHistory, addChat, activeQuestIds } = useAppStore()
   const { lat, lng, placeName } = useLocation()
-  const route = useRoute()
-  const navigate = useNavigate()
-  const asked = useRef(false)
   const [text, setText] = useState('')
   const [nodding, setNodding] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -74,16 +70,6 @@ export default function MeiluChat() {
     setBusy(false)
     addChat({ role: 'meilu', text: failureMessage(r, t, 'meiluCant') })
   }
-
-  // A message typed in the box on Home arrives here and is sent once
-  useEffect(() => {
-    const ask = (route.state as { ask?: string } | null)?.ask
-    if (!ask || asked.current) return
-    asked.current = true
-    navigate(route.pathname, { replace: true, state: null })
-    void send(ask)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   return (
     <div>

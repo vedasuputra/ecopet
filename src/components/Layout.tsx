@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, Outlet, useLocation as useRoute, useNavigate } from 'react-router-dom'
 import PhoneFrame from './PhoneFrame'
 import BottomNav from './BottomNav'
 import CelebrationOverlay from './CelebrationOverlay'
+import WatchAdPrompt from './WatchAdPrompt'
 import { useT } from '../i18n'
 import { supabase } from '../lib/supabase'
 import { refreshEconomy } from '../store/economy'
@@ -22,6 +23,7 @@ export default function Layout() {
   const coins = useAppStore((s) => s.coins)
   const couponCount = useAppStore((s) => s.ownedCoupons.filter((c) => c.status === 'unused' && !isCouponExpired(c)).length)
   const taps = useRef(0)
+  const [adPrompt, setAdPrompt] = useState(false)
 
   // On app load with an existing Supabase session: pull the saved account state, then keep saving.
   useEffect(() => {
@@ -66,8 +68,10 @@ export default function Layout() {
         {user && !NO_BAR.includes(pathname) && (
           <>
             <span>🪙 {t('headerCoins', { n: coins })}</span>
+            <button aria-label={t('adPlusLabel')} title={t('adPlusLabel')} onClick={() => setAdPrompt(true)}>
+              +
+            </button>
             <Link to="/coupons">🎟️ {t('headerCoupons', { n: couponCount })}</Link>
-            <button onClick={() => navigate('/ad')}>{t('watchAdShort')}</button>
           </>
         )}
       </header>
@@ -76,6 +80,15 @@ export default function Layout() {
       </main>
       <BottomNav />
       <CelebrationOverlay />
+      {adPrompt && (
+        <WatchAdPrompt
+          onClose={() => setAdPrompt(false)}
+          onWatch={() => {
+            setAdPrompt(false)
+            navigate('/ad')
+          }}
+        />
+      )}
     </PhoneFrame>
   )
 }

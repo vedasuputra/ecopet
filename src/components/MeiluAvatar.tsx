@@ -66,6 +66,7 @@ export default function MeiluAvatar({
   celebrating = false,
   interactive = false,
   halfBody = false,
+  fluid = false,
   size = 120,
 }: {
   nodding?: boolean
@@ -73,6 +74,8 @@ export default function MeiluAvatar({
   interactive?: boolean
   /** Only the top part (head and chest) shows, as if she peeks out from behind the box below her. */
   halfBody?: boolean
+  /** As wide as the space she is in (the home screen), instead of a fixed `size` in pixels. */
+  fluid?: boolean
   size?: number
 }) {
   const [anim, setAnim] = useState<Anim>('')
@@ -144,16 +147,17 @@ export default function MeiluAvatar({
         onPointerCancel={onUp}
         style={{
           position: 'relative',
-          display: 'inline-block',
-          width: size,
+          display: fluid ? 'block' : 'inline-block',
+          width: fluid ? '100%' : size,
           // the sprite is 364x294: keep about the upper 62% of it for the half-body view
-          ...(halfBody ? { height: Math.round(size * (294 / 364) * 0.62), overflow: 'hidden' } : {}),
+          ...(halfBody ? (fluid ? { aspectRatio: `364 / ${Math.round(294 * 0.62)}` } : { height: Math.round(size * (294 / 364) * 0.62) }) : {}),
+          ...(halfBody ? { overflow: 'hidden' } : {}),
           userSelect: 'none',
           touchAction: interactive ? 'none' : undefined, // stroking must not scroll the page
           cursor: interactive ? 'pointer' : undefined,
         }}
       >
-        <img src="/meilu.png" alt="Meilu" width={size} className={cls} draggable={false} style={{ display: 'block' }} />
+        <img src="/meilu.png" alt="Meilu" width={fluid ? undefined : size} className={cls} draggable={false} style={{ display: 'block', ...(fluid ? { width: '100%' } : {}) }} />
         {hearts.map((h) => (
           <span
             key={h.id}
