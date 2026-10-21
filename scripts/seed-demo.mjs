@@ -279,6 +279,7 @@ console.log('Live scan demo: the traveler owns an unused Cafe Sen Xanh coupon, s
 
 // the extra demo accounts (more travelers, a second vendor, the team)
 await import('./demo-accounts.mjs')
+console.log(`Second story traveler ( /login ):  demo.hana${DOMAIN}  /  ${PASSWORD}   (7 days on the western route, last day today; the utensils quest q7 is untouched)`)
 console.log(`More travelers ( /login ):  demo.minh${DOMAIN}, demo.sophie${DOMAIN}  /  ${PASSWORD}`)
 console.log(`Second vendor ( /vendor/login ):  demo.vendor2${DOMAIN}  /  ${PASSWORD}   (Banh Xeo Co Lan)`)
 console.log(`Team dashboard ( /admin ):  demo.admin${DOMAIN}, demo.admin2${DOMAIN}  /  ${PASSWORD}`)
