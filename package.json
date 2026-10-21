@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "seed:demo": "node --env-file=.env.local scripts/seed-demo.mjs"
+    "seed:demo": "node --env-file=.env.local scripts/seed-demo.mjs",
+    "seed:accounts": "node --env-file=.env.local scripts/demo-accounts.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

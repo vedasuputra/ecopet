@@ -44,10 +44,12 @@ export default function Billing() {
     await sleep(1100)
     setPhase('approving')
     await sleep(2200)
-    const r = await vendorApi('pay', { plan, method })
+    // a short network or server hiccup must not fail a (simulated) payment: one more try before giving up
+    let r = await vendorApi('pay', { plan, method })
+    if (!r.ok && r.error !== 'bad_request' && r.error !== 'not_a_vendor') r = await vendorApi('pay', { plan, method })
     if (!r.ok) {
       setPhase('form')
-      return setError(t('vErrPay'))
+      return setError(`${t('vErrPay')} (${r.error ?? 'unknown'})`) // the reason, so a failure can be traced
     }
     const payment = r.payment as { id: number }
     setResult({ invoice: invoiceNo(payment.id), until: String(r.paidUntil) })

@@ -29,6 +29,7 @@ export interface OwnedCoupon {
 export interface ChatMessage {
   role: 'user' | 'meilu'
   text: string
+  place?: string // the place picked on the map that the message is about
 }
 /** A quest photo that a person has to look at (pending), or that was looked at and not approved. */
 export interface ReviewInfo {

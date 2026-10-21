@@ -410,3 +410,81 @@
 .chat-backdrop.is-min .chat-head {
   border-bottom-color: transparent;
 }
+
+/* the map button in the chat headers: blue while the map is open */
+.chat-map-btn.on {
+  color: var(--blue);
+}
+.chat-backdrop.is-min .cm {
+  display: none;
+}
+
+/* the place Meilu keeps in mind (picked on the map), above the box */
+.chat-topic {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 16px 8px;
+  padding: 5px 6px 5px 10px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #f0f7fc;
+  font-size: 0.75rem;
+  color: var(--ink);
+}
+.chat-topic > .mi {
+  flex: none;
+  font-size: 16px;
+  color: var(--blue);
+}
+.chat-topic-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chat-topic-text b {
+  color: var(--navy);
+}
+.chat-topic button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  cursor: pointer;
+}
+.chat-topic button .mi {
+  font-size: 16px;
+}
+
+/* on a message sent while a map place was the topic: which place it is about */
+.chat-about {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  margin-bottom: 2px;
+  font-size: 0.6875rem;
+  color: var(--ink-2);
+}
+.chat-about .mi {
+  flex: none;
+  font-size: 14px;
+  color: var(--blue);
+}
+.chat-about > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chat-about b {
+  font-weight: 600;
+  color: var(--navy);
+}

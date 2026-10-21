@@ -317,3 +317,89 @@
 .popup-backdrop[hidden] {
   display: none;
 }
+
+/* ---- the quest is done: coins and Meilu's fun fact, over white confetti */
+.qd-done-backdrop {
+  z-index: 2200;
+}
+.popup-card.qd-done {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  max-width: 340px;
+  padding: 22px 18px 18px;
+  text-align: center;
+}
+.qd-done-title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--navy);
+}
+.qd-done-coins {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-title);
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1b7a43;
+}
+.qd-done-coins .mi {
+  font-size: 28px;
+}
+.qd-fact {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  text-align: left;
+}
+.qd-fact-ava {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: rgba(22, 143, 214, 0.14);
+}
+.qd-fact-ava-in {
+  position: absolute;
+  left: -8px;
+  top: 3px;
+  display: flex;
+}
+.qd-fact-text b {
+  display: block;
+  font-family: var(--font-title);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.qd-fact-text p {
+  margin: 2px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.qd-done .qd-btn {
+  margin-top: 6px;
+}
+
+/* the completion card counts padding inside the widths, so the fun fact box is exactly as wide as the button under it */
+.qd-done *,
+.qd-done *::before,
+.qd-done *::after {
+  box-sizing: border-box;
+}
+.qd-done .qd-fact,
+.qd-done .qd-btn {
+  width: 100%;
+}

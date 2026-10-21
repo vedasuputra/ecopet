@@ -1,7 +1,8 @@
 import L from 'leaflet'
 import { useEffect, useMemo, useState } from 'react'
-import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
+import { Circle, CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import { useLoc, useT, type Key } from '../i18n'
+import { ARRIVAL_SPOTS, PLACE_COLOR, QUEST_COLOR, SHOP_COLOR, shopsWithCoupons } from '../data/arrival'
 import type { Quest } from '../data/quests'
 import { haversine } from '../lib/geo'
 import { searchPlaces, type Place } from '../lib/geocode'
@@ -50,22 +51,56 @@ function FollowAndTap({ lat, lng, minZoom, onTap }: { lat: number; lng: number; 
 
 /** The map of both tabs: your pin (drag it, or tap the map) and, on the quest tab, a marker for each quest spot. */
 function LocationMap({ spots, minZoom }: { spots?: Quest[]; minZoom: number }) {
+  const t = useT()
   const loc = useLoc()
   const { lat, lng, setSimulated } = useLocation()
+  const vendors = useCatalog((s) => s.vendors)
+  const coupons = useCatalog((s) => s.coupons)
+  const shops = useMemo(() => shopsWithCoupons(vendors, coupons), [vendors, coupons])
   return (
     <div className="loc-map">
       <MapContainer center={[lat, lng]} zoom={minZoom} style={{ height: 190, width: '100%' }}>
         <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <FollowAndTap lat={lat} lng={lng} minZoom={minZoom} onTap={(a, b) => setSimulated(a, b)} />
+        {/* the area of each place: inside it, Meilu says hello */}
+        {ARRIVAL_SPOTS.map((p) => (
+          <Circle key={`a:${p.name}`} center={[p.lat, p.lng]} radius={p.radiusM} interactive={false} pathOptions={{ color: PLACE_COLOR, weight: 1, opacity: 0.5, fillOpacity: 0.06 }} />
+        ))}
+        {ARRIVAL_SPOTS.map((p) => (
+          <CircleMarker
+            key={`p:${p.name}`}
+            center={[p.lat, p.lng]}
+            radius={7}
+            pathOptions={{ color: '#fff', weight: 2, fillColor: PLACE_COLOR, fillOpacity: 1 }}
+            bubblingMouseEvents={false}
+            eventHandlers={{ click: () => setSimulated(p.lat, p.lng, p.name) }}
+          >
+            <Tooltip>{p.name}</Tooltip>
+          </CircleMarker>
+        ))}
         {spots?.map((q) => (
           <CircleMarker
             key={q.id}
             center={[q.lat, q.lng]}
-            radius={7}
-            pathOptions={{ color: '#044388', weight: 2, fillColor: '#168fd6', fillOpacity: 0.9 }}
+            radius={6}
+            pathOptions={{ color: '#fff', weight: 2, fillColor: QUEST_COLOR, fillOpacity: 1 }}
+            bubblingMouseEvents={false}
             eventHandlers={{ click: () => setSimulated(q.lat, q.lng, q.destination) }}
           >
             <Tooltip>{`${loc(q.title)} · ${q.destination}`}</Tooltip>
+          </CircleMarker>
+        ))}
+        {/* shops last, so they stay on top in the towns where everything is close together */}
+        {shops.map((v) => (
+          <CircleMarker
+            key={`v:${v.id}`}
+            center={[v.lat, v.lng]}
+            radius={6}
+            pathOptions={{ color: '#fff', weight: 2, fillColor: SHOP_COLOR, fillOpacity: 1 }}
+            bubblingMouseEvents={false}
+            eventHandlers={{ click: () => setSimulated(v.lat, v.lng, v.name) }}
+          >
+            <Tooltip>{`${v.name} · ${t('mapShop')}`}</Tooltip>
           </CircleMarker>
         ))}
         <Marker
@@ -80,6 +115,22 @@ function LocationMap({ spots, minZoom }: { spots?: Quest[]; minZoom: number }) {
           }}
         />
       </MapContainer>
+      <div className="loc-legend">
+        <span>
+          <i style={{ background: PLACE_COLOR }} />
+          {t('locLegendPlace')}
+        </span>
+        <span>
+          <i style={{ background: SHOP_COLOR }} />
+          {t('mapShop')}
+        </span>
+        {spots && (
+          <span>
+            <i style={{ background: QUEST_COLOR }} />
+            {t('locLegendQuest')}
+          </span>
+        )}
+      </div>
     </div>
   )
 }

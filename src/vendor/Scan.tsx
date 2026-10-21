@@ -77,6 +77,8 @@ export default function Scan() {
     setDone(null)
     setFound(null)
     setScanning(true)
+    // let the box show first (the scanner sizes the video to it)
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
     try {
       const qr = new Html5Qrcode(READER_ID)
       scanner.current = qr
@@ -124,19 +126,17 @@ export default function Scan() {
       </div>
 
       <section className="v-card">
-        <div id={READER_ID} className="v-reader" />
+        <div id={READER_ID} className={`v-reader${scanning ? ' on' : ''}`} />
         {scanning && <p className="v-hint" style={{ textAlign: 'center', marginBottom: 12 }}>{t('vReady')}</p>}
-        <div className="v-row">
-          {scanning ? (
-            <button className="v-btn" onClick={() => void stopCamera()}>
-              {t('vStopCamera')}
-            </button>
-          ) : (
-            <button className="v-btn primary" onClick={() => void startCamera()} disabled={busy}>
-              {t('vStartCamera')}
-            </button>
-          )}
-        </div>
+        {scanning ? (
+          <button className="v-btn v-wide" onClick={() => void stopCamera()}>
+            {t('vStopCamera')}
+          </button>
+        ) : (
+          <button className="v-btn primary v-wide" onClick={() => void startCamera()} disabled={busy}>
+            {t('vStartCamera')}
+          </button>
+        )}
 
         <div className="v-field" style={{ marginTop: 18 }}>
           <label htmlFor="v-code">{t('vOrManual')}</label>

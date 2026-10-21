@@ -1,0 +1,303 @@
+/* The small map of the Meilu chat: a search box, the map, and the card of the place that is picked. */
+.cm {
+  flex: none;
+  display: grid;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--mist);
+  background: var(--cream);
+  font-family: var(--font);
+}
+.cm *,
+.cm *::before,
+.cm *::after {
+  box-sizing: border-box;
+}
+.cm-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.cm-search > .mi {
+  position: absolute;
+  left: 10px;
+  font-size: 18px;
+  color: var(--ink-2);
+  pointer-events: none;
+}
+.cm-search input {
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 36px 0 34px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.8125rem;
+}
+.cm-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.cm-hide {
+  position: absolute;
+  right: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--navy);
+  cursor: pointer;
+}
+.cm-hide .mi {
+  font-size: 18px;
+}
+.cm-map {
+  position: relative;
+  height: 190px;
+  overflow: hidden;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+}
+.chat:not(.is-popup) .cm-map {
+  height: 240px; /* more room on the full-screen chat */
+}
+.cm-status {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  z-index: 500;
+  transform: translateX(-50%);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(4, 30, 66, 0.2);
+  font-size: 0.6875rem;
+  color: var(--ink-2);
+}
+
+/* the card of the place */
+.cm-card {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  animation: rise-in 0.2s ease-out;
+}
+.cm-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cm-kind {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+.cm-dist {
+  font-size: 0.6875rem;
+  color: var(--ink-2);
+}
+.cm-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-title);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+.cm-detail {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+.cm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 6px;
+}
+.cm-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 8px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.cm-btn:hover:not(:disabled) {
+  background: var(--sky);
+}
+.cm-primary {
+  background: var(--navy);
+  color: #fff;
+}
+.cm-primary:hover:not(:disabled) {
+  background: #033269;
+}
+.cm-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.cm :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+/* the list of the places found, under the search box */
+.cm-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 1100; /* over the map (Leaflet's panes and controls go up to 1000) */
+  max-height: 210px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(4, 67, 136, 0.12);
+}
+.cm-results li + li {
+  border-top: 1px solid var(--mist);
+}
+.cm-results button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.cm-results button:hover,
+.cm-results button[aria-selected='true'] {
+  background: #f0f7fc;
+}
+.cm-results .mi {
+  flex: none;
+  font-size: 18px;
+  color: var(--blue);
+}
+.cm-r-text {
+  display: grid;
+  min-width: 0;
+}
+.cm-r-text b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+.cm-r-text span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.6875rem;
+  color: var(--ink-2);
+}
+
+/* the traveler on the map: a blue dot with a soft pulse */
+.cm-me {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 0 0 rgba(22, 143, 214, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3);
+  animation: cm-pulse 2s ease-out infinite;
+}
+@keyframes cm-pulse {
+  70% {
+    box-shadow: 0 0 0 12px rgba(22, 143, 214, 0), 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(22, 143, 214, 0), 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+}
+/* back to my location: a round button at the bottom left of the map */
+.cm-locate {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  z-index: 1000; /* over the panes of the map */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--sky);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink-2);
+  box-shadow: 0 2px 6px rgba(4, 30, 66, 0.2);
+  cursor: pointer;
+}
+.cm-locate.on {
+  color: var(--blue);
+}
+.cm-locate .mi {
+  font-size: 20px;
+}
+/* what the dots are */
+.cm-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin-top: -4px;
+  font-size: 0.6875rem;
+  color: var(--ink-2);
+}
+.cm-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.cm-legend i {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(4, 30, 66, 0.25);
+}
+@media (prefers-reduced-motion: reduce) {
+  .cm-me {
+    animation: none;
+  }
+}

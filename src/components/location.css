@@ -183,3 +183,27 @@
   outline: 3px solid var(--blue);
   outline-offset: 2px;
 }
+
+/* what the dots on the map are */
+.loc-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 6px 10px;
+  border-top: 1px solid var(--sky);
+  background: #fff;
+  font-size: 0.6875rem;
+  color: var(--ink-2);
+}
+.loc-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.loc-legend i {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(4, 30, 66, 0.25);
+}

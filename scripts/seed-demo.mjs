@@ -276,3 +276,9 @@ console.log(`Vendor dashboard  ( /vendor/login ):  demo.vendor${DOMAIN}   /  ${P
 console.log(`Traveler app      ( /login )       :  demo.traveler${DOMAIN}  /  ${PASSWORD}`)
 console.log(`Story demo traveler ( /login ):  demo.rani${DOMAIN}  /  ${PASSWORD}   (7 days, ${RANI_QUESTS.length} quests done, ${RANI_COUPONS.length} coupons used, referral code ${raniCode}; the own-bottle quest q6 is untouched)`)
 console.log('Live scan demo: the traveler owns an unused Cafe Sen Xanh coupon, short code  SX15-9001')
+
+// the extra demo accounts (more travelers, a second vendor, the team)
+await import('./demo-accounts.mjs')
+console.log(`More travelers ( /login ):  demo.minh${DOMAIN}, demo.sophie${DOMAIN}  /  ${PASSWORD}`)
+console.log(`Second vendor ( /vendor/login ):  demo.vendor2${DOMAIN}  /  ${PASSWORD}   (Banh Xeo Co Lan)`)
+console.log(`Team dashboard ( /admin ):  demo.admin${DOMAIN}, demo.admin2${DOMAIN}  /  ${PASSWORD}`)

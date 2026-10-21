@@ -2,6 +2,7 @@ import { screenOf } from '../pages/Screens'
 import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, Outlet, useLocation as useRoute, useNavigate } from 'react-router-dom'
 import AdblockGate from './AdblockGate'
+import ArrivalToast from './ArrivalToast'
 import PhoneFrame from './PhoneFrame'
 import BottomNav from './BottomNav'
 import LocationPopup from './LocationPopup'
@@ -169,6 +170,8 @@ export default function Layout() {
         </div>
       )}
       {user && !NO_BAR.includes(pathname) && <MeiluPopup />}
+      {/* Meilu says hello when the traveler arrives somewhere the app knows (only in the app, never a system notification) */}
+      {user && !NO_BAR.includes(pathname) && <ArrivalToast />}
       <RewardPopup />
       {locOpen && <LocationPopup onClose={() => setLocOpen(false)} />}
       {adPrompt && (

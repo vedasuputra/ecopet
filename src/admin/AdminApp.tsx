@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import DashChat from '../components/DashChat'
 import { supabase } from '../lib/supabase'
 import { useCatalog } from '../store/useCatalog'
 import '../vendor/vendor.css'
@@ -58,6 +59,7 @@ export default function AdminApp() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [msg, setMsg] = useState('')
+  const [menu, setMenu] = useState(false) // the drawer on phones
   const quests = useCatalog((s) => s.quests)
 
   const check = useCallback(async () => {
@@ -83,70 +85,121 @@ export default function AdminApp() {
 
   const title = (id: string) => quests.find((q) => q.id === id)?.title.en ?? id
 
+  const signOut = () => void supabase?.auth.signOut().then(check)
+
+  // ---- not signed in, or not an admin: the blue sign-in screen of the app
+  if (auth !== 'ok') {
+    return (
+      <div className="v-app">
+        <div className="v-login">
+          <section className="v-login-card">
+            <div className="v-brand" style={{ color: 'var(--navy)', padding: 0, marginBottom: 12 }}>
+              <img src="/icon-192.png?v=4" alt="" />
+              Eco-Pet
+            </div>
+            <h1>Team dashboard</h1>
+            <p className="v-sub">Photo reviews, customer service, referrals and the impact of Eco-Pet travelers.</p>
+            {auth === 'loading' && <p>Loading...</p>}
+            {auth === 'signin' && (
+              <>
+                <div className="v-field">
+                  <label htmlFor="a-email">Email</label>
+                  <input id="a-email" className="v-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                </div>
+                <div className="v-field">
+                  <label htmlFor="a-pass">Password</label>
+                  <input id="a-pass" className="v-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && void signIn()} />
+                </div>
+                {msg && <p className="v-error">{msg}</p>}
+                <button className="v-btn primary" style={{ width: '100%' }} onClick={() => void signIn()}>
+                  Sign in
+                </button>
+              </>
+            )}
+            {auth === 'denied' && (
+              <>
+                <p className="v-error">This account is not an admin.</p>
+                <button className="v-btn v-login-out" onClick={signOut}>
+                  Sign out
+                </button>
+              </>
+            )}
+          </section>
+        </div>
+      </div>
+    )
+  }
+
+  // ---- signed in: the sidebar (a drawer on phones) with the sections, Meilu and sign out
+  const sections = [
+    { id: 'queue', label: 'Review queue', icon: 'fact_check', sub: 'Quest photos the AI was not sure about, or that travelers reported.' },
+    { id: 'attempts', label: 'Recent checks', icon: 'history', sub: 'How the photo checks are doing, to tune them.' },
+    { id: 'support', label: 'Customer service', icon: 'support_agent', sub: 'Problems travelers reported, and your answers.' },
+    { id: 'referrals', label: 'Referrals', icon: 'group_add', sub: 'Who invited whom, and the bonus coins paid.' },
+    { id: 'impact', label: 'Impact', icon: 'insights', sub: 'What all travelers did for sustainability, and where they went.' },
+  ] as const
+  const current = sections.find((x) => x.id === tab) ?? sections[0]
+
   return (
     <div className="v-app">
-      <div className="v-main" style={{ margin: '0 auto' }}>
-        <div className="v-head">
-          <div>
-            <h1>Eco-Pet admin: photo review</h1>
-            <p className="v-sub">Check the quest photos the AI was not sure about, and see how verification is doing.</p>
-          </div>
-          {auth === 'ok' && (
-            <button className="v-btn" onClick={() => void supabase?.auth.signOut().then(check)}>
-              Sign out
-            </button>
-          )}
+      <div className="v-layout">
+        <div className="v-topbar">
+          <button className="v-btn small" onClick={() => setMenu(true)} aria-label="Menu">
+            <span className="mi" aria-hidden="true">
+              menu
+            </span>
+          </button>
+          <strong>Eco-Pet team</strong>
         </div>
+        <div className={`v-backdrop ${menu ? 'open' : ''}`} onClick={() => setMenu(false)} />
 
-        {auth === 'loading' && <p>Loading...</p>}
-        {auth === 'signin' && (
-          <section className="v-card" style={{ maxWidth: 420 }}>
-            <h2>Sign in</h2>
-            <div className="v-field">
-              <label htmlFor="a-email">Email</label>
-              <input id="a-email" className="v-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-            <div className="v-field">
-              <label htmlFor="a-pass">Password</label>
-              <input id="a-pass" className="v-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && void signIn()} />
-            </div>
-            {msg && <p className="v-error">{msg}</p>}
-            <button className="v-btn primary" onClick={() => void signIn()}>
-              Sign in
-            </button>
-          </section>
-        )}
-        {auth === 'denied' && (
-          <section className="v-card">
-            <p className="v-error">This account is not an admin. In Supabase, open Table Editor → accounts and set its role to admin.</p>
-            <button className="v-btn" onClick={() => void supabase?.auth.signOut().then(check)}>
+        <aside className={`v-side ${menu ? 'open' : ''}`}>
+          <div className="v-brand">
+            <img src="/icon-192.png?v=4" alt="" />
+            Eco-Pet
+          </div>
+          <div className="v-biz">
+            <b>Team dashboard</b>
+            Admin
+          </div>
+          <nav className="v-nav">
+            {sections.map((x) => (
+              <button
+                key={x.id}
+                className={tab === x.id ? 'active' : ''}
+                onClick={() => {
+                  setTab(x.id)
+                  setMenu(false)
+                }}
+              >
+                <span className="mi" aria-hidden="true">
+                  {x.icon}
+                </span>
+                {x.label}
+              </button>
+            ))}
+          </nav>
+          <div className="v-side-bottom">
+            <button className="v-btn" onClick={signOut}>
+              <span className="mi" aria-hidden="true">
+                logout
+              </span>
               Sign out
             </button>
-          </section>
-        )}
+          </div>
+        </aside>
 
-        {auth === 'ok' && (
-          <>
-            <div className="v-tabs" style={{ maxWidth: 760 }}>
-              <button className={tab === 'queue' ? 'active' : ''} onClick={() => setTab('queue')}>
-                Review queue
-              </button>
-              <button className={tab === 'attempts' ? 'active' : ''} onClick={() => setTab('attempts')}>
-                Recent checks
-              </button>
-              <button className={tab === 'support' ? 'active' : ''} onClick={() => setTab('support')}>
-                Customer service
-              </button>
-              <button className={tab === 'referrals' ? 'active' : ''} onClick={() => setTab('referrals')}>
-                Referrals
-              </button>
-              <button className={tab === 'impact' ? 'active' : ''} onClick={() => setTab('impact')}>
-                Impact
-              </button>
+        <main className="v-main">
+          <div className="v-head">
+            <div>
+              <h1>{current.label}</h1>
+              <p className="v-sub">{current.sub}</p>
             </div>
-            {tab === 'queue' ? <Queue title={title} /> : tab === 'attempts' ? <Attempts title={title} /> : tab === 'support' ? <Support /> : tab === 'referrals' ? <Referrals /> : <Impact />}
-          </>
-        )}
+          </div>
+          {tab === 'queue' ? <Queue title={title} /> : tab === 'attempts' ? <Attempts title={title} /> : tab === 'support' ? <Support /> : tab === 'referrals' ? <Referrals /> : <Impact />}
+        </main>
+        {/* Meilu: the "Ask Meilu" button at the bottom right and her chat box, as the team's assistant */}
+        <DashChat role="admin" />
       </div>
     </div>
   )

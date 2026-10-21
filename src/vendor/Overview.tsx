@@ -66,7 +66,7 @@ export default function Overview() {
       )}
 
       <section className="v-hero">
-        <div className="v-label" style={{ color: 'var(--ink-2)' }}>
+        <div className="v-label">
           {t('vHero')}
         </div>
         <div className="v-value">{vnd(s.sales, lang)}</div>

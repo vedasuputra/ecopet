@@ -680,6 +680,27 @@ const vi: Record<keyof typeof en, string> = {
 
   cardForTitle: 'Bạn cũng muốn đến Mekong?',
 
+  mapToggle: 'Bản đồ',
+  mapHide: 'Ẩn bản đồ',
+  mapSearch: 'Tìm một địa điểm',
+  mapSearching: 'Đang tìm...',
+  mapNoResults: 'Không tìm thấy địa điểm',
+  mapAsk: 'Hỏi Meilu về nơi này',
+  mapAskText: 'Kể mình nghe về {name} nhé!',
+  mapOpenGoogle: 'Mở trong Google Maps',
+  mapSeeCoupons: '{n} phiếu ở đây',
+  mapShop: 'Cửa hàng đối tác',
+  mapMyLocation: 'Về vị trí của tôi',
+  mapOpenQuest: 'Mở nhiệm vụ',
+  locLegendPlace: 'Địa điểm',
+  locLegendQuest: 'Điểm nhiệm vụ',
+  mapDestination: 'Điểm đến',
+  mapPlace: 'Địa điểm',
+  questDoneTitle: 'Hoàn thành nhiệm vụ!',
+  questDoneFactLabel: 'Meilu kể bạn nghe',
+  questDoneOk: 'Tuyệt!',
+  mapTopic: 'Đang nói về',
+  mapTopicRemove: 'Thôi nói về nơi này',
 }
 
 export default vi

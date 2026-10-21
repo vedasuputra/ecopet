@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocation as useRoute, useNavigate, useParams } from 'react-router-dom'
 import CameraCapture, { type Captured } from '../components/CameraCapture'
 import { useCatalog } from '../store/useCatalog'
-import { useLoc, useT, type Key } from '../i18n'
+import { useLang, useLoc, useT, type Key } from '../i18n'
 import { failureMessage, reportAttempt, verifyQuest } from '../lib/api'
 import { formatDistance, haversine } from '../lib/geo'
 import { refreshEconomy } from '../store/economy'
 import { useAppStore } from '../store/useAppStore'
-import { useCelebration } from '../store/useCelebration'
+import Confetti from '../components/Confetti'
+import MeiluAvatar from '../components/MeiluAvatar'
+import { questFact } from '../data/questFacts'
 import { useLocation } from '../store/useLocation'
 import { QUEST_ICON } from '../data/questIcons'
 import { useFadeClose } from '../lib/useFadeClose'
@@ -25,6 +27,7 @@ export default function QuestDetail() {
   const navigate = useNavigate()
   const t = useT()
   const loc = useLoc()
+  const lang = useLang((s) => s.lang)
   const quest = quests.find((q) => q.id === id)
   const { lat, lng, placeName, source, status, userChose, startReal } = useLocation()
   const questStatus = useAppStore((s) => s.questStatus)
@@ -33,6 +36,8 @@ export default function QuestDetail() {
   const closeBtn = useRef<HTMLButtonElement>(null)
   const review = useAppStore((s) => s.reviewStatus[id ?? ''])
   const [msg, setMsg] = useState('')
+  // the quest is done: the completion popup with the coins and Meilu's fun fact
+  const [doneInfo, setDoneInfo] = useState<{ coins: number; fact: string | null } | null>(null)
   const [reportErr, setReportErr] = useState('') // why a report could not be sent (shown in the report popup)
   const [msgKind, setMsgKind] = useState<'info' | 'bad' | 'ok'>('info')
   // what the check said about the photo: nothing yet (it was just taken), wrong, waiting for a person, or fine
@@ -170,7 +175,7 @@ export default function QuestDetail() {
     setReport(typeof r.attemptId === 'number' ? { attemptId: r.attemptId, open: false, note: '', sent: false, busy: false } : null)
     if (r.ok) {
       void refreshEconomy() // the server already paid the reward
-      useCelebration.getState().show(t('celebrateQuest', { n: quest.rewardCoins }))
+      setDoneInfo({ coins: quest.rewardCoins, fact: questFact(quest.type, quest.destination, lang) })
       return say(t('verified', { n: quest.rewardCoins }), 'ok', 'ok')
     }
     // Server sends reason codes; texts are translated here.
@@ -207,6 +212,39 @@ export default function QuestDetail() {
 
   const reportOpen = !!(report && report.open && !report.sent && !done && photo)
   const noteOk = !!report && report.note.trim().length >= 10 // the reason is required, so nobody reports just like that
+  // the quest is done: white confetti behind a card with the coins and Meilu's fun fact about the action or the place
+  // closing it closes the quest too: there is nothing left to do there
+  const donePopup = doneInfo ? (
+    <div className={`popup-backdrop qd-done-backdrop${closing ? ' is-closing' : ''}`} role="dialog" aria-modal="true" aria-label={t('questDoneTitle')} onClick={close}>
+      <Confetti />
+      <div className="popup-card qd-done" onClick={(e) => e.stopPropagation()}>
+        <h3 className="qd-done-title">{t('questDoneTitle')}</h3>
+        <span className="qd-done-coins">
+          <span className="mi" aria-hidden="true">
+            monetization_on
+          </span>
+          +{doneInfo.coins}
+        </span>
+        {doneInfo.fact && (
+          <div className="qd-fact">
+            <span className="qd-fact-ava" aria-hidden="true">
+              <span className="qd-fact-ava-in">
+                <MeiluAvatar size={74} spinner={false} reaction="hop" />
+              </span>
+            </span>
+            <div className="qd-fact-text">
+              <b>{t('questDoneFactLabel')}</b>
+              <p>{doneInfo.fact}</p>
+            </div>
+          </div>
+        )}
+        <button className="qd-btn qd-primary" onClick={close} autoFocus>
+          {t('questDoneOk')}
+        </button>
+      </div>
+    </div>
+  ) : null
+
   const reportPopup =
     reportOpen && report && photo ? (
       <div className={`popup-backdrop qd-report-backdrop${closing ? ' is-closing' : ''}`} role="dialog" aria-modal="true" aria-label={t('reportHeading')} onClick={close}>
@@ -354,6 +392,12 @@ export default function QuestDetail() {
         </p>
       )}
     </>,
-    reportPopup,
+    // the quest popup itself is hidden while one of these is open
+    reportPopup || donePopup ? (
+      <>
+        {reportPopup}
+        {donePopup}
+      </>
+    ) : undefined,
   )
 }

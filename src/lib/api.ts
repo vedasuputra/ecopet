@@ -47,6 +47,15 @@ export function failureMessage(r: ApiResult, t: T, fallback: Key): string {
   return t(fallback)
 }
 
+/** Meilu in the shop or team dashboard: help for the shop owner or the team (same rate limits as the traveler chat). */
+export const askMeiluDash = (p: {
+  role: 'vendor' | 'admin'
+  message: string
+  history: { role: 'user' | 'meilu'; text: string }[]
+  language: string
+  shop?: { name: string; plan: string; status: string; coupons: number }
+}) => post('/api/chat', { message: p.message, history: p.history, language: p.language, shop: p.shop, mode: p.role }, true)
+
 /** Quest photo check. Signed-in only: the server pays the reward to the account. */
 export const verifyQuest = (p: {
   questId: string
@@ -71,6 +80,9 @@ export const askMeilu = (p: {
   plan?: string
   style?: unknown
   pageText?: string
+  focusPlace?: { name: string; detail: string; lat: number; lng: number; kind: string }
+  /** where the traveler is right now, if at a place the app knows: a partner shop, or inside the area of a destination */
+  hereAt?: { kind: 'shop' | 'place'; name: string }
 }) => post('/api/chat', p, true)
 
 /** Asks the server for an itinerary (one AI call). Falls back to rules on the server if the AI is unavailable. */

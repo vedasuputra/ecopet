@@ -269,7 +269,9 @@ export default function MeiluAvatar({
           width: fluid ? '100%' : size,
           // keep about the upper 62% of the drawing for the half-body view
           ...(halfBody ? (fluid ? { aspectRatio: `${SPRITE_VIEW.w} / ${Math.round(SPRITE_VIEW.h * 0.62)}` } : { height: Math.round(size * (SPRITE_VIEW.h / SPRITE_VIEW.w) * 0.62) }) : {}),
-          ...(halfBody ? { overflow: 'hidden' } : {}),
+          // cut only below (the tail): a waving wing or a hop may still reach past the sides and the top
+          // (minHeight 0: without it the box grows to fit the whole drawing and the aspect ratio is lost)
+          ...(halfBody ? { clipPath: 'inset(-50% -50% 0 -50%)', minHeight: 0 } : {}),
           userSelect: 'none',
           touchAction: interactive ? 'none' : undefined, // stroking must not scroll the page
           cursor: interactive ? 'pointer' : undefined,

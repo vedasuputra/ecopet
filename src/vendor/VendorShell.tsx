@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Navigate, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import DashChat from '../components/DashChat'
 import { useLang, useT } from '../i18n'
 import { supabase } from '../lib/supabase'
 import type { VendorCtx } from './context'
@@ -86,20 +87,22 @@ export function VendorChrome({ vendor, ctx, onSignOut }: { vendor: VendorInfo; c
   const close = () => setMenu(false)
 
   const items = [
-    { to: '/vendor', label: t('vOverview'), end: true },
-    { to: '/vendor/scan', label: t('vScan') },
-    { to: '/vendor/coupons', label: t('vNavCoupons') },
-    { to: '/vendor/shop', label: t('vShopInfo') },
-    { to: '/vendor/redemptions', label: t('vRedemptions') },
-    { to: '/vendor/fees', label: t('vFees') },
-    { to: '/vendor/billing', label: subscriptionStatus(vendor) === 'active' ? t('vSubscription') : `${t('vSubscribe')} •` },
+    { to: '/vendor', label: t('vOverview'), icon: 'dashboard', end: true },
+    { to: '/vendor/scan', label: t('vScan'), icon: 'qr_code_scanner' },
+    { to: '/vendor/coupons', label: t('vNavCoupons'), icon: 'confirmation_number' },
+    { to: '/vendor/shop', label: t('vShopInfo'), icon: 'storefront' },
+    { to: '/vendor/redemptions', label: t('vRedemptions'), icon: 'receipt_long' },
+    { to: '/vendor/fees', label: t('vFees'), icon: 'payments' },
+    { to: '/vendor/billing', label: subscriptionStatus(vendor) === 'active' ? t('vSubscription') : `${t('vSubscribe')} •`, icon: 'credit_card' },
   ]
 
   return (
     <div className="v-layout">
       <div className="v-topbar">
         <button className="v-btn small" onClick={() => setMenu(true)} aria-label={t('vMenu')}>
-          ☰ {t('vMenu')}
+          <span className="mi" aria-hidden="true">
+            menu
+          </span>
         </button>
         <strong>{vendor.name}</strong>
       </div>
@@ -117,6 +120,9 @@ export function VendorChrome({ vendor, ctx, onSignOut }: { vendor: VendorInfo; c
         <nav className="v-nav">
           {items.map((i) => (
             <NavLink key={i.to} to={i.to} end={i.end} onClick={close}>
+              <span className="mi" aria-hidden="true">
+                {i.icon}
+              </span>
               {i.label}
             </NavLink>
           ))}
@@ -131,6 +137,9 @@ export function VendorChrome({ vendor, ctx, onSignOut }: { vendor: VendorInfo; c
             </button>
           </div>
           <button className="v-btn" onClick={onSignOut}>
+            <span className="mi" aria-hidden="true">
+              logout
+            </span>
             {t('vSignOut')}
           </button>
         </div>
@@ -139,6 +148,8 @@ export function VendorChrome({ vendor, ctx, onSignOut }: { vendor: VendorInfo; c
       <main className="v-main">
         <Outlet context={ctx} />
       </main>
+      {/* Meilu: the "Ask Meilu" button at the bottom right and her chat box, as the shop's helper */}
+      <DashChat role="vendor" shop={{ name: vendor.name, plan: vendor.plan, status: subscriptionStatus(vendor), coupons: ctx.offers.length }} />
     </div>
   )
 }

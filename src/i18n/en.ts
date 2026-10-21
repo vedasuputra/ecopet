@@ -697,6 +697,27 @@ const en = {
 
   cardForTitle: 'Want to go to Mekong too?',
 
+  mapToggle: 'Map',
+  mapHide: 'Hide the map',
+  mapSearch: 'Search a place',
+  mapSearching: 'Searching...',
+  mapNoResults: 'No place found',
+  mapAsk: 'Ask Meilu about this',
+  mapAskText: 'Tell me about {name}!',
+  mapOpenGoogle: 'Open in Google Maps',
+  mapSeeCoupons: '{n} coupons here',
+  mapShop: 'Partner shop',
+  mapMyLocation: 'Back to my location',
+  mapOpenQuest: 'Open quest',
+  locLegendPlace: 'Place',
+  locLegendQuest: 'Quest spot',
+  mapDestination: 'Destination',
+  mapPlace: 'Place',
+  questDoneTitle: 'Quest complete!',
+  questDoneFactLabel: "Meilu's fun fact",
+  questDoneOk: 'Nice!',
+  mapTopic: 'Talking about',
+  mapTopicRemove: 'Stop talking about this place',
 } as const
 
 export default en

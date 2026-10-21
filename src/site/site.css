@@ -1,36 +1,24 @@
-/* Public pages (landing + privacy policy): a normal responsive website. */
+/* Public pages (landing + privacy policy): a responsive website in the look of the app: navy, blue, sky and cream, Hanken Grotesk for
+   titles and Inter for text, 8px corners, small uppercase buttons. Laptop and phone. */
 
 .s-app {
-  --bg: #fbfbf8;
-  --surface: #ffffff;
-  --surface-2: #f1f3ee;
-  --border: #e2e4df;
-  --ink: #161714;
-  --ink-2: #4d5049;
-  --accent: #1f6f50;
-  --accent-ink: #ffffff;
-  --warn-bg: #fff6df;
+  --navy: #044388;
+  --blue: #168fd6;
+  --sky: #ccdde7;
+  --mist: #edece8;
+  --cream: #fffbf5;
+  --pale: #e3f1fa;
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-title: 'Hanken Grotesk', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ink: #0b2545;
+  --ink-2: #4a5d73;
   color-scheme: light;
   min-height: 100vh;
-  background: var(--bg);
+  background: var(--cream);
   color: var(--ink);
-  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  font-size: 16px;
+  font-family: var(--font);
+  font-size: 15px;
   line-height: 1.6;
-}
-@media (prefers-color-scheme: dark) {
-  .s-app {
-    --bg: #131412;
-    --surface: #1b1c1a;
-    --surface-2: #232522;
-    --border: #2e302c;
-    --ink: #f0efec;
-    --ink-2: #c3c2b7;
-    --accent: #4cc38a;
-    --accent-ink: #0b1a12;
-    --warn-bg: #2a2412;
-    color-scheme: dark;
-  }
 }
 .s-app *,
 .s-app *::before,
@@ -43,259 +31,390 @@
 .s-app p {
   margin: 0;
 }
+.s-app h1,
+.s-app h2,
+.s-app h3 {
+  font-family: var(--font-title);
+  letter-spacing: -0.01em;
+  color: var(--navy);
+}
 .s-app a {
-  color: var(--accent);
+  color: var(--blue);
 }
 
 .s-wrap {
-  max-width: 1040px;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
-/* header */
+/* ---- header: the navy bar of the app ---- */
 .s-header {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border);
+  background: var(--navy);
+  box-shadow: 0 2px 10px rgba(4, 30, 66, 0.25);
 }
 .s-header .s-wrap {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   min-height: 60px;
-  flex-wrap: wrap;
 }
 .s-brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-weight: 700;
-  color: var(--ink) !important;
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff !important;
   text-decoration: none;
 }
 .s-brand img {
   width: 32px;
   height: 32px;
   border-radius: 50%;
+  background: #fff;
 }
 .s-nav {
   display: flex;
-  align-items: center;
-  gap: 4px 14px;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
 }
 .s-nav a {
-  color: var(--ink-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
-  font-weight: 500;
 }
 .s-nav a:hover {
-  color: var(--ink);
+  color: #fff;
 }
 .s-lang {
-  display: flex;
-  gap: 4px;
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
 }
+.s-lang .s-btn {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #fff;
+}
+.s-lang .s-btn + .s-btn {
+  border-left: 1px solid rgba(255, 255, 255, 0.6);
+}
+.s-lang .s-btn[aria-pressed='true'] {
+  background: #fff;
+  color: var(--navy);
+}
+.s-header .s-btn.primary {
+  border-color: #fff;
+  background: #fff;
+  color: var(--navy);
+}
+
+/* ---- buttons ---- */
 .s-btn {
-  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: var(--font);
+  font-size: 0.75rem;
   font-weight: 600;
-  display: inline-block;
-  padding: 10px 18px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--ink) !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   text-decoration: none;
   cursor: pointer;
 }
+.s-btn:hover {
+  background: var(--sky);
+}
 .s-btn.primary {
-  background: var(--accent);
-  color: var(--accent-ink) !important;
-  border-color: transparent;
+  background: var(--navy);
+  color: #fff;
+}
+.s-btn.primary:hover {
+  background: #033269;
 }
 .s-btn.small {
-  padding: 5px 10px;
-  font-size: 14px;
-}
-.s-btn[aria-pressed='true'] {
-  background: var(--accent);
-  color: var(--accent-ink) !important;
-  border-color: transparent;
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 0.6875rem;
 }
 
-/* sections */
+/* ---- hero: the blue gradient of the app, with Meilu ---- */
 .s-hero {
-  padding: 64px 0 40px;
   display: grid;
-  grid-template-columns: 1.3fr 0.7fr;
-  gap: 32px;
-  align-items: center;
+  justify-items: center;
+  align-content: center;
+  min-height: min(560px, 72vh); /* the first thing seen: a tall, calm block */
+  margin-top: 24px;
+  padding: 80px 40px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(150deg, #044388 0%, #0a64ad 55%, #168fd6 100%);
+  color: #fff;
+  text-align: center; /* everything in the middle */
+}
+.s-hero > div {
+  display: grid;
+  justify-items: center;
+  max-width: 720px;
 }
 .s-hero h1 {
-  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-size: clamp(1.9rem, 4.5vw, 2.9rem);
+  font-weight: 800;
   line-height: 1.12;
-  margin-bottom: 16px;
+  color: #fff;
+}
+.s-line {
+  display: block;
 }
 .s-hero p {
-  color: var(--ink-2);
-  font-size: 1.1rem;
-  margin-bottom: 22px;
+  margin-top: 18px;
+  max-width: 540px;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
 }
-.s-hero img {
+.s-hero .s-btn {
+  border-color: #fff;
+  color: #fff;
+}
+.s-hero .s-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+.s-hero .s-btn.primary {
+  background: #fff;
+  color: var(--navy);
+}
+.s-hero .s-btn.primary:hover {
+  background: var(--pale);
+}
+.s-bird {
+  align-self: end;
+  justify-self: center;
   width: 100%;
   max-width: 300px;
-  justify-self: center;
 }
 .s-actions {
   display: flex;
-  gap: 10px;
   flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 22px;
 }
 .s-pilot {
-  margin-top: 14px;
-  font-size: 14px;
-  color: var(--ink-2);
+  margin-top: 16px !important;
+  font-size: 0.8125rem !important;
+  color: rgba(255, 255, 255, 0.75) !important;
 }
+
+/* ---- sections ---- */
 .s-section {
-  padding: 40px 0;
-  border-top: 1px solid var(--border);
+  margin: 40px 0;
 }
 .s-section h2 {
-  font-size: 1.7rem;
-  margin-bottom: 18px;
-  line-height: 1.2;
+  margin-bottom: 14px;
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  font-weight: 800;
 }
+.s-section > p,
 .s-section p + p {
-  margin-top: 12px;
+  margin-top: 10px;
+  color: var(--ink-2);
 }
 .s-steps {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
+  gap: 12px;
 }
 .s-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
   padding: 18px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: linear-gradient(270deg, rgba(22, 143, 214, 0.07) 0%, #fff 70%);
 }
 .s-card h3 {
-  font-size: 1.05rem;
-  margin-bottom: 6px;
+  margin: 10px 0 4px;
+  font-size: 1rem;
+  font-weight: 700;
 }
 .s-card p {
+  font-size: 0.875rem;
   color: var(--ink-2);
-  font-size: 0.97rem;
 }
 .s-num {
-  display: inline-grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-weight: 700;
-  margin-bottom: 8px;
+  background: var(--navy);
+  font-family: var(--font-title);
+  font-weight: 800;
+  color: #fff;
 }
 .s-list {
   margin: 12px 0 0;
   padding-left: 20px;
+  color: var(--ink-2);
 }
 .s-list li {
-  margin: 8px 0;
+  margin: 6px 0;
 }
+/* Meilu with a text: a light blue panel */
 .s-two {
   display: grid;
-  grid-template-columns: 0.4fr 1fr;
-  gap: 28px;
+  grid-template-columns: 240px 1fr;
   align-items: center;
+  gap: 28px;
+  padding: 24px 28px;
+  border: 1px solid var(--sky);
+  border-radius: 12px;
+  background: var(--pale);
 }
-.s-two img {
-  width: 100%;
-  max-width: 220px;
-  justify-self: center;
+.s-two {
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
+  padding-bottom: 0; /* she sits on the bottom edge of the panel */
+  overflow: hidden;
+}
+.s-two .s-bird {
+  align-self: end;
+  max-width: 280px;
+  padding-left: 24px; /* room for her waving wing (on her left) inside the panel */
+}
+.s-two > div:last-child {
+  padding-bottom: 24px;
 }
 .s-faq details {
-  border-bottom: 1px solid var(--border);
-  padding: 12px 0;
+  margin-bottom: 8px;
+  padding: 12px 16px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
 }
 .s-faq summary {
+  font-family: var(--font-title);
+  font-weight: 700;
+  color: var(--navy);
   cursor: pointer;
-  font-weight: 600;
 }
 .s-faq p {
   margin-top: 8px;
+  font-size: 0.875rem;
   color: var(--ink-2);
 }
 
-/* privacy policy */
+/* ---- the privacy policy ---- */
 .s-doc {
   max-width: 760px;
-  padding: 40px 0 56px;
+  margin: 32px auto 48px;
+  padding: 28px 30px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
 }
 .s-doc h1 {
-  font-size: 2rem;
   margin-bottom: 6px;
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  font-weight: 800;
 }
 .s-doc h2 {
-  font-size: 1.2rem;
-  margin: 28px 0 8px;
+  margin: 26px 0 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 .s-doc p,
 .s-doc li {
+  font-size: 0.9375rem;
   color: var(--ink-2);
 }
 .s-doc li {
-  margin: 8px 0;
+  margin: 6px 0;
 }
 .s-notice {
-  background: var(--warn-bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 16px;
   margin: 16px 0;
-  font-size: 0.95rem;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--pale);
+  font-size: 0.875rem;
+  color: var(--ink);
 }
 
-/* footer */
+/* ---- footer: navy, like the bars of the app ---- */
 .s-footer {
-  border-top: 1px solid var(--border);
-  padding: 28px 0 40px;
-  color: var(--ink-2);
-  font-size: 14px;
+  margin-top: 48px;
+  padding: 28px 0;
+  background: var(--navy);
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+.s-footer b {
+  font-family: var(--font-title);
+  color: #fff;
 }
 .s-footer .s-wrap {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 12px 24px;
-  flex-wrap: wrap;
 }
 .s-footer nav {
   display: flex;
-  gap: 8px 18px;
   flex-wrap: wrap;
+  gap: 8px 18px;
+}
+.s-footer a {
+  color: #fff;
+  text-decoration: none;
+}
+.s-footer a:hover {
+  text-decoration: underline;
 }
 
+/* ---- phones ---- */
 @media (max-width: 720px) {
-  .s-hero,
+  .s-hero {
+    min-height: 0;
+    padding: 56px 20px;
+  }
   .s-two {
     grid-template-columns: 1fr;
+    justify-items: center;
+    padding: 20px 20px 0;
+    text-align: center;
   }
-  .s-hero {
-    padding-top: 36px;
+  /* on a phone she comes after the text, sitting on the bottom edge */
+  .s-two .s-bird {
+    order: 2;
+    max-width: 260px;
+    padding: 0 24px; /* the same on both sides, so she stays centred */
   }
-  .s-hero img,
-  .s-two img {
-    max-width: 180px;
+  .s-two > div:last-child {
+    padding-bottom: 0;
+  }
+  .s-doc {
+    margin: 20px 0 32px;
+    padding: 20px 18px;
   }
 }
-
 /* on a phone the header keeps only the brand, the language switch and the button, all on one row */
 @media (max-width: 560px) {
   .s-header .s-wrap {
@@ -312,4 +431,8 @@
   .s-brand {
     white-space: nowrap;
   }
+}
+.s-app :focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
 }

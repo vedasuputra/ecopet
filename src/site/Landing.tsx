@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import MeiluAvatar from '../components/MeiluAvatar'
 import { useLoc, useT } from '../i18n'
 import { LANDING as C } from './content'
 import SiteLayout from './SiteLayout'
@@ -18,7 +19,16 @@ export default function Landing() {
         <div className="s-wrap">
           <section className="s-hero">
             <div>
-              <h1>{loc(C.heroTitle)}</h1>
+              {/* one sentence per line: "Travel the Mekong Delta." / "Leave it better." */}
+              <h1>
+                {loc(C.heroTitle)
+                  .split(/(?<=\.)\s+/)
+                  .map((s, i) => (
+                    <span key={i} className="s-line">
+                      {s}
+                    </span>
+                  ))}
+              </h1>
               <p>{loc(C.heroText)}</p>
               <div className="s-actions">
                 <Link to="/login" className="s-btn primary">
@@ -30,7 +40,6 @@ export default function Landing() {
               </div>
               <p className="s-pilot">{loc(C.pilot)}</p>
             </div>
-            <img src="/meilu.png" alt="Meilu, the Eco-Pet bird guide" />
           </section>
 
           <section className="s-section">
@@ -48,7 +57,10 @@ export default function Landing() {
 
           <section className="s-section">
             <div className="s-two">
-              <img src="/meilu.png" alt="" />
+              {/* Meilu herself (tap or stroke her), the same as in the app: only her body, above the tail */}
+              <div className="s-bird">
+                <MeiluAvatar interactive fluid halfBody mood="day" />
+              </div>
               <div>
                 <h2>{loc(C.meiluTitle)}</h2>
                 <p>{loc(C.meiluText)}</p>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation as useRoute, useNavigate } from 'react-router-dom'
 import MeiluChat from '../pages/MeiluChat'
+import { useChatMap } from '../store/useChatMap'
 import { useT } from '../i18n'
 import { useFadeClose } from '../lib/useFadeClose'
 import '../pages/chat.css'
@@ -14,6 +15,8 @@ export default function MeiluPopup() {
   const [open, setOpen] = useState(false)
   const [pageText, setPageText] = useState('')
   const [closing, hide, reopen] = useFadeClose(() => setOpen(false))
+  const mapOpen = useChatMap((s) => s.open)
+  const toggleMap = useChatMap((s) => s.toggle)
   const [min, setMin] = useState(false) // dragged down to the small bar
   const [drag, setDrag] = useState<number | null>(null) // how far the sheet is dragged right now (px, down is +)
   const grab = useRef<{ y: number; moved: number } | null>(null)
@@ -80,6 +83,11 @@ export default function MeiluPopup() {
               <div className="popup-titles">
                 <h3>{t('meiluTalk')}</h3>
               </div>
+              <button className={`popup-close chat-map-btn${mapOpen ? ' on' : ''}`} onClick={toggleMap} aria-pressed={mapOpen} aria-label={t('mapToggle')} title={t('mapToggle')}>
+                <span className="mi" aria-hidden="true">
+                  map
+                </span>
+              </button>
               <button
                 className="popup-close"
                 onClick={() => {

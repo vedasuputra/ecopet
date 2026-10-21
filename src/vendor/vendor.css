@@ -1,47 +1,36 @@
-/* Vendor dashboard: a normal responsive web app (sidebar on laptops, drawer on phones). */
+/* The dashboards (shops and the Eco-Pet team): the same look as the traveler app (navy, blue, sky, cream; Hanken Grotesk for titles,
+   Inter for text; small text; 8px corners), as a normal responsive web app: a navy sidebar on laptops, a top bar with a drawer on phones. */
 
 .v-app {
-  --bg: #f5f6f4;
+  --navy: #044388;
+  --blue: #168fd6;
+  --sky: #ccdde7;
+  --mist: #edece8;
+  --cream: #fffbf5;
+  --pale: #e3f1fa; /* the light blue of an active tab */
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-title: 'Hanken Grotesk', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --bg: var(--cream);
   --surface: #ffffff;
-  --surface-2: #f0f1ee;
-  --border: #e2e4df;
-  --ink: #161714;
-  --ink-2: #53554f;
-  --ink-3: #7a7c75;
-  --accent: #1f6f50;
+  --surface-2: #f0f7fc;
+  --border: var(--sky);
+  --ink: #0b2545;
+  --ink-2: #4a5d73;
+  --ink-3: #6b7d91;
+  --accent: var(--navy);
   --accent-ink: #ffffff;
   --danger: #b3261e;
-  --ok: #1f6f50;
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
+  --ok: #1b7a43;
+  --series-1: var(--navy);
+  --series-2: var(--blue);
   color-scheme: light;
   min-height: 100vh;
   background: var(--bg);
   color: var(--ink);
-  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  font-size: 15px;
+  font-family: var(--font);
+  font-size: 14px;
   line-height: 1.5;
 }
-
-@media (prefers-color-scheme: dark) {
-  .v-app {
-    --bg: #131412;
-    --surface: #1b1c1a;
-    --surface-2: #232522;
-    --border: #2e302c;
-    --ink: #f0efec;
-    --ink-2: #c3c2b7;
-    --ink-3: #8f8f86;
-    --accent: #4cc38a;
-    --accent-ink: #0b1a12;
-    --danger: #f2796f;
-    --ok: #4cc38a;
-    --series-1: #3987e5;
-    --series-2: #d95926;
-    color-scheme: dark;
-  }
-}
-
 .v-app *,
 .v-app *::before,
 .v-app *::after {
@@ -51,79 +40,119 @@
 .v-app h2,
 .v-app h3 {
   margin: 0;
+  font-family: var(--font-title);
   line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--navy);
 }
 .v-app h1 {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
+  font-weight: 800;
 }
 .v-app h2 {
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.v-app h3 {
+  font-size: 0.9375rem;
+  font-weight: 700;
 }
 .v-app p {
   margin: 0;
 }
 .v-app a {
-  color: var(--accent);
+  color: var(--blue);
+}
+.v-app .mi {
+  font-size: 20px;
+  line-height: 1;
 }
 
-/* ---- layout ---- */
+/* ---- layout: navy sidebar on laptops ---- */
 .v-layout {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 248px minmax(0, 1fr);
   min-height: 100vh;
 }
 .v-side {
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  padding: 20px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
   position: sticky;
   top: 0;
   height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 14px;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #044388 0%, #06519f 100%);
+  color: #fff;
 }
 .v-brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-weight: 700;
   padding: 0 6px;
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
 }
 .v-brand img {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
+  background: #fff;
 }
 .v-biz {
   padding: 10px 12px;
-  background: var(--surface-2);
-  border-radius: 10px;
-  font-size: 13px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
 }
 .v-biz b {
   display: block;
-  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-title);
+  font-size: 0.875rem;
+  color: #fff;
 }
 .v-nav {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
-.v-nav a {
-  display: block;
-  padding: 10px 12px;
+.v-nav a,
+.v-nav button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
   border-radius: 8px;
-  color: var(--ink-2);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: left;
   text-decoration: none;
-  font-weight: 500;
+  cursor: pointer;
 }
-.v-nav a:hover {
-  background: var(--surface-2);
+.v-nav a:hover,
+.v-nav button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
-.v-nav a.active {
-  background: var(--accent);
-  color: var(--accent-ink);
+.v-nav a.active,
+.v-nav button.active {
+  background: var(--pale);
+  color: var(--navy);
+}
+.v-nav .mi {
+  font-size: 19px;
 }
 .v-side-bottom {
   margin-top: auto;
@@ -131,11 +160,19 @@
   flex-direction: column;
   gap: 10px;
 }
+.v-side .v-btn {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: transparent;
+  color: #fff;
+}
+.v-side .v-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
 .v-main {
-  padding: 28px 32px 48px;
-  min-width: 0;
-  max-width: 1100px;
   width: 100%;
+  max-width: 1120px;
+  min-width: 0;
+  padding: 28px 32px 48px;
 }
 .v-topbar {
   display: none;
@@ -144,43 +181,58 @@
   display: none;
 }
 
+/* ---- phones and small tablets: a navy top bar, the sidebar becomes a drawer ---- */
 @media (max-width: 899px) {
   .v-layout {
     display: block;
   }
   .v-topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 16px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
     z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--navy);
+    color: #fff;
+  }
+  .v-topbar strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--font-title);
+    font-size: 0.9375rem;
+  }
+  .v-topbar .v-btn {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: transparent;
+    color: #fff;
   }
   .v-side {
     position: fixed;
     left: 0;
     top: 0;
     bottom: 0;
-    width: 260px;
     z-index: 40;
+    width: 272px;
+    height: auto;
     transform: translateX(-100%);
-    transition: transform 0.2s ease;
+    transition: transform 0.22s ease;
   }
   .v-side.open {
     transform: translateX(0);
   }
   .v-backdrop.open {
-    display: block;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
     z-index: 30;
+    display: block;
+    background: rgba(4, 30, 66, 0.55);
   }
   .v-main {
-    padding: 18px 16px 40px;
+    padding: 18px 14px 40px;
   }
 }
 
@@ -191,94 +243,124 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 8px 16px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 .v-sub {
-  color: var(--ink-2);
   margin-top: 4px;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
 }
 
-/* ---- cards & tiles ---- */
+/* ---- cards and number tiles ---- */
 .v-card {
-  background: var(--surface);
+  margin-bottom: 14px;
+  padding: 16px 18px;
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px;
-  margin-bottom: 16px;
+  border-radius: 8px;
+  background: var(--surface);
 }
 .v-card > h2 {
   margin-bottom: 12px;
 }
+/* a title with a short explanation under it: the two stay close, and the content below comes after a clear gap */
+.v-card > h2:has(+ .v-hint) {
+  margin-bottom: 4px;
+}
+.v-card > h2 + .v-hint {
+  margin: 0 0 16px;
+}
 .v-grid-tiles {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 14px;
 }
 .v-tile {
-  background: var(--surface);
+  padding: 12px 14px;
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 14px 16px;
+  border-radius: 8px;
+  background: linear-gradient(270deg, rgba(22, 143, 214, 0.07) 0%, #fff 70%);
 }
 .v-tile .v-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   color: var(--ink-2);
-  font-size: 13px;
 }
 .v-tile .v-value {
-  font-size: 1.5rem;
-  font-weight: 650;
   margin-top: 2px;
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--navy);
 }
 .v-tile .v-note {
-  color: var(--ink-3);
-  font-size: 12px;
   margin-top: 2px;
+  font-size: 0.6875rem;
+  color: var(--ink-3);
 }
 .v-hero {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 20px 22px;
   margin-bottom: 12px;
+  padding: 18px 20px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #044388 0%, #168fd6 100%);
+  color: #fff;
+}
+.v-hero .v-label,
+.v-hero .v-note,
+.v-hero .v-hint,
+.v-hero .v-sub {
+  color: rgba(255, 255, 255, 0.85);
 }
 .v-hero .v-value {
-  font-size: clamp(2rem, 6vw, 3.25rem);
-  font-weight: 700;
-  line-height: 1.1;
   margin: 4px 0;
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: #fff;
 }
 
-/* ---- buttons & forms ---- */
+/* ---- buttons and forms (the small uppercase buttons of the app) ---- */
 .v-btn {
-  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--navy);
+  font-family: var(--font);
+  font-size: 0.6875rem;
   font-weight: 600;
-  padding: 9px 16px;
-  border-radius: 9px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--ink);
-  cursor: pointer;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
 }
 .v-btn:hover {
-  background: var(--surface-2);
+  background: var(--sky);
 }
 .v-btn.primary {
-  background: var(--accent);
-  color: var(--accent-ink);
-  border-color: transparent;
+  border-color: var(--navy);
+  background: var(--navy);
+  color: #fff;
 }
 .v-btn.primary:hover {
-  filter: brightness(1.08);
+  background: #033269;
 }
 .v-btn:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 .v-btn.small {
-  padding: 6px 10px;
-  font-size: 13px;
+  min-height: 30px;
+  padding: 0 10px;
 }
 .v-field {
   display: flex;
@@ -287,100 +369,129 @@
   margin-bottom: 12px;
 }
 .v-field label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink-2);
+  font-family: var(--font-title);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--navy);
 }
 .v-input,
 .v-select {
-  font: inherit;
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 9px;
+  min-height: 40px;
+  padding: 0 12px;
   border: 1px solid var(--border);
-  background: var(--surface);
+  border-radius: 8px;
+  background: #fff;
   color: var(--ink);
+  font: inherit;
+  font-size: 0.8125rem;
+}
+textarea.v-input {
+  padding: 8px 12px;
 }
 .v-input:focus,
-.v-select:focus,
+.v-select:focus {
+  border-color: var(--blue);
+  outline: 3px solid rgba(22, 143, 214, 0.25);
+}
 .v-btn:focus-visible,
-.v-nav a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+.v-nav a:focus-visible,
+.v-nav button:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
 }
 .v-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
 }
 .v-hint {
-  font-size: 12.5px;
+  font-size: 0.75rem;
   color: var(--ink-3);
 }
 .v-error {
-  color: var(--danger);
   margin: 8px 0;
+  font-size: 0.8125rem;
+  color: var(--danger);
 }
 .v-success {
-  color: var(--ok);
   margin: 8px 0;
+  font-size: 0.8125rem;
   font-weight: 600;
+  color: var(--ok);
 }
+/* tabs like the ones of the app: one bar, the chosen one light blue */
 .v-tabs {
   display: flex;
-  gap: 4px;
-  background: var(--surface-2);
-  padding: 4px;
-  border-radius: 10px;
-  margin-bottom: 16px;
+  overflow-x: auto;
+  margin-bottom: 14px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  background: #fff;
+  scrollbar-width: none;
+}
+.v-tabs::-webkit-scrollbar {
+  display: none;
 }
 .v-tabs button {
   flex: 1;
-  font: inherit;
-  font-weight: 600;
-  padding: 8px 10px;
+  min-height: 34px; /* with the border of the bar: 36px, the height of a button */
+  padding: 0 12px;
   border: 0;
-  border-radius: 8px;
   background: transparent;
-  color: var(--ink-2);
+  color: var(--navy);
+  font-family: var(--font);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
   cursor: pointer;
 }
+.v-tabs button + button {
+  border-left: 1px solid var(--navy);
+}
 .v-tabs button.active {
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  background: var(--pale);
+}
+.v-tabs button:not(.active):hover {
+  background: var(--mist);
 }
 .v-lang {
   display: flex;
   gap: 6px;
 }
+.v-lang .v-btn {
+  flex: 1;
+}
 .v-lang .v-btn[aria-pressed='true'] {
-  background: var(--accent);
-  color: var(--accent-ink);
-  border-color: transparent;
+  border-color: #fff;
+  background: #fff;
+  color: var(--navy);
 }
 
-/* ---- login ---- */
+/* ---- sign in: a blue gradient with a white card, like the app ---- */
 .v-login {
-  min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 24px 16px;
+  min-height: 100vh;
+  padding: 28px 16px;
+  background: linear-gradient(165deg, #044388 0%, #0a64ad 55%, #168fd6 100%);
 }
 .v-login-card {
   width: 100%;
   max-width: 440px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 24px;
+  padding: 24px 22px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(2, 30, 66, 0.35);
 }
 .v-login-card h1 {
   margin-bottom: 6px;
 }
 .v-login-card .v-sub {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 /* ---- tables ---- */
@@ -390,46 +501,51 @@
 .v-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 0.8125rem;
 }
 .v-table th,
 .v-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--mist);
   text-align: left;
-  padding: 10px 10px;
-  border-bottom: 1px solid var(--border);
   white-space: nowrap;
 }
 .v-table th {
-  font-size: 12px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--ink-3);
-  font-weight: 600;
+  color: var(--ink-2);
+  background: var(--surface-2);
+}
+.v-table tbody tr:hover td {
+  background: #f7fbfe;
 }
 .v-table .v-num {
-  text-align: right;
   font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 .v-table tfoot td {
-  font-weight: 700;
   border-bottom: 0;
+  font-weight: 700;
 }
 .v-badge {
   display: inline-block;
   padding: 2px 9px;
   border-radius: 999px;
-  font-size: 12px;
+  background: var(--mist);
+  font-size: 0.6875rem;
   font-weight: 600;
-  background: var(--surface-2);
   color: var(--ink-2);
 }
 .v-badge.used {
-  background: color-mix(in srgb, var(--ok) 18%, transparent);
+  background: #e3f4ea;
   color: var(--ok);
 }
 .v-empty {
-  color: var(--ink-3);
   padding: 18px 4px;
+  font-size: 0.8125rem;
+  color: var(--ink-3);
 }
 
 /* ---- chart ---- */
@@ -439,16 +555,16 @@
 .v-legend {
   display: flex;
   gap: 16px;
-  font-size: 13px;
-  color: var(--ink-2);
   margin-bottom: 6px;
+  font-size: 0.75rem;
+  color: var(--ink-2);
 }
 .v-swatch {
   display: inline-block;
   width: 10px;
   height: 10px;
-  border-radius: 3px;
   margin-right: 4px;
+  border-radius: 3px;
   vertical-align: baseline;
 }
 .v-s1 {
@@ -461,17 +577,17 @@
   position: relative;
 }
 .v-chart svg {
+  display: block;
   width: 100%;
   height: auto;
-  display: block;
 }
 .v-grid {
-  stroke: var(--border);
+  stroke: var(--mist);
   stroke-width: 1;
 }
 .v-axis {
-  fill: var(--ink-3);
   font-size: 10.5px;
+  fill: var(--ink-3);
 }
 .v-bar1 {
   fill: var(--series-1);
@@ -480,50 +596,53 @@
   fill: var(--series-2);
 }
 .v-hoverband {
-  fill: var(--ink);
+  fill: var(--navy);
   opacity: 0.06;
 }
 .v-tooltip {
   position: absolute;
   top: 0;
-  transform: translateX(-50%);
-  background: var(--surface);
+  z-index: 2;
+  padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 12.5px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-  pointer-events: none;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(4, 30, 66, 0.15);
+  font-size: 0.75rem;
   white-space: nowrap;
-  z-index: 2;
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 .v-table-toggle {
   margin-top: 10px;
-  font-size: 13px;
+  font-size: 0.75rem;
 }
 .v-table-toggle summary {
-  cursor: pointer;
   color: var(--ink-2);
+  cursor: pointer;
 }
 
 /* ---- scan ---- */
 .v-reader {
   width: 100%;
-  max-width: 420px;
-  margin: 0 auto 12px;
-  border-radius: 12px;
+  margin: 0 0 12px;
   overflow: hidden;
+  border-radius: 8px;
   background: #000;
 }
-.v-reader:empty {
+/* hidden until the camera is started; it must be visible (with a width) BEFORE the scanner starts, which measures it */
+.v-reader:not(.on) {
   display: none;
 }
+.v-reader.on {
+  min-height: 240px;
+}
 .v-found {
-  border: 1px solid var(--accent);
-  border-radius: 12px;
-  padding: 14px;
   margin-top: 8px;
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  padding: 14px;
+  border: 1px solid var(--blue);
+  border-radius: 8px;
+  background: var(--surface-2);
 }
 .v-found h3 {
   margin-bottom: 4px;
@@ -533,22 +652,24 @@
 .v-ledger {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.8125rem;
 }
 .v-ledger td {
   padding: 9px 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--mist);
 }
 .v-ledger td:last-child {
-  text-align: right;
   font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 .v-ledger tr.total td {
-  font-weight: 700;
   border-bottom: 0;
+  font-weight: 700;
 }
 .v-list {
   margin: 0;
   padding-left: 18px;
+  font-size: 0.8125rem;
   color: var(--ink-2);
 }
 .v-list li {
@@ -557,7 +678,7 @@
 .v-two {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 14px;
 }
 @media (max-width: 1179px) {
   .hide-md {
@@ -571,4 +692,303 @@
   .hide-sm {
     display: none;
   }
+}
+
+/* the sign-out button under a "not an admin" message on the sign-in card */
+.v-login .v-login-out {
+  width: 100%;
+  margin-top: 16px;
+}
+/* an error on the sign-in card keeps its distance from the button below it */
+.v-login .v-error {
+  margin-bottom: 16px;
+}
+/* the camera fills the card; its video too */
+.v-reader video {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+}
+.v-btn.v-wide {
+  width: 100%;
+}
+
+/* ---- Meilu in the shop and team dashboards: the "Ask Meilu" button at the bottom right, and her small chat box ---- */
+.vm-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 18px 6px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--navy);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 22px rgba(4, 30, 66, 0.3);
+  cursor: pointer;
+  animation: vm-in 0.25s ease-out;
+}
+.vm-fab:hover {
+  background: #033269;
+}
+.vm-fab-ava,
+.vm-ava {
+  position: relative;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #fff;
+}
+.vm-fab-ava > span,
+.vm-ava > span {
+  position: absolute;
+  left: -7px;
+  top: 3px;
+  display: flex;
+}
+.vm-box {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+  height: min(540px, calc(100vh - 40px));
+  overflow: hidden;
+  border: 1px solid var(--sky);
+  border-radius: 12px;
+  background: var(--cream);
+  box-shadow: 0 16px 40px rgba(4, 30, 66, 0.28);
+  font-family: var(--font);
+  animation: vm-in 0.25s ease-out;
+}
+.vm-box *,
+.vm-box *::before,
+.vm-box *::after {
+  box-sizing: border-box;
+}
+.vm-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px 10px 14px;
+  background: var(--navy);
+  color: #fff;
+}
+.vm-head > div {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.vm-head b {
+  font-family: var(--font-title);
+  font-size: 0.9375rem;
+}
+.vm-head > div span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+.vm-close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+.vm-close .mi {
+  font-size: 20px;
+}
+.vm-log {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  padding: 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.vm-msg {
+  max-width: 88%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.vm-msg.is-meilu {
+  align-self: flex-start;
+  border: 1px solid var(--sky);
+  background: #fff;
+}
+.vm-msg.is-me {
+  align-self: flex-end;
+  background: var(--navy);
+  color: #fff;
+}
+.vm-msg p {
+  margin: 0;
+}
+.vm-msg p + p,
+.vm-msg p + .chat-md-list,
+.vm-msg .chat-md-list + p {
+  margin-top: 6px;
+}
+.vm-msg .chat-md-list {
+  margin: 0;
+  padding-left: 18px;
+}
+.vm-typing {
+  display: inline-flex;
+  gap: 4px;
+  padding: 12px;
+}
+.vm-typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+  animation: vm-dot 1s infinite ease-in-out;
+}
+.vm-typing span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.vm-typing span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+/* one row that slides sideways, like the suggestions in the traveler chat */
+.vm-chips {
+  display: flex;
+  flex: none;
+  gap: 6px;
+  padding: 0 14px 10px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.vm-chips::-webkit-scrollbar {
+  display: none;
+}
+.vm-chips button {
+  flex: none;
+  white-space: nowrap;
+  padding: 6px 10px;
+  border: 1px solid var(--navy);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--navy);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.vm-chips button:hover:not(:disabled) {
+  background: var(--pale);
+}
+.vm-form {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px 14px;
+  border-top: 1px solid var(--mist);
+}
+.vm-form input {
+  flex: 1;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--sky);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.8125rem;
+}
+.vm-form button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: var(--navy);
+  color: #fff;
+  cursor: pointer;
+}
+.vm-form button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.vm-form .mi {
+  font-size: 18px;
+}
+@keyframes vm-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes vm-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+/* phones: the box takes the width of the screen */
+@media (max-width: 560px) {
+  .vm-fab {
+    right: 14px;
+    bottom: 14px;
+  }
+  .vm-box {
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    width: auto;
+    height: min(560px, calc(100dvh - 16px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vm-fab,
+  .vm-box,
+  .vm-typing span {
+    animation: none;
+  }
+}
+/* the app icon on the "Ask Meilu" button */
+.vm-fab-icon {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
 }
