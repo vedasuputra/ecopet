@@ -42,13 +42,13 @@ const QUESTIONS: Record<Role, { en: string[]; vi: string[] }> = {
   },
   admin: {
     en: [
-      'How do I decide on a photo in the review queue?',
+      'How do I decide on a photo the AI was unsure about?',
       'What do the red flags and AI confidence mean?',
       'Many checks fail on one quest. What should I do?',
       'How should I answer a customer service report?',
     ],
     vi: [
-      'Làm sao quyết định một ảnh trong hàng chờ duyệt?',
+      'Làm sao quyết định ảnh mà AI không chắc chắn?',
       'Dấu hiệu đáng ngờ và độ tin cậy AI nghĩa là gì?',
       'Một nhiệm vụ bị kiểm tra trượt nhiều, mình nên làm gì?',
       'Nên trả lời báo cáo của du khách thế nào?',

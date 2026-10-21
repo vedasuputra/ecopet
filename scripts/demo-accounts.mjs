@@ -93,4 +93,31 @@ if (!v3?.plan_paid_until || new Date(v3.plan_paid_until) < new Date()) {
 await setRole(await ensureUser('demo.admin', 'Eco-Pet Team'), 'admin')
 await setRole(await ensureUser('demo.admin2', 'Eco-Pet Support'), 'admin')
 
+// ---- one photo waiting in the admin review queue, sent by Sophie for the own-bottle quest. Its image is broken on purpose (a JPEG
+// cut off after its first bytes), to show how the queue handles a damaged photo. Only added when Sophie has nothing pending.
+const sophie = (await (await fetch(`${URL_}/auth/v1/admin/users?per_page=1000`, { headers: H })).json()).users.find((u) => u.email === `demo.sophie${DOMAIN}`)
+const pending = (await (await rest(`verification_attempts?user_id=eq.${sophie.id}&review_status=eq.pending&select=id`)).json()).length
+if (!pending) {
+  await must(
+    await rest('verification_attempts', {
+      method: 'POST',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        user_id: sophie.id,
+        quest_id: 'q6',
+        outcome: 'review',
+        reason: 'low_confidence',
+        confidence: 0.41,
+        quest_met: null,
+        red_flags: ['image partly unreadable'],
+        ai_reason: 'Part of the photo could not be read. Something like a bottle may be in the lower half, but it is not clear.',
+        distance_m: 40,
+        review_image: '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL',
+        review_status: 'pending',
+      }),
+    }),
+    'review queue entry',
+  )
+}
+
 console.log(`demo accounts ready (password: ${process.env.DEMO_PASSWORD ? 'DEMO_PASSWORD' : PASSWORD})`)

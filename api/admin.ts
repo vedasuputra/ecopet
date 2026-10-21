@@ -84,6 +84,32 @@ export default async function handler(req: Req, res: Res) {
     return res.json({ ok: true, items: rows, stats, reasons, total: week.length })
   }
 
+  // every photo check ever logged (kept LOG_KEEP_DAYS days), not only the doubtful ones: filter by result and quest, 50 per page.
+  // The photos themselves are never kept, except while one waits for a review.
+  if (action === 'history') {
+    const { outcome, questId, page } = req.body ?? {}
+    const PAGE = 50
+    const p = Number.isInteger(page) && page >= 0 ? page : 0
+    const filters = [
+      outcome === 'approved' || outcome === 'pending' ? `review_status=eq.${outcome}` : '',
+      outcome === 'review_rejected' ? 'review_status=eq.rejected' : '',
+      outcome === 'verified' || outcome === 'rejected' || outcome === 'review' ? `outcome=eq.${outcome}` : '',
+      typeof questId === 'string' && /^[\w-]{1,40}$/.test(questId) ? `quest_id=eq.${questId}` : '',
+    ].filter(Boolean)
+    const r = await rest(
+      `verification_attempts?select=id,user_id,quest_id,outcome,reason,confidence,red_flags,ai_reason,distance_m,review_status,review_note,reported_by_user,user_note,reviewed_at,created_at` +
+        `${filters.map((f) => `&${f}`).join('')}&order=created_at.desc&offset=${p * PAGE}&limit=${PAGE}`,
+      { headers: { Prefer: 'count=exact' } },
+    )
+    if (!r.ok) return fail(res, 500, 'db_error')
+    const rows = (await r.json()) as (Attempt & { review_note: string | null; reviewed_at: string | null })[]
+    const total = Number(r.headers.get('content-range')?.split('/')[1] ?? rows.length)
+    const ids = [...new Set(rows.map((a) => a.user_id))]
+    const profiles = ids.length ? await getJsonRows<{ id: string; state: { user?: { name?: string } } | null }>(`profiles?id=in.(${ids.join(',')})&select=id,state`) : []
+    const nameOf = (id: string) => profiles.find((x) => x.id === id)?.state?.user?.name ?? ''
+    return res.json({ ok: true, total, page: p, pageSize: PAGE, items: rows.map((a) => ({ ...a, traveler: nameOf(a.user_id) })) })
+  }
+
   if (action === 'decide') {
     if (typeof id !== 'number' || (decision !== 'approve' && decision !== 'reject')) return fail(res, 400, 'bad_request')
     const row = (await getJsonRows<Attempt>(`verification_attempts?id=eq.${id}&select=id,user_id,quest_id,review_status`))[0]

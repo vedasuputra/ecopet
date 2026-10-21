@@ -992,3 +992,125 @@ textarea.v-input {
   border-radius: 50%;
   background: #fff;
 }
+/* a review photo that could not be shown */
+.v-broken-photo {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-height: 220px;
+  align-content: center;
+  padding: 20px;
+  border: 1px dashed var(--sky);
+  border-radius: 8px;
+  background: var(--mist);
+  text-align: center;
+  color: var(--ink-2);
+  font-size: 0.75rem;
+}
+.v-broken-photo .mi {
+  font-size: 40px;
+  color: var(--ink-3);
+}
+.v-broken-photo b {
+  font-size: 0.8125rem;
+  color: var(--navy);
+}
+/* all verifications: the filters, the rows that open their details, and the pages */
+.v-hist-filters .v-input {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+.v-hist-row {
+  cursor: pointer;
+}
+.v-hist-row:hover td {
+  background: var(--pale);
+}
+.v-hist-detail td {
+  background: #fff;
+}
+.v-hist-pages {
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.v-hist-pages .v-hint {
+  margin-right: auto;
+}
+/* a review photo: it fills the height of its card (cropped), and opens full screen when clicked */
+.v-review-photo {
+  display: flex;
+  min-height: 260px;
+}
+.v-review-photo > * {
+  flex: 1;
+}
+.v-review-zoom {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 260px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 8px;
+  background: #000;
+  cursor: zoom-in;
+}
+.v-review-zoom img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.v-review-zoom .mi {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 18px;
+}
+.v-review-photo .v-broken-photo {
+  min-height: 260px;
+}
+.v-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(4, 18, 36, 0.92);
+  cursor: zoom-out;
+  animation: vm-in 0.2s ease-out;
+}
+.v-lightbox img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.v-lightbox-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+}

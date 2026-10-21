@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 import DashChat from '../components/DashChat'
 import { supabase } from '../lib/supabase'
 import { useCatalog } from '../store/useCatalog'
@@ -55,7 +55,7 @@ const tag = (id: string) => `#${id.slice(0, 4)}`
 
 export default function AdminApp() {
   const [auth, setAuth] = useState<'loading' | 'signin' | 'denied' | 'ok'>('loading')
-  const [tab, setTab] = useState<'queue' | 'attempts' | 'support' | 'referrals' | 'impact'>('queue')
+  const [tab, setTab] = useState<'queue' | 'reports' | 'history' | 'attempts' | 'support' | 'referrals' | 'impact'>('queue')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [msg, setMsg] = useState('')
@@ -74,6 +74,11 @@ export default function AdminApp() {
   useEffect(() => {
     void check()
     void useCatalog.getState().refresh()
+    // one sign-in is shared by all tabs of the browser: signing out (or into another account) in another tab must show here too
+    const sub = supabase?.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT' || event === 'SIGNED_IN' || event === 'USER_UPDATED') void check()
+    })
+    return () => sub?.data.subscription.unsubscribe()
   }, [check])
 
   const signIn = async () => {
@@ -132,7 +137,9 @@ export default function AdminApp() {
 
   // ---- signed in: the sidebar (a drawer on phones) with the sections, Meilu and sign out
   const sections = [
-    { id: 'queue', label: 'Review queue', icon: 'fact_check', sub: 'Quest photos the AI was not sure about, or that travelers reported.' },
+    { id: 'queue', label: 'AI unsure', icon: 'fact_check', sub: 'Quest photos the AI could not decide on. You decide: approve or reject.' },
+    { id: 'reports', label: 'Traveler reports', icon: 'policy', sub: 'Photos the AI rejected that the traveler says were right. Check them again.' },
+    { id: 'history', label: 'All verifications', icon: 'checklist', sub: 'Every quest photo check: passed, failed, sent to review and decided.' },
     { id: 'attempts', label: 'Recent checks', icon: 'history', sub: 'How the photo checks are doing, to tune them.' },
     { id: 'support', label: 'Customer service', icon: 'support_agent', sub: 'Problems travelers reported, and your answers.' },
     { id: 'referrals', label: 'Referrals', icon: 'group_add', sub: 'Who invited whom, and the bonus coins paid.' },
@@ -196,7 +203,7 @@ export default function AdminApp() {
               <p className="v-sub">{current.sub}</p>
             </div>
           </div>
-          {tab === 'queue' ? <Queue title={title} /> : tab === 'attempts' ? <Attempts title={title} /> : tab === 'support' ? <Support /> : tab === 'referrals' ? <Referrals /> : <Impact />}
+          {tab === 'queue' ? <Queue key="ai" title={title} reported={false} /> : tab === 'reports' ? <Queue key="reported" title={title} reported /> : tab === 'history' ? <History title={title} quests={quests} /> : tab === 'attempts' ? <Attempts title={title} /> : tab === 'support' ? <Support /> : tab === 'referrals' ? <Referrals /> : <Impact />}
         </main>
         {/* Meilu: the "Ask Meilu" button at the bottom right and her chat box, as the team's assistant */}
         <DashChat role="admin" />
@@ -205,17 +212,26 @@ export default function AdminApp() {
   )
 }
 
-function Queue({ title }: { title: (id: string) => string }) {
+// The photos waiting for a decision, in two lists: the ones the AI could not decide on, and the ones a traveler reported
+// (the AI rejected them and the traveler says it was wrong).
+function Queue({ title, reported }: { title: (id: string) => string; reported: boolean }) {
   const [items, setItems] = useState<QueueItem[] | null>(null)
   const [notes, setNotes] = useState<Record<number, string>>({})
   const [busy, setBusy] = useState<number | null>(null)
   const [error, setError] = useState('')
-
+  const [broken, setBroken] = useState<number[]>([]) // photos the browser could not show
+  const [zoom, setZoom] = useState<string | null>(null) // the photo shown full screen
+  useEffect(() => {
+    if (!zoom) return
+    const key = (e: KeyboardEvent) => e.key === 'Escape' && setZoom(null)
+    window.addEventListener('keydown', key)
+    return () => window.removeEventListener('keydown', key)
+  }, [zoom])
   const load = useCallback(async () => {
     const r = await adminApi('queue')
-    if (r.ok) setItems(r.items as QueueItem[])
+    if (r.ok) setItems((r.items as QueueItem[]).filter((it) => !!it.reported_by_user === reported))
     else setError(r.error ?? 'error')
-  }, [])
+  }, [reported])
   useEffect(() => {
     void load()
     const id = setInterval(() => void load(), 15000)
@@ -230,21 +246,41 @@ function Queue({ title }: { title: (id: string) => string }) {
     await load()
   }
 
-  if (error) return <p className="v-error">Could not load the queue ({error}). Is the review schema installed?</p>
+  if (error)
+    return (
+      <p className="v-error">
+        {error === 'unauthorized' || error === 'not_admin'
+          ? 'Your sign-in has ended (maybe you signed out or into another account in another tab). Please sign in again.'
+          : `Could not load the queue (${error}). Is the review schema installed?`}
+      </p>
+    )
   if (!items) return <p>Loading...</p>
-  if (!items.length) return <p className="v-empty">Nothing is waiting for review.</p>
+  if (!items.length) return <p className="v-empty">{reported ? 'No traveler reports are waiting.' : 'No photos are waiting for a decision.'}</p>
 
   return (
     <>
       {items.map((it) => (
         <section className="v-card" key={it.id}>
           <div className="v-two">
-            <div>
-              <img
-                src={`data:image/jpeg;base64,${it.review_image}`}
-                alt="Quest photo to review"
-                style={{ width: '100%', maxHeight: 420, objectFit: 'contain', background: '#000', borderRadius: 10 }}
-              />
+            <div className="v-review-photo">
+              {broken.includes(it.id) || !it.review_image ? (
+                // a damaged photo: say so, the attempt can still be decided
+                <div className="v-broken-photo" role="img" aria-label="The photo could not be shown">
+                  <span className="mi" aria-hidden="true">
+                    broken_image
+                  </span>
+                  <b>The photo could not be shown</b>
+                  <span>It may be damaged or cut off. Use the AI notes, or reject it so the traveler can send a new one.</span>
+                </div>
+              ) : (
+                // fills the height of the card (cropped); click it for the whole photo, full screen
+                <button className="v-review-zoom" onClick={() => setZoom(`data:image/jpeg;base64,${it.review_image}`)} aria-label="Show the whole photo">
+                  <img src={`data:image/jpeg;base64,${it.review_image}`} alt="Quest photo to review" onError={() => setBroken((b) => [...b, it.id])} />
+                  <span className="mi" aria-hidden="true">
+                    open_in_full
+                  </span>
+                </button>
+              )}
             </div>
             <div>
               <h2>{title(it.quest_id)}</h2>
@@ -264,7 +300,7 @@ function Queue({ title }: { title: (id: string) => string }) {
                 <li>AI confidence: {it.confidence != null ? it.confidence.toFixed(2) : '?'}</li>
                 <li>AI says: {it.ai_reason || '—'}</li>
                 <li>Red flags: {it.red_flags.length ? it.red_flags.join(', ') : 'none'}</li>
-                <li>Distance from the quest spot: {it.distance_m != null ? `${it.distance_m} m` : '?'} (allowed {it.quest?.radiusM ?? '?'} m)</li>
+                <li>Distance from the quest spot: {it.distance_m != null ? `${it.distance_m} m` : '?'} ({it.quest ? (it.quest.radiusM ? `allowed ${it.quest.radiusM} m` : 'any place is fine for this quest') : 'allowed ? m'})</li>
               </ul>
               <div className="v-field" style={{ marginTop: 12 }}>
                 <label htmlFor={`n${it.id}`}>Note (optional, shown to the traveler if rejected)</label>
@@ -283,7 +319,165 @@ function Queue({ title }: { title: (id: string) => string }) {
           </div>
         </section>
       ))}
+      {/* the whole photo, full screen: click anywhere or press Escape to close */}
+      {zoom && (
+        <div className="v-lightbox" role="dialog" aria-modal="true" aria-label="Quest photo" onClick={() => setZoom(null)}>
+          <img src={zoom} alt="Quest photo to review, full size" />
+          <button className="v-lightbox-close" onClick={() => setZoom(null)} aria-label="Close" autoFocus>
+            <span className="mi" aria-hidden="true">
+              close
+            </span>
+          </button>
+        </div>
+      )}
     </>
+  )
+}
+
+interface HistoryRow extends Attempt {
+  ai_reason: string | null
+  review_note: string | null
+  reported_by_user: boolean | null
+  user_note: string | null
+  reviewed_at: string | null
+  traveler: string
+}
+// what a check ended as, in words: the AI's result, and the team's decision when it went to review
+const RESULT: Record<string, string> = {
+  '': 'All results',
+  verified: 'Passed by the AI',
+  rejected: 'Failed by the AI',
+  review: 'Sent to review',
+  pending: 'Waiting for review',
+  approved: 'Approved by the team',
+  review_rejected: 'Rejected by the team',
+}
+const resultOf = (r: Attempt) =>
+  r.outcome !== 'review'
+    ? RESULT[r.outcome] ?? r.outcome
+    : r.review_status === 'approved'
+      ? RESULT.approved
+      : r.review_status === 'rejected'
+        ? RESULT.review_rejected
+        : RESULT.pending
+
+// Every photo check ever made (the log keeps 90 days), whatever the result: passed, failed, sent to review and decided. 50 per page.
+function History({ title, quests }: { title: (id: string) => string; quests: { id: string; title: { en: string } }[] }) {
+  const [outcome, setOutcome] = useState('')
+  const [questId, setQuestId] = useState('')
+  const [page, setPage] = useState(0)
+  const [data, setData] = useState<{ items: HistoryRow[]; total: number; pageSize: number } | null>(null)
+  const [error, setError] = useState('')
+  const [open, setOpen] = useState<number | null>(null) // the row whose details are shown
+
+  useEffect(() => {
+    setData(null)
+    setError('')
+    void adminApi('history', { outcome, questId, page }).then((r) => {
+      if (!r.ok) return setError(r.error ?? 'error')
+      setData({ items: r.items as HistoryRow[], total: Number(r.total), pageSize: Number(r.pageSize) })
+    })
+  }, [outcome, questId, page])
+
+  const from = data ? page * data.pageSize + 1 : 0
+  const to = data ? page * data.pageSize + data.items.length : 0
+
+  return (
+    <section className="v-card">
+      <div className="v-row v-hist-filters">
+        <select className="v-input" value={outcome} onChange={(e) => (setOutcome(e.target.value), setPage(0))} aria-label="Result">
+          {Object.entries(RESULT).map(([k, v]) => (
+            <option key={k} value={k}>
+              {v}
+            </option>
+          ))}
+        </select>
+        <select className="v-input" value={questId} onChange={(e) => (setQuestId(e.target.value), setPage(0))} aria-label="Quest">
+          <option value="">All quests</option>
+          {quests.map((q) => (
+            <option key={q.id} value={q.id}>
+              {q.title.en}
+            </option>
+          ))}
+        </select>
+      </div>
+      <p className="v-hint" style={{ margin: '8px 0 14px' }}>
+        Photos are not kept after a check (only while one waits for a review), so this list shows what the AI and the team decided. Tap a row for the details.
+      </p>
+
+      {error ? (
+        <p className="v-error">Could not load the checks ({error}).</p>
+      ) : !data ? (
+        <p>Loading...</p>
+      ) : !data.items.length ? (
+        <p className="v-empty">No checks match.</p>
+      ) : (
+        <>
+          <div className="v-table-scroll">
+            <table className="v-table">
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>Traveler</th>
+                  <th>Quest</th>
+                  <th>Result</th>
+                  <th>Reason</th>
+                  <th className="v-num">Confidence</th>
+                  <th className="v-num">Distance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.items.map((r) => (
+                  <Fragment key={r.id}>
+                    <tr className="v-hist-row" onClick={() => setOpen(open === r.id ? null : r.id)} aria-expanded={open === r.id}>
+                      <td>{when(r.created_at)}</td>
+                      <td>{r.traveler || tag(r.user_id)}</td>
+                      <td>{title(r.quest_id)}</td>
+                      <td>
+                        <span className={`v-badge ${r.outcome === 'verified' || r.review_status === 'approved' ? 'used' : ''}`}>{resultOf(r)}</span>
+                        {r.reported_by_user && <span className="v-badge"> reported</span>}
+                      </td>
+                      <td>{REASON_TEXT[r.reason] ?? r.reason}</td>
+                      <td className="v-num">{r.confidence != null ? r.confidence.toFixed(2) : '—'}</td>
+                      <td className="v-num">{r.distance_m != null ? `${r.distance_m} m` : '—'}</td>
+                    </tr>
+                    {open === r.id && (
+                      <tr className="v-hist-detail">
+                        <td colSpan={7}>
+                          <ul className="v-list">
+                            <li>AI says: {r.ai_reason || '—'}</li>
+                            <li>Red flags: {r.red_flags.length ? r.red_flags.join(', ') : 'none'}</li>
+                            {r.reported_by_user && <li>Reported by the traveler{r.user_note ? `: "${r.user_note}"` : ''}</li>}
+                            {r.reviewed_at && (
+                              <li>
+                                Decided {when(r.reviewed_at)}
+                                {r.review_note ? `, note: "${r.review_note}"` : ''}
+                              </li>
+                            )}
+                            <li>Check #{r.id} · traveler {tag(r.user_id)}</li>
+                          </ul>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="v-row v-hist-pages">
+            <span className="v-hint">
+              {from}–{to} of {data.total}
+            </span>
+            <button className="v-btn" disabled={page === 0} onClick={() => setPage(page - 1)}>
+              Newer
+            </button>
+            <button className="v-btn" disabled={to >= data.total} onClick={() => setPage(page + 1)}>
+              Older
+            </button>
+          </div>
+        </>
+      )}
+    </section>
   )
 }
 
